@@ -7,6 +7,7 @@ int main(int ac, char **av)
     if(ac != 3)
         return (errorMsg("Wrong number of arguments"));
     int port = myPortConvertor(av[1]);
+    printf("%d\n", port);
     if(port == -1)
         return (errorMsg("Invalid port number"));
 
@@ -43,62 +44,68 @@ int main(int ac, char **av)
     if(listen(myFirtSocket, 5) == -1) {
         std::cerr << "erro ao fazer listen\n";
     }
-    
-    while(1)
-    {
-
-
-
-
-
-    }
+  
     std::cout << "Servidor aguardando por conexões...\n";
 
-   // Aceitando conexões
-    sockaddr_in clientAddress;
-    socklen_t clientAddressSize = sizeof(clientAddress);
-    int clientSocket = accept(myFirtSocket, (sockaddr*)&clientAddress, &clientAddressSize);
-    
-    if (clientSocket == -1) {
-        std::cerr << "Erro ao aceitar a conexão\n";
-        return 1;
+    std::vector<ClientInfo> clients;
+    clients.reserve(10); // Reserva espaço para 10 clientes
+
+    // Adicione o socket do servidor ao conjunto de descritores a serem monitorados por poll()
+    std::vector<pollfd> fds;
+    pollfd server;
+    server.fd = myFirtSocket;
+    server.events = POLLIN;
+    fds.push_back(server);
+
+    while (true) {
+        int ret = poll(fds.data(), fds.size(), -1); // Espera indefinidamente por eventos
+        if (ret < 0) {
+            std::cerr << "Erro em poll()\n";
+            break;
+        }
+        for (size_t i = 0; i < fds.size(); ++i) {
+            if (fds[i].revents & POLLIN) {
+                if (fds[i].fd == myFirtSocket) {
+                    // mNovo cliente tentando se conectar
+                    sockaddr_in clientAddr;
+                    socklen_t clientAddrSize = sizeof(clientAddr);
+                    int clientSocket = accept(myFirtSocket, (sockaddr*)&clientAddr, &clientAddrSize);
+                    if (clientSocket == -1) {
+                        std::cerr << "Erro ao aceitar a conexão\n";
+                        continue;
+                    }
+                    pollfd client;
+                    client.fd = clientSocket;
+                    client.events = POLLIN;
+                    fds.push_back(client);
+                    ClientInfo tata;
+                    tata.socket = clientSocket;
+                    clients.push_back(tata);
+                    std::cout << "Novo cliente conectado\n";
+                } else {
+                    // Cliente existente enviando dados
+                    char buffer[1024];
+                    int bytesReceived = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
+                    if (bytesReceived <= 0) { 
+                        // Erro ou conexão fechada pelo cliente
+                        if (bytesReceived == 0) {
+                            std::cout << "Cliente desconectado\n";
+                        } else {
+                            std::cerr << "Erro ao receber dados do cliente\n";
+                        }
+                        close(fds[i].fd);
+                        fds.erase(fds.begin() + i);
+                        clients.erase(clients.begin() + i);
+                        continue;
+                    }
+                    buffer[bytesReceived] = '\0';
+                    std::cout << "Recebido: " << buffer << std::endl;
+                }
+            }
+        }
     }
-     std::cout << "Cliente conectado\n";
-    
-    char buffer[1024];
-    int bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    
-    
-    if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0'; // Null-termina a string recebida
-        std::cout << "Recebido: " << buffer << std::endl;
-    }
 
-
-    bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    
-    
-    if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0'; // Null-termina a string recebida
-        std::cout << "Recebido: " << buffer << std::endl;
-    }
-
-    bytesReceived = recv(clientSocket, buffer, sizeof(buffer) - 1, 0);
-    
-    
-    if (bytesReceived > 0) {
-        buffer[bytesReceived] = '\0'; // Null-termina a string recebida
-        std::cout << "Recebido: " << buffer << std::endl;
-    }
-
-
-
-    const char* message = "Bem-vindo ao servidor!\r\n";
-    send(clientSocket, message, strlen(message), 0);
-
-
-
-    close(clientSocket);
+    // Fechar sockets, limpar recursos, etc...
     close(myFirtSocket);
     return 0;
 }

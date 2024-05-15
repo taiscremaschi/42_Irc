@@ -1,5 +1,6 @@
 
 #include "Irc.hpp"
+#include <cstdio>
 
 int errorMsg(std::string msg)
 {
@@ -13,12 +14,13 @@ int myPortConvertor(char *av)
     int result = 0;
     while(av[i])
     {
-        if(av[i] < 30 || av[i] > 39)
+        if(av[i] < 48 || av[i] > 57)
             return -1;
         i++;
     }
     if(i  > 5)
         return -1;
+    i = 0;
     while(av[i])
     {
         result = result * 10; 

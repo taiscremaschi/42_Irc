@@ -11,8 +11,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <sstream>
+#include <poll.h>
+#include <vector>
+#include <cstdio>
 
+
+struct ClientInfo {
+    int socket;
+    // Outras informações do cliente podem ser adicionadas aqui
+};
 
 int errorMsg(std::string msg);
 int myPortConvertor(char *av);
