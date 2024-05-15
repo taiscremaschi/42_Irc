@@ -25,7 +25,7 @@ int myPortConvertor(char *av)
         result = result + av[i] - '0';
         i++;
     }
-    if(result > 65535)
+    if(result < 1024 || result > 65535)
         return -1;
 
     return result;

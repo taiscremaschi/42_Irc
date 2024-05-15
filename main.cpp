@@ -30,7 +30,7 @@ int main(int ac, char **av)
     sockaddr_in serverAddr;
     serverAddr.sin_family = AF_INET; 
     serverAddr.sin_addr.s_addr = INADDR_ANY; //
-    serverAddr.sin_port = htons(8080); //porta padrao do irc 6667
+    serverAddr.sin_port = htons(port); //porta padrao do irc 6667
 
     //afr ligar o o socket ao endereço 
     //A função bind() é utilizada para associar um endereço IP e uma porta a um socket.
