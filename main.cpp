@@ -1,8 +1,19 @@
 
 #include "Irc.hpp"
 
-int main()
+int main(int ac, char **av)
 {
+
+    if(ac != 3)
+        return (errorMsg("Wrong number of arguments"));
+    int port = myPortConvertor(av[1]);
+    if(port == -1)
+        return (errorMsg("Invalid port number"));
+
+    // TODO: tratar das passwords
+
+
+
     //crio uma variavel inteira com o socket e os parametros
     //af_net é o dominio e sera usando o protocoloco ipv4 
     //o sock_stream iéo type indicando uma conexao tcp ou sseja
@@ -32,7 +43,15 @@ int main()
     if(listen(myFirtSocket, 5) == -1) {
         std::cerr << "erro ao fazer listen\n";
     }
+    
+    while(1)
+    {
 
+
+
+
+
+    }
     std::cout << "Servidor aguardando por conexões...\n";
 
    // Aceitando conexões
@@ -74,7 +93,7 @@ int main()
 
 
 
-    const char* message = "Bem-vindo ao servidor!\n";
+    const char* message = "Bem-vindo ao servidor!\r\n";
     send(clientSocket, message, strlen(message), 0);
 
 

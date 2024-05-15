@@ -1,7 +1,7 @@
 SILENT:
 
 NAME		= 		ircserv
-SRCS		=		main.cpp client.cpp
+SRCS		=		main.cpp utils.cpp
 OBJS 		=		$(SRCS:.cpp=.o)
 CXXFLAGS	=		-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
 RM			=		rm -f
