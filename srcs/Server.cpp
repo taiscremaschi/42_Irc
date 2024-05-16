@@ -1,41 +1,72 @@
 
-#include "Irc.hpp"
+#include "Server.hpp"
 
-int main(int ac, char **av)
+Server::Server() { 
+    std::cout << "this is server constructor" << std::endl;
+}
+
+Server::~Server() {
+    std::cout << "this is server destructor" << std::endl;
+}
+
+int Server::_myPortConvertor(char *av)
 {
+    int i = 0;
+    int result = 0;
+    while(av[i])
+    {
+        if(av[i] < 48 || av[i] > 57)
+            return -1;
+        i++;
+    }
+    if(i  > 5)
+        return -1;
+    i = 0;
+    while(av[i])
+    {
+        result = result * 10; 
+        result = result + av[i] - '0';
+        i++;
+    }
+    if(result < 1024 || result > 65535)
+        return -1;
 
-    if(ac != 3)
-        return (errorMsg("Wrong number of arguments"));
-    int port = myPortConvertor(av[1]);
-    if(port == -1)
-        return (errorMsg("Invalid port number"));
+    return result;
+}
 
-    // TODO: tratar das passwords
+int Server::setPort(char *av){
 
-    int myFirtSocket = socket(AF_INET, SOCK_STREAM, 0); //my notes 1
-    if(myFirtSocket == -1){
+    _port  = _myPortConvertor(av);
+    return (_port);
+}
+
+void Server::inicializeServer() {
+    
+    _serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
+
+    if(_serverSocket == -1){
         std::cerr << "error in create server socket\n";
-        return 1;
     }
     sockaddr_in serverAddr; // now I need configure the server address (read help 2)
     serverAddr.sin_family = AF_INET; 
     serverAddr.sin_addr.s_addr = INADDR_ANY; 
-    serverAddr.sin_port = htons(port); 
+    serverAddr.sin_port = htons(_port); 
 
-    if(bind(myFirtSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) {
+    if(bind(_serverSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) {
         std::cerr << "erro ao fazer bind" << std::endl; //help 3
     }
-    if(listen(myFirtSocket, 5) == -1) {
+    if(listen(_serverSocket, 5) == -1) {
         std::cerr << "erro ao fazer listen\n"; // max_nbr of connections
     }
     std::cout << "Servidor aguardando por conexões...\n";
-
+    
     std::vector<ClientInfo> clients;
+
     clients.reserve(10); // Reserva espaço para 10 clientes
 
     std::vector<pollfd> fds;
     pollfd server;
-    server.fd = myFirtSocket;
+    server.fd = _serverSocket;
     server.events = POLLIN; 
     fds.push_back(server); //add the server socket to the set of descriptors to be monitored by poll()
 
@@ -47,12 +78,14 @@ int main(int ac, char **av)
         }
         for (size_t i = 0; i < fds.size(); ++i) {
             if (fds[i].revents & POLLIN) {
-                if (fds[i].fd == myFirtSocket) {
-                    // mNovo cliente tentando se conectar
+                if (fds[i].fd == _serverSocket) 
+                {
+                    // Novo cliente tentando se conectar
                     sockaddr_in clientAddr;
                     socklen_t clientAddrSize = sizeof(clientAddr);
-                    int clientSocket = accept(myFirtSocket, (sockaddr*)&clientAddr, &clientAddrSize);
-                    if (clientSocket == -1) {
+                    int clientSocket = accept(_serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
+                    if (clientSocket == -1) 
+                    {
                         std::cerr << "Erro ao aceitar a conexão\n";
                         continue;
                     }
@@ -64,7 +97,9 @@ int main(int ac, char **av)
                     tata.socket = clientSocket;
                     clients.push_back(tata);
                     std::cout << "Novo cliente conectado\n";
-                } else {
+                } 
+                else 
+                {
                     // Cliente existente enviando dados
                     char buffer[1024];
                     int bytesReceived = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
@@ -86,6 +121,5 @@ int main(int ac, char **av)
             }
         }
     }
-    close(myFirtSocket);
-    return 0;
+    close(_serverSocket);
 }

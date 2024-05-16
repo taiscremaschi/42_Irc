@@ -1,9 +1,7 @@
-SILENT:
-
 NAME		= 		ircserv
-SRCS		=		main.cpp utils.cpp
+SRCS		=		srcs/main.cpp srcs/utils.cpp srcs/Server.cpp
 OBJS 		=		$(SRCS:.cpp=.o)
-CXXFLAGS	=		-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address
+CXXFLAGS	=		-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address -Iincludes/
 RM			=		rm -f
 
 COLOUR_GREEN=\033[32m
@@ -12,7 +10,7 @@ COLOUR_END=\033[0m
 COLOUR_MAG=\001\e[0;35m\002
 
 objs/%.o: */%.cpp
-					@c++ $(CXXFLAGS) -c $< -o $@
+	@c++ $(CXXFLAGS) -c $< -o $@
 
 ${NAME}: ${OBJS}
 	@c++ $(CXXFLAGS) $(OBJS) -o $(NAME)

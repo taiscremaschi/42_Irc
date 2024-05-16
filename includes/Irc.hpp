@@ -14,6 +14,7 @@
 #include <poll.h>
 #include <vector>
 #include <cstdio>
+#include "Server.hpp"
 
 
 struct ClientInfo {
