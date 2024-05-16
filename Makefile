@@ -1,6 +1,6 @@
 NAME		= 		ircserv
-SRCS		=		srcs/main.cpp srcs/utils.cpp srcs/Server.cpp
-OBJS 		=		$(SRCS:.cpp=.o)
+SRCS		=		main.cpp utils.cpp Server.cpp
+OBJS 		=		$(addprefix objs/, $(SRCS:.cpp=.o))
 CXXFLAGS	=		-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address -Iincludes/
 RM			=		rm -f
 
@@ -10,6 +10,7 @@ COLOUR_END=\033[0m
 COLOUR_MAG=\001\e[0;35m\002
 
 objs/%.o: */%.cpp
+	@mkdir -p objs
 	@c++ $(CXXFLAGS) -c $< -o $@
 
 ${NAME}: ${OBJS}

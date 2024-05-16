@@ -76,7 +76,8 @@ void Server::inicializeServer() {
             std::cerr << "Erro em poll()\n";
             break;
         }
-        for (size_t i = 0; i < fds.size(); ++i) {
+        for (size_t i = 0; i < fds.size(); ++i) 
+        {
             if (fds[i].revents & POLLIN) {
                 if (fds[i].fd == _serverSocket) 
                 {
@@ -103,11 +104,13 @@ void Server::inicializeServer() {
                     // Cliente existente enviando dados
                     char buffer[1024];
                     int bytesReceived = recv(fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-                    if (bytesReceived <= 0) { 
+                    if (bytesReceived <= 0) 
+                    { 
                         // Erro ou conexão fechada pelo cliente
                         if (bytesReceived == 0) {
                             std::cout << "Cliente desconectado\n";
-                        } else {
+                        } 
+                        else {
                             std::cerr << "Erro ao receber dados do cliente\n";
                         }
                         close(fds[i].fd);
