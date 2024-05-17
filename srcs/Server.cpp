@@ -113,15 +113,14 @@ void Server::runServer()
                     //         findCmd(result, &_clients[i]);
                     //     }
                     // }
-
                 }
             }
         }
     }
 }
 
-void Server::inicializeServer() {
-    
+void Server::createServerSocket()
+{
     _serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
 
     if(_serverSocket == -1){
@@ -143,8 +142,13 @@ void Server::inicializeServer() {
         return;
 
     }
-    std::cout << "Server waiting for connections...\n";
+}
+
+
+void Server::inicializeServer() {
     
+    createServerSocket();
+    std::cout << "Server waiting for connections...\n";
     pollfd server;
     server.fd = _serverSocket;
     server.events = POLLIN; 

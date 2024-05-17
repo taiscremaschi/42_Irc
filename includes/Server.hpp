@@ -19,12 +19,13 @@ public:
 
 Server();
 ~Server();
-void    inicializeServer();
-int     setPort(char *av);
-void    savePass(char *av);
-void    runServer();
-void    newClientConnection();
+void        inicializeServer();
+int         setPort(char *av);
+void        savePass(char *av);
+void        runServer();
+void        newClientConnection();
 std::string readData(int i);
+void        createServerSocket();
 
 };
 
