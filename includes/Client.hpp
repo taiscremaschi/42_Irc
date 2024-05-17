@@ -15,6 +15,8 @@ public:
     ~Client();
     int getSocketClient();
     void setSocketClient(int socketClient);
+    void setName(std::string name);
+    void setNickname(std::string nickname);
 
 };
 

@@ -22,6 +22,9 @@ Server();
 void    inicializeServer();
 int     setPort(char *av);
 void    savePass(char *av);
+void    runServer();
+void    newClientConnection();
+void    readData(int i);
 
 };
 

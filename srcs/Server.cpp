@@ -42,8 +42,85 @@ int Server::setPort(char *av){
     return (_port);
 }
 
+void Server::savePass(char *av)
+{
+    _password = av;
+
+}
+
+void    Server::readData(int i){
+    
+    char buffer[1024];
+    int bytesReceived = recv(_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
+    if (bytesReceived <= 0) { 
+        // Erro ou conexão fechada pelo cliente
+        if (bytesReceived == 0) {
+            std::cout << "Client disconnected\n";
+        } 
+        else {
+            std::cerr << "Error in recv\n";
+        }
+        close(_fds[i].fd);
+        _fds.erase(_fds.begin() + i);
+        _clients.erase(_clients.begin() + i);
+        return;
+    }
+    buffer[bytesReceived] = '\0';
+    std::cout << "Received: " << buffer << std::endl;
+    IrcMessages message(buffer);
+    // for(size_t i = 0; i < _clients.size(); i++)
+    // {
+    //     if(_fds[i].fd == _clients[i].getSocketClient())
+    //     {
+    //         findCmd(result, &_clients[i]);
+    //     }
+    // }
+
+}
 
 
+void Server::newClientConnection()
+{
+    // Novo cliente tentando se conectar
+    sockaddr_in clientAddr;
+    socklen_t clientAddrSize = sizeof(clientAddr);
+    int clientSocket = accept(_serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
+    if (clientSocket == -1) 
+    {
+        std::cerr << "Erro in accept conection\n";
+        return;
+    }
+    pollfd client;
+    client.fd = clientSocket;
+    client.events = POLLIN;
+    _fds.push_back(client);
+    Client newClient(clientSocket);
+    _clients.push_back(newClient);
+    std::cout << "new client conected\n";
+
+}
+
+void Server::runServer()
+{
+    while (1) {
+        int result = poll(_fds.data(), _fds.size(), -1); // Espera indefinidamente por eventos
+        if (result < 0) {
+            std::cerr << "Error in poll()\n";
+            break;
+        }
+        for (size_t i = 0; i < _fds.size(); ++i) {
+            if (_fds[i].revents & POLLIN) {
+                if (_fds[i].fd == _serverSocket) 
+                    newClientConnection();
+                else {
+                    // Cliente existente enviando dados
+                    readData(i); 
+
+                }
+            }
+        }
+    }
+}
 
 void Server::inicializeServer() {
     
@@ -74,66 +151,8 @@ void Server::inicializeServer() {
     server.fd = _serverSocket;
     server.events = POLLIN; 
     _fds.push_back(server); //add the server socket to the set of descriptors to be monitored by poll()
-
-    while (1) {
-        int result = poll(_fds.data(), _fds.size(), -1); // Espera indefinidamente por eventos
-        if (result < 0) {
-            std::cerr << "Error in poll()\n";
-            break;
-        }
-        for (size_t i = 0; i < _fds.size(); ++i) 
-        {
-            if (_fds[i].revents & POLLIN) {
-                if (_fds[i].fd == _serverSocket) 
-                {
-                    // Novo cliente tentando se conectar
-                    sockaddr_in clientAddr;
-                    socklen_t clientAddrSize = sizeof(clientAddr);
-                    int clientSocket = accept(_serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
-                    if (clientSocket == -1) 
-                    {
-                        std::cerr << "Erro in accept conection\n";
-                        continue;
-                    }
-                    pollfd client;
-                    client.fd = clientSocket;
-                    client.events = POLLIN;
-                    _fds.push_back(client);
-                    Client newClient(clientSocket);
-                    _clients.push_back(newClient);
-                    std::cout << "new client conected\n";
-                } 
-                else 
-                {
-                    // Cliente existente enviando dados
-                    char buffer[1024];
-                    int bytesReceived = recv(_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
-                    if (bytesReceived <= 0) { 
-                        // Erro ou conexão fechada pelo cliente
-                        if (bytesReceived == 0) {
-                            std::cout << "Client disconnected\n";
-                        } 
-                        else {
-                            std::cerr << "Error in recv\n";
-                        }
-                        close(_fds[i].fd);
-                        _fds.erase(_fds.begin() + i);
-                        _clients.erase(_clients.begin() + i);
-                        continue;
-                    }
-                    buffer[bytesReceived] = '\0';
-                    std::cout << "Received: " << buffer << std::endl;
-                    IrcMessages message(buffer);
-                }
-            }
-        }
-    }
+    runServer();
     close(_serverSocket);
 }
 
 
-void Server::savePass(char *av)
-{
-    _password = av;
-
-}
