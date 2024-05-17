@@ -9,6 +9,7 @@ class Server {
 private:
 int                     _serverSocket;
 int                     _port;
+std::string             _password;
 std::vector<Client>     _clients;
 std::vector<pollfd>     _fds;
 int                     _myPortConvertor(char *av);
@@ -20,6 +21,7 @@ Server();
 ~Server();
 void    inicializeServer();
 int     setPort(char *av);
+void    savePass(char *av);
 
 };
 

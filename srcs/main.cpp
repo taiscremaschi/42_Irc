@@ -17,6 +17,8 @@ int main(int ac, char **av)
 
     if(serverClass.setPort(av[1]) == -1)
         return (errorMsg("Invalid port number"));
+    serverClass.savePass(av[2]);
+    
     // TODO: tratar das passwords aqui nessa linha
     serverClass.inicializeServer();
     

@@ -124,3 +124,10 @@ void Server::inicializeServer() {
     }
     close(_serverSocket);
 }
+
+
+void Server::savePass(char *av)
+{
+    _password = av;
+
+}
