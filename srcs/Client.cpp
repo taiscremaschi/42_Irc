@@ -15,3 +15,11 @@ int Client::getSocketClient(){
 void Client::setSocketClient(int socketClient){
     _socketClient = socketClient;
 }
+
+
+//salvar o nick 
+//se receber um nick salvar o nome novo
+//depois mandar pro servidor
+//funcao send
+
+

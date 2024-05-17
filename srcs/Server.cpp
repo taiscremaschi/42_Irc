@@ -40,6 +40,9 @@ int Server::setPort(char *av){
     return (_port);
 }
 
+
+
+
 void Server::inicializeServer() {
     
     _serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
@@ -118,6 +121,8 @@ void Server::inicializeServer() {
                     }
                     buffer[bytesReceived] = '\0';
                     std::cout << "Received: " << buffer << std::endl;
+                    std::string message = buffer;
+                    
                 }
             }
         }
