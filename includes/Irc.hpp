@@ -1,8 +1,6 @@
 
-
 #ifndef IRC_HPP
 #define IRC_HPP
-
 
 #include <iostream>
 #include <cstdlib>
@@ -16,14 +14,7 @@
 #include <cstdio>
 #include "Server.hpp"
 
-
-struct ClientInfo {
-    int socket;
-    // Outras informações do cliente podem ser adicionadas aqui
-};
-
 int errorMsg(std::string msg);
-int myPortConvertor(char *av);
 
 
 #endif
