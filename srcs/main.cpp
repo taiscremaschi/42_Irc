@@ -1,6 +1,13 @@
 
 #include "Irc.hpp"
 
+
+int errorMsg(std::string msg)
+{
+    std::cout << msg << std::endl;
+    return 1;
+}
+
 int main(int ac, char **av)
 {
     Server serverClass;

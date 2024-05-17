@@ -14,7 +14,5 @@
 #include <cstdio>
 #include "Server.hpp"
 
-int errorMsg(std::string msg);
-
 
 #endif
