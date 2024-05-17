@@ -1,5 +1,5 @@
 
-#ifndef SERVER_HPP
+# ifndef SERVER_HPP
 # define SERVER_HPP
 
 #include "Irc.hpp"
@@ -24,7 +24,7 @@ int     setPort(char *av);
 void    savePass(char *av);
 void    runServer();
 void    newClientConnection();
-void    readData(int i);
+std::string readData(int i);
 
 };
 

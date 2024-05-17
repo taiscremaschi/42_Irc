@@ -2,14 +2,9 @@
 #include "Server.hpp"
 #include "IrcMessages.hpp"
 
+Server::Server() {}
 
-Server::Server() { 
-    std::cout << "this is server constructor" << std::endl;
-}
-
-Server::~Server() {
-    std::cout << "this is server destructor" << std::endl;
-}
+Server::~Server() {}
 
 int Server::_myPortConvertor(char *av)
 {
@@ -48,7 +43,7 @@ void Server::savePass(char *av)
 
 }
 
-void    Server::readData(int i){
+std::string     Server::readData(int i){
     
     char buffer[1024];
     int bytesReceived = recv(_fds[i].fd, buffer, sizeof(buffer) - 1, 0);
@@ -63,21 +58,13 @@ void    Server::readData(int i){
         close(_fds[i].fd);
         _fds.erase(_fds.begin() + i);
         _clients.erase(_clients.begin() + i);
-        return;
+        return std::string();
     }
     buffer[bytesReceived] = '\0';
-    std::cout << "Received: " << buffer << std::endl;
-    IrcMessages message(buffer);
-    // for(size_t i = 0; i < _clients.size(); i++)
-    // {
-    //     if(_fds[i].fd == _clients[i].getSocketClient())
-    //     {
-    //         findCmd(result, &_clients[i]);
-    //     }
-    // }
-
+    std::string result = buffer;
+    return result;
+  
 }
-
 
 void Server::newClientConnection()
 {
@@ -114,7 +101,18 @@ void Server::runServer()
                     newClientConnection();
                 else {
                     // Cliente existente enviando dados
-                    readData(i); 
+                    std::string buff = readData(i);
+                    if(buff.empty())
+                        continue ;
+                    std::cout << "Received: " << buff << std::endl;
+                    IrcMessages message(buff);
+                    // for(size_t i = 0; i < _clients.size(); i++)
+                    // {
+                    //     if(_fds[i].fd == _clients[i].getSocketClient())
+                    //     {
+                    //         findCmd(result, &_clients[i]);
+                    //     }
+                    // }
 
                 }
             }
