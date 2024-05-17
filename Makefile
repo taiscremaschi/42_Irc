@@ -1,5 +1,5 @@
 NAME		= 		ircserv
-SRCS		=		main.cpp Server.cpp Client.cpp
+SRCS		=		main.cpp Server.cpp Client.cpp IrcMessages.cpp
 OBJS 		=		$(addprefix objs/, $(SRCS:.cpp=.o))
 CXXFLAGS	=		-Wall -Wextra -Werror -std=c++98 -g -fsanitize=address -Iincludes/
 RM			=		rm -f

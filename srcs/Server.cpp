@@ -1,5 +1,7 @@
 
 #include "Server.hpp"
+#include "IrcMessages.hpp"
+
 
 Server::Server() { 
     std::cout << "this is server constructor" << std::endl;
@@ -121,8 +123,7 @@ void Server::inicializeServer() {
                     }
                     buffer[bytesReceived] = '\0';
                     std::cout << "Received: " << buffer << std::endl;
-                    std::string message = buffer;
-                    
+                    IrcMessages message(buffer);
                 }
             }
         }
