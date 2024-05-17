@@ -25,7 +25,6 @@ void    savePass(char *av);
 
 };
 
-
 #endif
 
 
