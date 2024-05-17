@@ -87,7 +87,7 @@ void Server::inicializeServer() {
                     int clientSocket = accept(_serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
                     if (clientSocket == -1) 
                     {
-                        std::cerr << "Erro in accept cone\n";
+                        std::cerr << "Erro in accept conection\n";
                         continue;
                     }
                     pollfd client;
