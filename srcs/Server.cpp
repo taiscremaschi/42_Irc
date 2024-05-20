@@ -87,6 +87,30 @@ void Server::newClientConnection()
 
 }
 
+void MsgforHex(int clientSocket, const std::string& message) 
+{
+    std::string msg = message + "\r\n";
+    std::cout << msg << std::endl;
+    send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
+}
+
+void findCmd(const std::vector<std::string>& vec, Client* client, int clientSocket) {
+    
+    for (size_t i = 0; i < vec.size(); ++i) {
+        if (vec[i] == "USER") {
+            client->setName(vec[i + 1]);
+            std::cout << "User set to: " << vec[i + 1] << std::endl;
+        } else if (vec[i] == "NICK") {
+            std::string oldNick = client->getNickname();
+            std::string newNick = vec[i + 1];
+            client->setNickname(newNick);
+            std::cout << "Nickname changed from " << oldNick << " to " << newNick << std::endl;
+            std::string response = ":" + oldNick + " NICK " + newNick;
+            MsgforHex(clientSocket, response);
+        }
+    }
+}
+
 void Server::runServer()
 {
     while (1) {
@@ -106,13 +130,14 @@ void Server::runServer()
                         continue ;
                     std::cout << "Received: " << buff << std::endl;
                     IrcMessages message(buff);
-                    // for(size_t i = 0; i < _clients.size(); i++)
-                    // {
-                    //     if(_fds[i].fd == _clients[i].getSocketClient())
-                    //     {
-                    //         findCmd(result, &_clients[i]);
-                    //     }
-                    // }
+
+                    std::cout << "recebido aqui " << message._vecMsg[0] << std::endl;
+
+                    for (size_t j = 0; j < _clients.size(); ++j) 
+                    {
+                        if (_fds[i].fd == _clients[j].getSocketClient()) 
+                            findCmd(message._vecMsg, &_clients[j], _clients[j].getSocketClient());
+                    }
                 }
             }
         }

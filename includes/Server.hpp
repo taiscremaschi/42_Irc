@@ -31,14 +31,3 @@ void        createServerSocket();
 
 #endif
 
-
-// Server::Server() : _serverSocket(-1), _port(0) {}
-
-// Server::~Server() {
-//     if (_serverSocket != -1) {
-//         close(_serverSocket);
-//     }
-//     for (size_t i = 0; i &lt; _clients.size(); ++i) {
-//         close(_clients[i]._socketClient);
-//     }
-// }

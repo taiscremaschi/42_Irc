@@ -5,6 +5,7 @@ IrcMessages::IrcMessages(std::string msg)
 {
     _message = msg;
     _vecMsg = split('\n');
+    _vecMsg = split(' ');
 }
 
 IrcMessages::~IrcMessages(){
@@ -34,21 +35,4 @@ std::vector<std::string> IrcMessages::split(char c){
 
 
 
-// void IrcMessages::findCmd(std::vector<std::string> vec, Client *client)
-// {
-//     for(size_t i = 0; i < vec.size(); i++)
-//     {
-//         if(vec[i] == "NICK")
-//         {
-//             _nickname = vec[i + 1];
-
-//         }
-//         if(vec[i] == "USER")
-//         {
-
-//         }
-
-//     }
-
-// }
 

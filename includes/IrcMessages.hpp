@@ -7,19 +7,12 @@
 class IrcMessages {
 private:
     std::string              _message;
-    std::vector<std::string> _vecMsg;
 
 public:
+    std::vector<std::string> _vecMsg;
     IrcMessages(std::string msg);
     ~IrcMessages();
     std::vector<std::string> split(char c);
-    void findCmd(std::vector<std::string> vec, Client *client);
-
-
-
-
-
-
 };
 
 

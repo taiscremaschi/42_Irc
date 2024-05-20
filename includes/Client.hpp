@@ -17,6 +17,8 @@ public:
     void setSocketClient(int socketClient);
     void setName(std::string name);
     void setNickname(std::string nickname);
+    std::string getName() const;
+    std::string getNickname() const;
 
 };
 
