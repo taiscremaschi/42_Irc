@@ -4,15 +4,14 @@
 IrcMessages::IrcMessages(std::string msg)
 {
     _message = msg;
-    _vecMsg = split('\n');
-    _vecMsg = split(' ');
+    _vecMsg = splitNewlineAndSpace();
 }
 
 IrcMessages::~IrcMessages(){
 
 }
 
-std::vector<std::string> IrcMessages::split(char c){
+std::vector<std::string> IrcMessages::splitNewlineAndSpace(){
     
     size_t i = 0;
     std::string msg;
@@ -20,10 +19,10 @@ std::vector<std::string> IrcMessages::split(char c){
     int start = 0;
     while(i < _message.size())
     {
-        while(_message[i] == c)
+        while(_message[i] == ' ' || _message[i] == '\n')
             i++;
         start = i;
-        while(_message[i] != '\0' &&  _message[i] != c)
+        while(_message[i] != '\0' &&  _message[i] != ' ' && _message[i] != '\n')
             i++;
         msg = _message.substr(start, i - start);
         result.push_back(msg);

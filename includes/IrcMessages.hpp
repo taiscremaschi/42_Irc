@@ -12,7 +12,7 @@ public:
     std::vector<std::string> _vecMsg;
     IrcMessages(std::string msg);
     ~IrcMessages();
-    std::vector<std::string> split(char c);
+    std::vector<std::string> splitNewlineAndSpace();
 };
 
 
