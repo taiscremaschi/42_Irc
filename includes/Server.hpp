@@ -27,6 +27,7 @@ void        newClientConnection();
 std::string readData(int i);
 void        createServerSocket();
 void handleJoinCommand(Client& client, const std::string& channel);
+void findCmd(const std::vector<std::string> &vec, Client* client, int clientSocket);
 
 };
 

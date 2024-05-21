@@ -93,31 +93,23 @@ void MsgforHex(int clientSocket, const std::string& message)
     send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
 }
 
-// bool checkNames(Client *client, std::string name)
-// {
-//     for(size_t i = 0; i < i++)
-//     {
-//         if (client[i].getNickname())
-//     }
-// }
-
-void handleJoinCommand(Client& client, const std::string& channel) 
+void Server::handleJoinCommand(Client& client, const std::string& channel) 
 {
-    std::string joinMessage = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channel;
-    std::string topicMessage = ":servidor 332 " + client.getNickname() + " " + channel + " :Tópico inicial do canal";
-    std::string topicCreatorMessage = ":servidor 333 " + client.getNickname() + " " + channel + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0";
+    std::string joinMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channel;
+    std::string topicMsg = ":servidor 332 " + client.getNickname() + " " + channel + " :Tópico inicial do canal";
+    std::string topicCreatorMsg = ":servidor 333 " + client.getNickname() + " " + channel + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0";
     std::string namesMessage = ":servidor 353 " + client.getNickname() + " = " + channel + " :@" + client.getNickname();
-    std::string endOfNamesMessage = ":servidor 366 " + client.getNickname() + " " + channel + " :End of /NAMES list.";
+    std::string endOfNameMsg = ":servidor 366 " + client.getNickname() + " " + channel + " :End of /NAMES list.";
 
-    MsgforHex(client.getSocketClient(), joinMessage);
-    MsgforHex(client.getSocketClient(), topicMessage);
-    MsgforHex(client.getSocketClient(), topicCreatorMessage);
+    MsgforHex(client.getSocketClient(), joinMsg);
+    MsgforHex(client.getSocketClient(), topicMsg);
+    MsgforHex(client.getSocketClient(), topicCreatorMsg);
     MsgforHex(client.getSocketClient(), namesMessage);
-    MsgforHex(client.getSocketClient(), endOfNamesMessage);
+    MsgforHex(client.getSocketClient(), endOfNameMsg);
 }
 
 
-void findCmd(const std::vector<std::string>& vec, Client* client, int clientSocket) {
+void Server::findCmd(const std::vector<std::string> &vec, Client* client, int clientSocket) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
         if (vec[i] == "USER") { //isso aqui ta erradao
@@ -126,8 +118,16 @@ void findCmd(const std::vector<std::string>& vec, Client* client, int clientSock
             std::string response = "USER " + vec[i + 1] + " 0 * :realname";
             MsgforHex(clientSocket, response);
         }
-        else if (vec[i] == "NICK") {
-            //aqui vou verificar a funcao check name pra ver se pode 
+        else if (vec[i] == "NICK") 
+        {
+            for(size_t x = 0; x < _clients.size(); ++x)
+            {
+                if (_clients[x].getNickname() == vec [i + 1]){
+                     std::string nickError = ":servidor 433 " + _clients[x].getNickname() + " " + vec[i + 1] + " :Nickname is already in use";
+                     MsgforHex(client->getSocketClient(), nickError);
+                     continue;
+                }
+            }
             std::string oldNick = client->getNickname();
             client->setNickname(vec[i + 1]);
             if(oldNick.empty())
