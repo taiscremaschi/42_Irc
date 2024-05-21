@@ -4,12 +4,16 @@
 
 #include <string>
 #include <unistd.h>
+#include <iostream>
+#include <netdb.h>
 
 class Client {
 protected:
-    std::string     _name;
-    std::string     _nickname;
-    int             _socketClient;
+    std::string             _name;
+    std::string             _nickname;
+    int                     _socketClient;
+    std::string             _hostname;
+
 public:
     Client(int clientSocket);
     ~Client();
@@ -19,6 +23,7 @@ public:
     void setNickname(std::string nickname);
     std::string getName() const;
     std::string getNickname() const;
+    std::string getHostname();
 
 };
 

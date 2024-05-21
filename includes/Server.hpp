@@ -12,7 +12,6 @@ int                     _port;
 std::string             _password;
 std::vector<Client>     _clients;
 std::vector<pollfd>     _fds;
-std::string             _hostname;
 int                     _myPortConvertor(char *av);
 
 
@@ -27,6 +26,7 @@ void        runServer();
 void        newClientConnection();
 std::string readData(int i);
 void        createServerSocket();
+void handleJoinCommand(Client& client, const std::string& channel);
 
 };
 

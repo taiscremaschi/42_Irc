@@ -11,6 +11,7 @@
 #include <arpa/inet.h>
 #include <poll.h>
 #include <vector>
+#include <netdb.h>
 #include <cstdio>
 #include "Server.hpp"
 
