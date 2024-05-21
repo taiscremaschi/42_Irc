@@ -1,4 +1,8 @@
 
+#include <iostream>
+#include <cstring>
+#include <netdb.h>
+#include <arpa/inet.h>
 #include "Server.hpp"
 #include "IrcMessages.hpp"
 
@@ -40,8 +44,29 @@ int Server::setPort(char *av){
 void Server::savePass(char *av)
 {
     _password = av;
-
 }
+
+
+std::string getHostname(int clientSocket) { //help 4
+    char buff[1025];
+    sockaddr_storage addr;
+    socklen_t addr_len = sizeof(addr);
+
+    if (getpeername(clientSocket, (sockaddr*)&addr, &addr_len) == -1) { //funcao pra obter o ip e a porta do cliente. paramentris, o fd o endereli para armazenar o add, e o size da estrutura
+        std:: cerr << "Error in getting IP address" << std::endl;
+        return "";
+    }
+
+    int result = getnameinfo((sockaddr*)&addr, addr_len, buff, sizeof(buff), nullptr, 0, NI_NAMEREQD); // funtion to covert ip address into hostname. paramenters: endereço, size do address, buff para armazenar o host, size do buff, flag que idica a necesdidadedo hostname 
+    if (result != 0) {
+        std::cerr << "Error in convert IP address to hostname " << std::endl;
+        return "";
+    }
+    return std::string(buff);
+}
+
+
+
 
 std::string     Server::readData(int i){
     
@@ -94,18 +119,67 @@ void MsgforHex(int clientSocket, const std::string& message)
     send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
 }
 
+// bool checkNames(Client *client, std::string name)
+// {
+//     for(size_t i = 0; i < i++)
+//     {
+//         if (client[i].getNickname())
+//     }
+// }
+
+
+
+// void sendToClient(int clientSocket, const std::string& message) {
+//     send(clientSocket, message.c_str(), message.size(), 0);
+// }
+
+// void handleJoinCommand(Client& client, const std::string& channel) 
+// {
+//     std::string joinMessage = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channel + "\r\n";
+//     std::string topicMessage = ":servidor 332 " + client.getNickname() + " " + channel + " :Tópico inicial do canal\r\n";
+//     std::string topicCreatorMessage = ":servidor 333 " + client.getNickname() + " " + channel + " " + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " 0\r\n";
+//     std::string namesMessage = ":servidor 353 " + client.getNickname() + " = " + channel + " :@" + client.getNickname() + "\r\n";
+//     std::string endOfNamesMessage = ":servidor 366 " + client.getNickname() + " " + channel + " :End of /NAMES list.\r\n";
+
+//     sendToClient(client.getSocketClient(), joinMessage);
+//     sendToClient(client.getSocketClient(), topicMessage);
+//     sendToClient(client.getSocketClient(), topicCreatorMessage);
+//     sendToClient(client.getSocketClient(), namesMessage);
+//     sendToClient(client.getSocketClient(), endOfNamesMessage);
+// }
+
+
 void findCmd(const std::vector<std::string>& vec, Client* client, int clientSocket) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
-        if (vec[i] == "USER") {
+        if (vec[i] == "USER") { //isso aqui ta erradao
             client->setName(vec[i + 1]);
             std::cout << "User set to: " << vec[i + 1] << std::endl;
-        }if (vec[i] == "NICK") {
+            std::string response = "USER " + vec[i + 1] + " 0 * :realname";
+            MsgforHex(clientSocket, response);
+        }
+        else if (vec[i] == "NICK") {
+            //aqui vou verificar a funcao check name pra ver se pode 
             std::string oldNick = client->getNickname();
             client->setNickname(vec[i + 1]);
+            if(oldNick.empty())
+                continue ;
             std::cout << "Nickname changed from " << oldNick << " to " << client->getNickname() << std::endl;
             std::string response = ":" + oldNick + " NICK " + client->getNickname();
             MsgforHex(clientSocket, response);
+        }
+        else if (vec[i] == "JOIN")
+        {
+                // :seunome!username@hostname JOIN :#meucanal
+                // :servidor 332 seunome #meucanal :Tópico inicial do canal
+                // :servidor 333 seunome #meucanal seunome!username@hostname 0
+                // :servidor 353 seunome = #meucanal :@seunome
+                // :servidor 366 seunome #meucanal :End of /NAMES list.
+
+        }
+        else if(vec[i] == "PRIVMSG")
+        {
+
         }
     }
 }

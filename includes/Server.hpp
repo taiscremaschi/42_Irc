@@ -12,6 +12,7 @@ int                     _port;
 std::string             _password;
 std::vector<Client>     _clients;
 std::vector<pollfd>     _fds;
+std::string             _hostname;
 int                     _myPortConvertor(char *av);
 
 
