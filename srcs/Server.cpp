@@ -42,9 +42,6 @@ void Server::savePass(char *av)
     _password = av;
 }
 
-
-
-
 std::string     Server::readData(int i){
     
     char buffer[1024];
@@ -167,10 +164,6 @@ void Server::runServer()
                         continue ;
                     std::cout << "Received: " << buff << std::endl;
                     IrcMessages message(buff);
-                    // for(size_t i = 0; i < message._vecMsg.size(); ++i)
-                    // {
-                    //     std::cout << message._vecMsg[i] << std::endl;
-                    // }
                     for (size_t j = 0; j < _clients.size(); ++j) 
                     {
                         if (_fds[i].fd == _clients[j].getSocketClient()) 
@@ -206,7 +199,6 @@ void Server::createServerSocket()
 
     }
 }
-
 
 void Server::inicializeServer() {
     
