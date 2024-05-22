@@ -100,40 +100,39 @@ std::string Server::channelExists(Client& client, const std::string& channelName
         {
             //TODO: ADC O @ APENAS AO OPERADOR
             std::string namesList = ":servidor 353 " + client.getNickname() + " = " + channelName + " :";
-            std::cerr << "nameliste é   " << namesList << std::endl;
+           // std::cerr << "nameliste é   " << namesList << std::endl;
 
             _channels[i].addClient(client);
-            std::vector<std::string> result = _channels[i].getAllClients();
+            std::vector<std::string> result = _channels[i].getAllClientsName();
             for(size_t j = 0; j < result.size(); ++j)
                     namesList += result[j] + " ";
-            std::cerr << "entrou   " << namesList << std::endl;
-            std::cerr << "entrou   " << channelName  << std::endl;
+           // std::cerr << "entrou   " << namesList << std::endl;
+            //std::cerr << "entrou   " << channelName  << std::endl;
             return namesList;
         }
     }
-    std::cerr << "nao entrou   " << channelName  << std::endl;
+    //std::cerr << "nao entrou   " << channelName  << std::endl;
     return "";
 }
 
+// void        Server::printChannels()
+// {
+//     std::cout << "list de channels:" << std::endl;
 
-void        Server::printChannels()
-{
-    std::cout << "list de channels:" << std::endl;
-
-    for (Channel& channel : _channels)
-    {
+//     for (Channel& channel : _channels)
+//     {
         
-        std::cout << "nome do channels: " <<  channel.getName() << std::endl;
-        std::vector<std::string> users = channel.getAllClients();
-        std::cout << "lista de utilizadores: " << std::endl;
+//         std::cout << "nome do channels: " <<  channel.getName() << std::endl;
+//         std::vector<std::string> users = channel.getAllClientsName();
+//         std::cout << "lista de utilizadores: " << std::endl;
         
-        for (std::string& user : users)
-        {
-            std::cout << "\t - " << user << std::endl;
-        }
-        std::cout << "\n";
-    }
-}
+//         for (std::string& user : users)
+//         {
+//             std::cout << "\t - " << user << std::endl;
+//         }
+//         std::cout << "\n";
+//     }
+// }
 
 
 void Server::handleJoinCommand(Client& client, const std::string& channelName) 
@@ -144,7 +143,7 @@ void Server::handleJoinCommand(Client& client, const std::string& channelName)
     if(namesMessage.empty()){
         Channel newchannel(channelName, client);
         _channels.push_back(newchannel);
-        std::cout << "meu novo chanel " << newchannel.getName() << std::endl;
+        //std::cout << "meu novo chanel " << newchannel.getName() << std::endl;
         namesMessage = ":servidor 353 " + client.getNickname() + " = " + channelName + " :@" + client.getNickname();
     }
     std::string joinMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName;
@@ -154,13 +153,40 @@ void Server::handleJoinCommand(Client& client, const std::string& channelName)
     std::string endOfNameMsg = ":servidor 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.";
 
 
-    printChannels();
+    //printChannels();
 
     MsgforHex(client.getSocketClient(), joinMsg);
     MsgforHex(client.getSocketClient(), topicMsg);
     MsgforHex(client.getSocketClient(), topicCreatorMsg);
     MsgforHex(client.getSocketClient(), namesMessage);
     MsgforHex(client.getSocketClient(), endOfNameMsg);
+
+}
+
+void Server::infoForChannel(Client &client, std::string channelName)
+{
+    //std::cout << "entrou \n" << std::endl;
+    size_t i =  0;
+    for(; i < _channels.size(); ++i)
+    {
+        //std::cout << _channels[i].getName() << " this is my name." << std::endl;
+        if(_channels[i].getName() == channelName)
+            break;
+    }
+    if (i == _channels.size())
+        return ;
+    std::vector<Client>  clients = _channels[i].getAllClients();
+    std:: string msg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName; 
+    for (size_t i = 0; i < clients.size(); ++i)
+    {
+        //std::cout << "devia entrar nesse for " << clients[i].getNickname() << std::endl;
+        if(clients[i].getNickname() != client.getNickname())
+        {
+           // std::cout << clients[i].getNickname() << "devia entrar" << std::endl;
+
+            MsgforHex(clients[i].getSocketClient(), msg);
+        }
+    }
 }
 
 void Server::findCmd(const std::vector<std::string> &vec, Client &client, int clientSocket) {
@@ -186,18 +212,24 @@ void Server::findCmd(const std::vector<std::string> &vec, Client &client, int cl
             client.setNickname(vec[i + 1]);
             if(oldNick.empty())
                 continue ;
-            std::cout << "Nickname changed from " << oldNick << " to " << client.getNickname() << std::endl;
+            //std::cout << "Nickname changed from " << oldNick << " to " << client.getNickname() << std::endl;
             std::string response = ":" + oldNick + " NICK " + client.getNickname();
             MsgforHex(clientSocket, response);
         }
         else if (vec[i] == "JOIN")
         {
-            printChannels();
-            handleJoinCommand(client, vec[i + 1]);
+            std::string channelName = vec[i + 1];
+            //printChannels();
+            handleJoinCommand(client, channelName);
+            infoForChannel(client, channelName);
         }
         else if(vec[i] == "PRIVMSG")
         {
-
+            std::string channelName = vec[i + 1];
+            std::string msg;
+            for (size_t j = i + 2; j < vec.size(); j++)
+                msg += vec[j];
+            std:: cout << msg << std::endl;
         }
         else if(vec[i] == "PART"){
 
@@ -246,13 +278,13 @@ void Server::runServer()
                     std::string buff = readData(i);
                     if(buff.empty())
                         continue ;
-                   // std::cout << "Received: " << buff << std::endl;
+                    std::cout << "Received: " << buff << std::endl;
                     IrcMessages message(buff);
                     for (size_t j = 0; j < _clients.size(); ++j) {
                         if (_fds[i].fd == _clients[j].getSocketClient()) 
                         {
                             findCmd(message._vecMsg, _clients[j], _clients[j].getSocketClient());
-                            std::cerr << "Cliente é " << _clients[j].getNickname() << std::endl;
+                            //std::cerr << "Cliente é " << _clients[j].getNickname() << std::endl;
                         }
                     }
                 }
