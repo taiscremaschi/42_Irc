@@ -3,12 +3,15 @@
 #define CHANNEL_HPP
 
 
-class Channel
-{
-private:
-public:
-    Channel();
-    ~Channel();
+#include "Irc.hpp"
+
+class Channel {
+    private:
+    std::vector<Client> _clientsChannel;
+    
+    public:
+        Channel();
+        ~Channel();
 };
 
 
