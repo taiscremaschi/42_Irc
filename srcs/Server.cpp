@@ -112,13 +112,13 @@ void Server::handleJoinCommand(Client& client, const std::string& channel)
 void Server::findCmd(const std::vector<std::string> &vec, Client* client, int clientSocket) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
-        if (vec[i] == "USER") { //isso aqui ta erradao
-            client->setName(vec[i + 1]);
-            std::cout << "User set to: " << vec[i + 1] << std::endl;
-            std::string response = "USER " + vec[i + 1] + " 0 * :realname";
-            MsgforHex(clientSocket, response);
-        }
-        else if (vec[i] == "NICK") 
+        // if (vec[i] == "USER") { //isso aqui ta erradao
+        //     client->setName(vec[i + 1]);
+        //     std::cout << "User set to: " << vec[i + 1] << std::endl;
+        //     std::string response = "USER " + vec[i + 1] + " 0 * :realname";
+        //     MsgforHex(clientSocket, response);
+        // }
+        if (vec[i] == "NICK") 
         {
             for(size_t x = 0; x < _clients.size(); ++x)
             {
@@ -142,7 +142,6 @@ void Server::findCmd(const std::vector<std::string> &vec, Client* client, int cl
         {
 
         }
-       
         else if(vec[i] == "PART"){
 
          }        

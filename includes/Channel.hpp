@@ -8,7 +8,7 @@
 class Channel {
     private:
     std::vector<Client> _clientsChannel;
-    
+    std::string         _channelName;
     public:
         Channel();
         ~Channel();
