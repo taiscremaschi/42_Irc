@@ -19,6 +19,8 @@ class Channel {
         ~Channel();
         const std::string &getName() const;
         void addClient(Client &client);
+        std::vector<std::string> getAllClients();
+
 };
 
 

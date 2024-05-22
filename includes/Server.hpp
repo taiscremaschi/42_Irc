@@ -26,8 +26,11 @@ void        runServer();
 void        newClientConnection();
 std::string readData(int i);
 void        createServerSocket();
+void        printChannels();
 void handleJoinCommand(Client& client, const std::string& channel);
-void findCmd(const std::vector<std::string> &vec, Client* client, int clientSocket);
+void findCmd(const std::vector<std::string> &vec, Client  &client, int clientSocket);
+std::string channelExists(Client& client, const std::string& channelName);
+
 
 };
 

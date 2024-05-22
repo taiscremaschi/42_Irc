@@ -19,10 +19,10 @@ std::vector<std::string> IrcMessages::splitNewlineAndSpace(){
     int start = 0;
     while(i < _message.size())
     {
-        while(_message[i] == ' ' || _message[i] == '\n')
+        while(_message[i] == ' ' || _message[i] == '\n' || _message[i] == '\r')
             i++;
         start = i;
-        while(_message[i] != '\0' &&  _message[i] != ' ' && _message[i] != '\n')
+        while(_message[i] != '\0' &&  _message[i] != ' ' && _message[i] != '\n' && _message[i] != '\r')
             i++;
         msg = _message.substr(start, i - start);
         result.push_back(msg);
