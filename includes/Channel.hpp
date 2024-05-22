@@ -3,8 +3,9 @@
 #define CHANNEL_HPP
 
 
-#include "Irc.hpp"
 #include "Client.hpp"
+#include <vector>
+
 
 
 class Channel {

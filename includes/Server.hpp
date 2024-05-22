@@ -5,8 +5,6 @@
 #include "Irc.hpp"
 #include "Channel.hpp"
 
-class Client;
-
 class Server {
 private:
 int                     _serverSocket;
@@ -14,9 +12,8 @@ int                     _port;
 std::string             _password;
 std::vector<Client>     _clients;
 std::vector<pollfd>     _fds;
-//std::vector<Channel>    _channels;
+std::vector<Channel>    _channels;
 int                     _myPortConvertor(char *av);
-
 
 public:
 
