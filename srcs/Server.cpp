@@ -93,13 +93,22 @@ void MsgforHex(int clientSocket, const std::string& message)
     send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
 }
 
-void Server::handleJoinCommand(Client& client, const std::string& channel) 
+void Server::handleJoinCommand(Client& client, const std::string& channelName) 
 {
-    std::string joinMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channel;
-    std::string topicMsg = ":servidor 332 " + client.getNickname() + " " + channel + " :Tópico inicial do canal";
-    std::string topicCreatorMsg = ":servidor 333 " + client.getNickname() + " " + channel + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0";
-    std::string namesMessage = ":servidor 353 " + client.getNickname() + " = " + channel + " :@" + client.getNickname();
-    std::string endOfNameMsg = ":servidor 366 " + client.getNickname() + " " + channel + " :End of /NAMES list.";
+    // for(int i = 0; i < _channels.size(); ++i)
+    // {
+    //     if(_channels[i].getName() == channelName)
+
+    //         return;
+    // }
+    Channel newchannel(channelName, client);
+
+    
+    std::string joinMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName;
+    std::string topicMsg = ":servidor 332 " + client.getNickname() + " " + channelName + " :Tópico inicial do canal";
+    std::string topicCreatorMsg = ":servidor 333 " + client.getNickname() + " " + channelName + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0";
+    std::string namesMessage = ":servidor 353 " + client.getNickname() + " = " + channelName + " :@" + client.getNickname();
+    std::string endOfNameMsg = ":servidor 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.";
 
     MsgforHex(client.getSocketClient(), joinMsg);
     MsgforHex(client.getSocketClient(), topicMsg);

@@ -3,7 +3,9 @@
 # define SERVER_HPP
 
 #include "Irc.hpp"
-#include "Client.hpp"
+#include "Channel.hpp"
+
+class Client;
 
 class Server {
 private:
@@ -12,6 +14,7 @@ int                     _port;
 std::string             _password;
 std::vector<Client>     _clients;
 std::vector<pollfd>     _fds;
+//std::vector<Channel>    _channels;
 int                     _myPortConvertor(char *av);
 
 
