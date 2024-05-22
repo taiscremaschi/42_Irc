@@ -125,7 +125,7 @@ void Server::findCmd(const std::vector<std::string> &vec, Client* client, int cl
                 if (_clients[x].getNickname() == vec [i + 1]){
                      std::string nickError = ":servidor 433 " + _clients[x].getNickname() + " " + vec[i + 1] + " :Nickname is already in use";
                      MsgforHex(client->getSocketClient(), nickError);
-                     continue;
+                     return;
                 }
             }
             std::string oldNick = client->getNickname();
@@ -142,6 +142,34 @@ void Server::findCmd(const std::vector<std::string> &vec, Client* client, int cl
         {
 
         }
+       
+        else if(vec[i] == "PART"){
+
+         }        
+         else if(vec[i] == "QUIT"){
+
+         }        
+         else if(vec[i] == "WHO"){
+
+         }        
+        else if(vec[i] == "LIST"){
+
+        }
+        //////////////////// aqui  pra baixo paulo 
+         else if(vec[i] == "KICK"){
+
+         }        
+        else if(vec[i] == "INVITE"){
+
+        }
+         else if(vec[i] == "TOPIC"){
+
+        }        
+         else if(vec[i] == "MODE"){
+
+        }        
+
+
     }
 }
 
@@ -164,8 +192,7 @@ void Server::runServer()
                         continue ;
                     std::cout << "Received: " << buff << std::endl;
                     IrcMessages message(buff);
-                    for (size_t j = 0; j < _clients.size(); ++j) 
-                    {
+                    for (size_t j = 0; j < _clients.size(); ++j) {
                         if (_fds[i].fd == _clients[j].getSocketClient()) 
                             findCmd(message._vecMsg, &_clients[j], _clients[j].getSocketClient());
                     }
