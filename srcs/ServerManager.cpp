@@ -35,7 +35,7 @@ void ServerManager::handleIrcCmds(std::string buff, int fd){
     IrcMessages message(buff);
     for (size_t j = 0; j < _clients.size(); ++j) {
         if (fd == _clients[j].getSocketClient()) 
-            findCmd(message._vecMsg, _clients[j], _clients[j].getSocketClient());
+            findCmd(message._vecMsg, _clients[j]);
     }
 
 }
@@ -105,7 +105,27 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
     MsgforHex(client.getSocketClient(), endOfNameMsg);
 }
 
-void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, int clientSocket) {
+bool ServerManager::changeNick(Client &client, const std::string &nick)
+{
+    for(size_t x = 0; x < _clients.size(); ++x)
+    {
+        if (_clients[x].getNickname() == nick){
+                std::string nickError = ":server 433 " + _clients[x].getNickname() + " " + nick + " :Nickname is already in use";
+                MsgforHex(client.getSocketClient(), nickError);
+                return false;
+        }
+    }
+    std::string oldNick = client.getNickname();
+    client.setNickname(nick);
+    if(oldNick.empty())
+        return false;
+    //std::cout << "Nickname changed from " << oldNick << " to " << client.getNickname() << std::endl;
+    std::string response = ":" + oldNick + " NICK " + client.getNickname();
+    MsgforHex(client.getSocketClient(), response);
+    return true;
+}
+
+void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
         // if (vec[i] == "USER") { //isso aqui ta erradao
@@ -116,21 +136,9 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         // }
         if (vec[i] == "NICK") 
         {
-            for(size_t x = 0; x < _clients.size(); ++x)
-            {
-                if (_clients[x].getNickname() == vec [i + 1]){
-                     std::string nickError = ":server 433 " + _clients[x].getNickname() + " " + vec[i + 1] + " :Nickname is already in use";
-                     MsgforHex(client.getSocketClient(), nickError);
-                     return;
-                }
-            }
-            std::string oldNick = client.getNickname();
-            client.setNickname(vec[i + 1]);
-            if(oldNick.empty())
-                continue ;
-            //std::cout << "Nickname changed from " << oldNick << " to " << client.getNickname() << std::endl;
-            std::string response = ":" + oldNick + " NICK " + client.getNickname();
-            MsgforHex(clientSocket, response);
+            i++;
+            changeNick(client, vec[i]);
+            return;
         }
         else if (vec[i] == "JOIN")
         {

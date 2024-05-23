@@ -2,11 +2,8 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-
 #include "Client.hpp"
 #include <vector>
-
-
 
 class Channel {
     private:
@@ -22,7 +19,6 @@ class Channel {
         std::vector<std::string> getAllClientsName();
         std::vector<Client> getAllClients();
 };
-
 
 #endif
 

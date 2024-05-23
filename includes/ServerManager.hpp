@@ -5,6 +5,7 @@
 #include "Client.hpp"
 #include "Channel.hpp"
 #include "IrcMessages.hpp"
+#include <map>
 
 
 class ServerManager{
@@ -20,9 +21,11 @@ class ServerManager{
         void handleIrcCmds(std::string buff, int fd);
         void findClientBySocket(int socket);
         void handleJoinCommand(Client& client, const std::string& channel);
-        void findCmd(const std::vector<std::string> &vec, Client  &client, int clientSocket);
+        void findCmd(const std::vector<std::string> &vec, Client  &client);
         std::string channelExists(Client& client, const std::string& channelName);
         void infoForChannel(Client &client, std::string channel);
+        bool changeNick(Client &client, const std::string &nick);
+
 };
 
 
