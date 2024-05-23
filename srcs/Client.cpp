@@ -42,7 +42,7 @@ std::string Client::getHostname() { //help 4
         return "";
     }
 
-    int result = getnameinfo((sockaddr*)&addr, addr_len, buff, sizeof(buff), nullptr, 0, NI_NAMEREQD); // funtion to convert ip address into hostname. paramenters: endereço, size do address, buff para armazenar o host, size do buff, flag que idica a necesdidadedo hostname 
+    int result = getnameinfo((sockaddr*)&addr, addr_len, buff, sizeof(buff), NULL, 0, NI_NAMEREQD); // funtion to convert ip address into hostname. paramenters: endereço, size do address, buff para armazenar o host, size do buff, flag que idica a necesdidadedo hostname 
     if (result != 0) {
         std::cerr << "Error in convert IP address to hostname" << std::endl;
         return "";
