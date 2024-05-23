@@ -56,7 +56,6 @@ void MsgforHex(int clientSocket, const std::string& message)
     send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
 }
 
-
 void ServerManager::infoForChannel(Client &client, std::string channelName)
 {
     size_t i =  0;
@@ -102,9 +101,9 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     for(size_t x = 0; x < _clients.size(); ++x)
     {
         if (_clients[x].getNickname() == nick){
-                std::string nickError = ":server 433 " + _clients[x].getNickname() + " " + nick + " :Nickname is already in use";
-                MsgforHex(client.getSocketClient(), nickError);
-                return false;
+            std::string nickError = ":server 433 " + _clients[x].getNickname() + " " + nick + " :Nickname is already in use";
+            MsgforHex(client.getSocketClient(), nickError);
+            return false;
         }
     }
     std::string oldNick = client.getNickname();
@@ -120,23 +119,21 @@ std::string handleMsg(std::string msg)
 {
     int i = 0;
     while(msg[i] != ':')
-        i++;
+       i++;
     i++;
-    // protecao aqui
+    // TODO: protecao aqui
     std::string result = msg.substr(i, msg.length() - i);
     std::cout   << "sera que esse resul esta certo? " << result << std::endl;
     return result;
 }
 
-Client *ServerManager::handleNickricardo(const std::vector<std::string> &vec, int i)
+Client *ServerManager::getClientByNick(const std::string &nick)
 {
-    int j = 0;
-    while(vec[i] != _clients[j].getNickname())
+    for (size_t i = 0; i < _clients.size(); ++i)
     {
-        j++;
+        if (_clients[i].getNickname() == nick)
+            return &_clients[i];
     }
-    if(vec[i] == _clients[j].getNickname())
-        return &_clients[j];
     return NULL;
 }
 
@@ -165,21 +162,16 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             {
                 //funcao pra mensagem privada 
                 std::string result = handleMsg(messages._message);
-                Client *nickricardo = handleNickricardo(vec,(i+ 1));
-                if(nickricardo == NULL)
-                {
+                Client *receiver = getClientByNick(vec[i + 1]);
+                if(receiver == NULL){
+                    std::string erroMsg =  ":server 401 " + client.getNickname() + " " + vec[i + 1] + " :No such nick/channel";
+                    MsgforHex(client.getSocketClient(), erroMsg);
                     return;
                 }
-                //std:: cout << result << std::endl;
-                std::string temp = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + nickricardo->getNickname() + ": " + result;
-                MsgforHex(nickricardo->getSocketClient(), temp);
+
+                std::string hexMessage = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + receiver->getNickname() + ": " + result;
+                MsgforHex(receiver->getSocketClient(), hexMessage);
             }
-            // std::string msg;
-            // for (size_t j = i + 2; j < vec.size(); j++)
-            //     msg += vec[j];
-
-
-
         }
         else if(vec[i] == "PART"){
 
