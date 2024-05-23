@@ -1,5 +1,6 @@
 
 #include "Irc.hpp"
+#include "Server.hpp"
 
 int errorMsg(std::string msg){
     std::cout << msg << std::endl;

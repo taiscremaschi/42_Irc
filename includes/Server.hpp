@@ -3,16 +3,15 @@
 # define SERVER_HPP
 
 #include "Irc.hpp"
-#include "Channel.hpp"
+#include "ServerManager.hpp"
 
 class Server {
 private:
 int                     _serverSocket;
 int                     _port;
 std::string             _password;
-std::vector<Client>     _clients;
 std::vector<pollfd>     _fds;
-std::vector<Channel>    _channels;
+ServerManager           _manager;
 int                     _myPortConvertor(char *av);
 
 public:
@@ -28,12 +27,6 @@ std::string readData(int i);
 void        createServerSocket();
 
 
-
-//void        printChannels();
-void handleJoinCommand(Client& client, const std::string& channel);
-void findCmd(const std::vector<std::string> &vec, Client  &client, int clientSocket);
-std::string channelExists(Client& client, const std::string& channelName);
-void infoForChannel(Client &client, std::string channel);
 
 };
 
