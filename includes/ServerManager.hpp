@@ -26,6 +26,8 @@ class ServerManager{
         void infoForChannel(Client &client, std::string channel);
         bool changeNick(Client &client, const std::string &nick);
         Client *getClientByNick(const std::string &nick);
+        Channel *getChannelByNick(const std::string &nick);
+
 };
 
 #endif

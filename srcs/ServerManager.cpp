@@ -123,7 +123,6 @@ std::string handleMsg(std::string msg)
     i++;
     // TODO: protecao aqui
     std::string result = msg.substr(i, msg.length() - i);
-    std::cout   << "sera que esse resul esta certo? " << result << std::endl;
     return result;
 }
 
@@ -133,6 +132,20 @@ Client *ServerManager::getClientByNick(const std::string &nick)
     {
         if (_clients[i].getNickname() == nick)
             return &_clients[i];
+    }
+    return NULL;
+}
+
+Channel *ServerManager::getChannelByNick(const std::string &channel)
+{
+    std::cout << "entrou" << std::endl;
+    for (size_t i = 0; i < _channels.size(); ++i)
+    {
+        if (_channels[i].getName() == channel)
+        {
+            std::cout << "my channel is " << _channels[i].getName() << std::endl;
+            return &_channels[i];
+        }
     }
     return NULL;
 }
@@ -156,11 +169,20 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             std::string type = vec[i + 1];
             if ( type[0] == '#')
             {
-                //funca para mensagem em grupo
+                std::string msgGruop = handleMsg(messages._message);
+                Channel *ch = getChannelByNick(type);
+                if(ch == NULL){
+                    std::string erroMsg =  ":server 401 " + client.getNickname() + " " + vec[i + 1] + " :No such nick/channel";
+                    MsgforHex(client.getSocketClient(), erroMsg);
+                    return;
+                }
+                std::string myMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + ch->getName() + " :" + msgGruop;
+                for(size_t i = 0; i < ch->getAllClients().size(); i++){
+                    if (ch->getAllClients()[i].getSocketClient() != client.getSocketClient())
+                        MsgforHex(ch->getAllClients()[i].getSocketClient(), myMsg);
+                }
             }
-            else 
-            {
-                //funcao pra mensagem privada 
+            else {
                 std::string result = handleMsg(messages._message);
                 Client *receiver = getClientByNick(vec[i + 1]);
                 if(receiver == NULL){
@@ -168,7 +190,6 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
                     MsgforHex(client.getSocketClient(), erroMsg);
                     return;
                 }
-
                 std::string hexMessage = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + receiver->getNickname() + ": " + result;
                 MsgforHex(receiver->getSocketClient(), hexMessage);
             }
