@@ -6,9 +6,9 @@
 
 class IrcMessages {
 private:
-    std::string              _message;
 
 public:
+    std::string              _message;
     std::vector<std::string> _vecMsg;
     IrcMessages(std::string msg);
     ~IrcMessages();

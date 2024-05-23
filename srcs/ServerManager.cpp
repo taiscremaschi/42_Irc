@@ -31,14 +31,6 @@ void ServerManager::removeClient(int i){
     _clients.erase(_clients.begin() + i);
 }
 
-void ServerManager::handleIrcCmds(std::string buff, int fd){
-    IrcMessages message(buff);
-    for (size_t j = 0; j < _clients.size(); ++j) {
-        if (fd == _clients[j].getSocketClient()) 
-            findCmd(message._vecMsg, _clients[j]);
-    }
-
-}
 
 std::string ServerManager::channelExists(Client& client, const std::string& channelName){
     for(size_t i = 0; i < _channels.size(); ++i)
@@ -119,25 +111,27 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     client.setNickname(nick);
     if(oldNick.empty())
         return false;
-    //std::cout << "Nickname changed from " << oldNick << " to " << client.getNickname() << std::endl;
     std::string response = ":" + oldNick + " NICK " + client.getNickname();
     MsgforHex(client.getSocketClient(), response);
     return true;
 }
 
-void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client) {
+std::string handleMsg(std::string msg)
+{
+    int i = 0;
+    while(msg[i] != ':')
+        i++;
+    i++;
+    std::string result = msg.substr(i, msg.length() - i);
+    return result;
+}
+
+void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
-        // if (vec[i] == "USER") { //isso aqui ta erradao
-        //     client->setName(vec[i + 1]);
-        //     std::cout << "User set to: " << vec[i + 1] << std::endl;
-        //     std::string response = "USER " + vec[i + 1] + " 0 * :realname";
-        //     MsgforHex(clientSocket, response);
-        // }
         if (vec[i] == "NICK") 
         {
-            i++;
-            changeNick(client, vec[i]);
+            changeNick(client, vec[++i]);
             return;
         }
         else if (vec[i] == "JOIN")
@@ -148,11 +142,23 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client)
         }
         else if(vec[i] == "PRIVMSG")
         {
-            std::string channelName = vec[i + 1];
+            std::string type = vec[i + 1];
+            if ( type[0] == '#')
+            {
+                //funca para mensagem em grupo
+            }
+            else 
+            {
+               std::string result = handleMsg(messages._message);
+                //funcao pra mensagem privada 
+                std:: cout << result << std::endl;
+            }
             std::string msg;
             for (size_t j = i + 2; j < vec.size(); j++)
                 msg += vec[j];
-            std:: cout << msg << std::endl;
+
+
+
         }
         else if(vec[i] == "PART"){
 
@@ -180,4 +186,14 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client)
 
         }
     }
+}
+
+void ServerManager::handleIrcCmds(std::string buff, int fd){
+    
+    IrcMessages message(buff);
+    for (size_t j = 0; j < _clients.size(); ++j) {
+        if (fd == _clients[j].getSocketClient()) 
+            findCmd(message._vecMsg, _clients[j], message);
+    }
+
 }
