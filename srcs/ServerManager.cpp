@@ -122,8 +122,22 @@ std::string handleMsg(std::string msg)
     while(msg[i] != ':')
         i++;
     i++;
+    // protecao aqui
     std::string result = msg.substr(i, msg.length() - i);
+    std::cout   << "sera que esse resul esta certo? " << result << std::endl;
     return result;
+}
+
+Client *ServerManager::handleNickricardo(const std::vector<std::string> &vec, int i)
+{
+    int j = 0;
+    while(vec[i] != _clients[j].getNickname())
+    {
+        j++;
+    }
+    if(vec[i] == _clients[j].getNickname())
+        return &_clients[j];
+    return NULL;
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
@@ -149,13 +163,20 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             }
             else 
             {
-               std::string result = handleMsg(messages._message);
                 //funcao pra mensagem privada 
-                std:: cout << result << std::endl;
+                std::string result = handleMsg(messages._message);
+                Client *nickricardo = handleNickricardo(vec,(i+ 1));
+                if(nickricardo == NULL)
+                {
+                    return;
+                }
+                //std:: cout << result << std::endl;
+                std::string temp = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + nickricardo->getNickname() + ": " + result;
+                MsgforHex(nickricardo->getSocketClient(), temp);
             }
-            std::string msg;
-            for (size_t j = i + 2; j < vec.size(); j++)
-                msg += vec[j];
+            // std::string msg;
+            // for (size_t j = i + 2; j < vec.size(); j++)
+            //     msg += vec[j];
 
 
 

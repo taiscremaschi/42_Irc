@@ -25,6 +25,7 @@ class ServerManager{
         std::string channelExists(Client& client, const std::string& channelName);
         void infoForChannel(Client &client, std::string channel);
         bool changeNick(Client &client, const std::string &nick);
+        Client *handleNickricardo(const std::vector<std::string> &vec, int i);
 
 };
 
