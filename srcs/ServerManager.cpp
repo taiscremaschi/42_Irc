@@ -50,7 +50,7 @@ std::string ServerManager::channelExists(Client& client, const std::string& chan
         if(_channels[i].getName() == channelName)
         {
             //TODO: ADC O @ APENAS AO OPERADOR
-            std::string namesList = ":servidor 353 " + client.getNickname() + " = " + channelName + " :";
+            std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
            // std::cerr << "nameliste é   " << namesList << std::endl;
 
             _channels[i].addClient(client);
@@ -109,13 +109,13 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
         Channel newchannel(channelName, client);
         _channels.push_back(newchannel);
         //std::cout << "meu novo chanel " << newchannel.getName() << std::endl;
-        namesMessage = ":servidor 353 " + client.getNickname() + " = " + channelName + " :@" + client.getNickname();
+        namesMessage = ":server 353 " + client.getNickname() + " = " + channelName + " :@" + client.getNickname();
     }
     std::string joinMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName;
-    std::string topicMsg = ":servidor 332 " + client.getNickname() + " " + channelName + " :Tópico inicial do canal";
+    std::string topicMsg = ":server 332 " + client.getNickname() + " " + channelName + " :Topic inicial of channel";
 
-    std::string topicCreatorMsg = ":servidor 333 " + client.getNickname() + " " + channelName + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0";
-    std::string endOfNameMsg = ":servidor 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.";
+    std::string topicCreatorMsg = ":server 333 " + client.getNickname() + " " + channelName + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0";
+    std::string endOfNameMsg = ":server 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.";
 
 
     //printChannels();
@@ -142,7 +142,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             for(size_t x = 0; x < _clients.size(); ++x)
             {
                 if (_clients[x].getNickname() == vec [i + 1]){
-                     std::string nickError = ":servidor 433 " + _clients[x].getNickname() + " " + vec[i + 1] + " :Nickname is already in use";
+                     std::string nickError = ":server 433 " + _clients[x].getNickname() + " " + vec[i + 1] + " :Nickname is already in use";
                      MsgforHex(client.getSocketClient(), nickError);
                      return;
                 }
