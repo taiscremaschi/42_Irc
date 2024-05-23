@@ -85,7 +85,7 @@ void Server::newClientConnection()
     std::cout << "new client conected\n";
 
 }
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void MsgforHex(int clientSocket, const std::string& message) 
 {
     std::string msg = message + "\r\n";
@@ -260,7 +260,7 @@ void Server::findCmd(const std::vector<std::string> &vec, Client &client, int cl
 
     }
 }
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void Server::runServer()
 {
     while (1) {
@@ -279,6 +279,10 @@ void Server::runServer()
                     if(buff.empty())
                         continue ;
                     std::cout << "Received: " << buff << std::endl;
+
+                    
+
+
                     IrcMessages message(buff);
                     for (size_t j = 0; j < _clients.size(); ++j) {
                         if (_fds[i].fd == _clients[j].getSocketClient()) 
