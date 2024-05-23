@@ -138,14 +138,10 @@ Client *ServerManager::getClientByNick(const std::string &nick)
 
 Channel *ServerManager::getChannelByNick(const std::string &channel)
 {
-    std::cout << "entrou" << std::endl;
     for (size_t i = 0; i < _channels.size(); ++i)
     {
         if (_channels[i].getName() == channel)
-        {
-            std::cout << "my channel is " << _channels[i].getName() << std::endl;
             return &_channels[i];
-        }
     }
     return NULL;
 }
@@ -160,12 +156,15 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         }
         else if (vec[i] == "JOIN")
         {
+            //TODO:: fazer os operators pq eles nao funcionam
             std::string channelName = vec[i + 1];
             handleJoinCommand(client, channelName);
             infoForChannel(client, channelName);
         }
         else if(vec[i] == "PRIVMSG")
         {
+            //TODO: preciso ver a questao de quando eu tiver no nome do nick ou channel : preciso ter certexza de onde começa my msg
+            ///TODO: o programa esta mandando msg pra grupo que n faz parte precisa de protecao. 
             std::string type = vec[i + 1];
             if ( type[0] == '#')
             {
