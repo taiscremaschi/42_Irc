@@ -30,8 +30,3 @@ std::vector<std::string> IrcMessages::splitNewlineAndSpace(){
     }
     return result;
 }
-
-
-
-
-

@@ -16,23 +16,21 @@ void Client::setSocketClient(int socketClient){
     _socketClient = socketClient;
 }
 
-std::string Client::getName() const{
-    return _name;
-}
-
-
-std::string Client::getNickname() const{
-    return _nickname;
-}
-
 void Client::setName(std::string name){
     _name = name;
+}
+
+std::string Client::getName() const{
+    return _name;
 }
 
 void Client::setNickname(std::string nick){
     _nickname = nick;
 }
 
+std::string Client::getNickname() const{
+    return _nickname;
+}
 
 std::string Client::getHostname() { //help 4
     char buff[1024];

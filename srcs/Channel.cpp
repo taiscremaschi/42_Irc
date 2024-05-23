@@ -21,6 +21,10 @@ void Channel::addClient(Client &client){
     _clientsChannel.push_back(client);
 }
 
+std::vector<Client> Channel::getAllClients(){
+    return _clientsChannel;
+}
+
 std::vector<std::string> Channel::getAllClientsName()
 {
     std::vector<std::string> result;    
@@ -30,9 +34,4 @@ std::vector<std::string> Channel::getAllClientsName()
         result.push_back(_clientsChannel[i].getNickname());
     }
     return result;
-}
-
-std::vector<Client> Channel::getAllClients()
-{
-    return _clientsChannel;
 }
