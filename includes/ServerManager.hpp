@@ -11,9 +11,6 @@ class ServerManager{
     private:
         std::vector<Channel>    _channels;
         std::vector<Client>     _clients;
-
-
-
     public:
         ServerManager();
         ~ServerManager();

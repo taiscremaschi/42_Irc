@@ -114,9 +114,8 @@ void Server::createServerSocket()
 {
     _serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
 
-    if(_serverSocket == -1){
+    if(_serverSocket == -1)
         std::cerr << "error in creating server socket\n";
-    }
     sockaddr_in serverAddr; // now I need configure the server address (read help 2)
     serverAddr.sin_family = AF_INET; 
     serverAddr.sin_addr.s_addr = INADDR_ANY; 
@@ -131,7 +130,6 @@ void Server::createServerSocket()
         std::cerr << "error in listen\n"; // max_nbr of connections
         close(_serverSocket);
         return;
-
     }
 }
 

@@ -10,10 +10,10 @@
 
 class Channel {
     private:
-    std::vector<Client> _clientsChannel;
-    std::string         _name;
-    std::string         _topic;
-    std::vector<Client> _operators;
+        std::vector<Client> _clientsChannel;
+        std::string         _name;
+        std::string         _topic;
+        std::vector<Client> _operators;
     public:
         Channel(const std::string &name, const Client &client);
         ~Channel();
@@ -21,7 +21,6 @@ class Channel {
         void addClient(Client &client);
         std::vector<std::string> getAllClientsName();
         std::vector<Client> getAllClients();
-
 };
 
 

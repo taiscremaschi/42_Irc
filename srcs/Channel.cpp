@@ -6,7 +6,6 @@ Channel::Channel(const std::string &name, const Client &client){
     _operators.push_back(client);
     _topic = name;
     _clientsChannel.push_back(client);
-
 }
 
 Channel::~Channel(){}
@@ -17,7 +16,6 @@ const std::string &Channel::getName() const {
 }
     
 void Channel::addClient(Client &client){
-
     _clientsChannel.push_back(client);
 }
 

@@ -31,16 +31,12 @@ void ServerManager::removeClient(int i){
     _clients.erase(_clients.begin() + i);
 }
 
-
 void ServerManager::handleIrcCmds(std::string buff, int fd){
     IrcMessages message(buff);
     for (size_t j = 0; j < _clients.size(); ++j) {
-    if (fd == _clients[j].getSocketClient()) 
-    {
-        findCmd(message._vecMsg, _clients[j], _clients[j].getSocketClient());
-        //std::cerr << "Cliente é " << _clients[j].getNickname() << std::endl;
+        if (fd == _clients[j].getSocketClient()) 
+            findCmd(message._vecMsg, _clients[j], _clients[j].getSocketClient());
     }
-}
 
 }
 
@@ -51,18 +47,13 @@ std::string ServerManager::channelExists(Client& client, const std::string& chan
         {
             //TODO: ADC O @ APENAS AO OPERADOR
             std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
-           // std::cerr << "nameliste é   " << namesList << std::endl;
-
             _channels[i].addClient(client);
             std::vector<std::string> result = _channels[i].getAllClientsName();
             for(size_t j = 0; j < result.size(); ++j)
-                    namesList += result[j] + " ";
-           // std::cerr << "entrou   " << namesList << std::endl;
-            //std::cerr << "entrou   " << channelName  << std::endl;
+                namesList += result[j] + " ";
             return namesList;
         }
     }
-    //std::cerr << "nao entrou   " << channelName  << std::endl;
     return "";
 }
 
@@ -76,11 +67,9 @@ void MsgforHex(int clientSocket, const std::string& message)
 
 void ServerManager::infoForChannel(Client &client, std::string channelName)
 {
-    //std::cout << "entrou \n" << std::endl;
     size_t i =  0;
     for(; i < _channels.size(); ++i)
     {
-        //std::cout << _channels[i].getName() << " this is my name." << std::endl;
         if(_channels[i].getName() == channelName)
             break;
     }
@@ -90,42 +79,30 @@ void ServerManager::infoForChannel(Client &client, std::string channelName)
     std:: string msg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName; 
     for (size_t i = 0; i < clients.size(); ++i)
     {
-        //std::cout << "devia entrar nesse for " << clients[i].getNickname() << std::endl;
         if(clients[i].getNickname() != client.getNickname())
-        {
-           // std::cout << clients[i].getNickname() << "devia entrar" << std::endl;
-
             MsgforHex(clients[i].getSocketClient(), msg);
-        }
     }
 }
 
 void ServerManager::handleJoinCommand(Client& client, const std::string& channelName) 
 {
-
-    // std::cout << "antes do chanel exist meu vec + 1 is   " << channelName  << std::endl;
     std::string namesMessage  = channelExists(client, channelName);
     if(namesMessage.empty()){
         Channel newchannel(channelName, client);
         _channels.push_back(newchannel);
-        //std::cout << "meu novo chanel " << newchannel.getName() << std::endl;
         namesMessage = ":server 353 " + client.getNickname() + " = " + channelName + " :@" + client.getNickname();
     }
+
     std::string joinMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName;
     std::string topicMsg = ":server 332 " + client.getNickname() + " " + channelName + " :Topic inicial of channel";
-
     std::string topicCreatorMsg = ":server 333 " + client.getNickname() + " " + channelName + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0";
     std::string endOfNameMsg = ":server 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.";
-
-
-    //printChannels();
 
     MsgforHex(client.getSocketClient(), joinMsg);
     MsgforHex(client.getSocketClient(), topicMsg);
     MsgforHex(client.getSocketClient(), topicCreatorMsg);
     MsgforHex(client.getSocketClient(), namesMessage);
     MsgforHex(client.getSocketClient(), endOfNameMsg);
-
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, int clientSocket) {
@@ -158,7 +135,6 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         else if (vec[i] == "JOIN")
         {
             std::string channelName = vec[i + 1];
-            //printChannels();
             handleJoinCommand(client, channelName);
             infoForChannel(client, channelName);
         }
@@ -172,20 +148,20 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         }
         else if(vec[i] == "PART"){
 
-         }        
-         else if(vec[i] == "QUIT"){
+        }        
+        else if(vec[i] == "QUIT"){
 
-         }        
-         else if(vec[i] == "WHO"){
+        }        
+        else if(vec[i] == "WHO"){
 
-         }        
+        }        
         else if(vec[i] == "LIST"){
 
         }
         //////////////////// aqui  pra baixo paulo 
-         else if(vec[i] == "KICK"){
+        else if(vec[i] == "KICK"){
 
-         }        
+        }        
         else if(vec[i] == "INVITE"){
 
         }
@@ -194,8 +170,6 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         }        
          else if(vec[i] == "MODE"){
 
-        }        
-
-
+        }
     }
 }
