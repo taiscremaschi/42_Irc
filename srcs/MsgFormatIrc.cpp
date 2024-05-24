@@ -21,19 +21,19 @@ std::string MsgFormatIrc::endOfNameMessage(Client &client, const std::string &ch
 }
 
 
-std::string MsgFormatIrc::partMessage(Client &client, std::string cmd, Channel &channel)
-{
-    return ;
-}
+// std::string MsgFormatIrc::partMessage(Client &client, std::string cmd, Channel &channel)
+// {
+//     return ;
+// }
 
-std::string MsgFormatIrc::nickMessage(Client &client, std::string cmd)
-{
-    return ; 
-}
+// std::string MsgFormatIrc::nickMessage(Client &client, std::string cmd)
+// {
+//     return ; 
+// }
 
-std::string MsgFormatIrc::privMessage(Client &client, std::string cmd)
-{
-    return ;
-}
+// std::string MsgFormatIrc::privMessage(Client &client, std::string cmd)
+// {
+//     return ;
+// }
 
 
