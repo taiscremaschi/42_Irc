@@ -40,9 +40,13 @@ std::string ServerManager::channelExists(Client& client, const std::string& chan
             //TODO: ADC O @ APENAS AO OPERADOR
             std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
             _channels[i].addClient(client);
-            std::vector<std::string> result = _channels[i].getAllClientsName();
-            for(size_t j = 0; j < result.size(); ++j)
-                namesList += result[j] + " ";
+            std::vector<std::string> vecClients = _channels[i].getAllClientsName();
+            for(size_t j = 0; j < vecClients.size(); ++j)
+            {
+                if(_channels[i].searchOperator(vecClients[j]))
+                    namesList += "@";
+                namesList += vecClients[j] + " ";
+            }
             return namesList;
         }
     }

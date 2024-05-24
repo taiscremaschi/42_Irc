@@ -27,6 +27,9 @@ void Channel::removeClient(Client &client){
     }
 }
 
+std::vector<Client>  Channel::getOperator() const{
+    return _operators;
+}
 
 
 
@@ -44,3 +47,13 @@ std::vector<std::string> Channel::getAllClientsName()
     }
     return result;
 }
+
+bool Channel::searchOperator(const std::string &name){
+    for(size_t i = 0; i < _operators.size(); ++i)
+    {
+        if(_operators[i].getNickname() == name)
+            return true;
+    }
+    return false;
+}
+

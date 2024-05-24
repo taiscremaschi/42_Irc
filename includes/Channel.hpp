@@ -15,10 +15,12 @@ class Channel {
         Channel(const std::string &name, const Client &client);
         ~Channel();
         const std::string &getName() const;
+        std::vector<Client>  getOperator() const;
         void addClient(Client &client);
         void removeClient(Client &client);
         std::vector<std::string> getAllClientsName();
         std::vector<Client> getAllClients();
+        bool searchOperator(const std::string &name);
 };
 
 #endif
