@@ -31,8 +31,6 @@ std::vector<Client>  Channel::getOperator() const{
     return _operators;
 }
 
-
-
 std::vector<Client> Channel::getAllClients(){
     return _clientsChannel;
 }

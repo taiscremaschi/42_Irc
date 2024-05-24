@@ -4,6 +4,7 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
+#include "MsgFormatIrc.hpp"
 #include "IrcMessages.hpp"
 #include <map>
 
@@ -27,7 +28,9 @@ class ServerManager{
         bool changeNick(Client &client, const std::string &nick);
         Client *getClientByNick(const std::string &nick);
         Channel *getChannelByNick(const std::string &nick);
+        void handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages);
+        
 
 };
 
-#endif
+# endif
