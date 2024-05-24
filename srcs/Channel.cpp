@@ -19,6 +19,17 @@ void Channel::addClient(Client &client){
     _clientsChannel.push_back(client);
 }
 
+void Channel::removeClient(Client &client){
+    for(size_t i = 0; i < _clientsChannel.size(); ++i)
+    {
+        if (_clientsChannel[i] == client)
+            _clientsChannel.erase(_clientsChannel.begin() + i);
+    }
+}
+
+
+
+
 std::vector<Client> Channel::getAllClients(){
     return _clientsChannel;
 }

@@ -24,7 +24,7 @@ public:
     std::string getName() const;
     std::string getNickname() const;
     std::string getHostname();
-
+    bool operator==(Client const &client);
 };
 
 #endif

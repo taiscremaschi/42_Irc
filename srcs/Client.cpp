@@ -8,6 +8,12 @@ Client::Client(int clientSocket) {
 Client:: ~Client(){
 }
 
+bool Client::operator==(Client const &client){
+    if(this == &client)
+        return true;
+    return false;
+}
+
 int Client::getSocketClient(){
     return _socketClient;
 }

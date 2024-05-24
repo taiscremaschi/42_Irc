@@ -205,7 +205,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             for(size_t i = 0; i < channel->getAllClients().size(); i++){
                     MsgforHex(channel->getAllClients()[i].getSocketClient(), msgPart);
                 }
-
+            channel->removeClient(client);
         }        
         else if(vec[i] == "QUIT"){
 
