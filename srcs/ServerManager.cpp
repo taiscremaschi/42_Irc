@@ -118,10 +118,10 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
 std::string handleMsg(std::string msg)
 {
     int i = 0;
-    while(msg[i] != ':')
+    while(msg[i] && msg[i] != ':')
        i++;
-    i++;
-    // TODO: protecao aqui
+    if(msg[i])
+        i++;
     std::string result = msg.substr(i, msg.length() - i);
     return result;
 }
@@ -194,6 +194,17 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             }
         }
         else if(vec[i] == "PART"){
+            std::string exitMsg = handleMsg(messages._message);
+            Channel *channel = getChannelByNick(vec[i + 1]);
+            if(channel == NULL){
+                std::string error = ":server 403 " + client.getNickname() + " " + vec[i + 1] + " :No such channel";
+                MsgforHex(client.getSocketClient(), error);
+                return;
+            }
+            std::string msgPart = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg;
+            for(size_t i = 0; i < channel->getAllClients().size(); i++){
+                    MsgforHex(channel->getAllClients()[i].getSocketClient(), msgPart);
+                }
 
         }        
         else if(vec[i] == "QUIT"){
