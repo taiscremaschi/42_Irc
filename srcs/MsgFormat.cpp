@@ -1,69 +1,59 @@
 
-#include "MsgFormatIrc.hpp"
+#include "MsgFormat.hpp"
 
-
-std::string MsgFormatIrc::joinMessage(Client &client, const std::string &channelName){
-
+std::string MsgFormat::join(Client &client, const std::string &channelName){
     return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName);
-
 }
 
-std::string MsgFormatIrc::partMessage(Client &client, Channel *channel, std::string exitMsg)
-{
+std::string MsgFormat::part(Client &client, Channel *channel, std::string exitMsg) {
     return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg);
 }
 
-std::string MsgFormatIrc::nickMessage(Client &client, const std::string &oldNick)
-{
+std::string MsgFormat::nick(Client &client, const std::string &oldNick) {
     return (":" + oldNick + " NICK " + client.getNickname()); 
 }
 
-std::string MsgFormatIrc::privMessage(Client &client, std::string name, std::string message)
-{
+std::string MsgFormat::priv(Client &client, std::string name, std::string message) {
     return ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + name + " :" + message;
 }
 
-std::string MsgFormatIrc::endOfNameMessage(Client &client, const std::string &channelName){
+std::string MsgFormat::endOfName(Client &client, const std::string &channelName){
     return (":server 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.");
 }
 
 /// topics
-std::string MsgFormatIrc::topicMessage(Client &client, const std::string &channelName, std::string topic) {
+std::string MsgFormat::topic(Client &client, const std::string &channelName, std::string topic) {
     return(":server 332 " + client.getNickname() + " " + channelName + " :" + topic);
 }
 
-std::string MsgFormatIrc::topicCreatorMessage(Client &client, const std::string &channelName){
+std::string MsgFormat::topicCreator(Client &client, const std::string &channelName){
     return(":server 333 " + client.getNickname() + " " + channelName + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0");
 }
 /// error handling
-std::string MsgFormatIrc::nickErrorMessage(Client &client, std::string nick)
-{
+std::string MsgFormat::nickError(Client &client, std::string nick) {
     return (":server 433 " + client.getNickname() + " " + nick + " :Nickname is already in use");
 }
 
-std::string MsgFormatIrc::partErrorMessage(Client &client, std::string wrongChannel)
-{
+std::string MsgFormat::partError(Client &client, std::string wrongChannel) {
     return (":server 403 " + client.getNickname() + " " + wrongChannel + " :No such channel");
 }
 
-std::string MsgFormatIrc::privErrorMessage(Client &client, std::string type)
-{
+std::string MsgFormat::privError(Client &client, std::string type) {
     return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
 }
 
-std::string MsgFormatIrc::handleMsg(std::string msg)
+std::string MsgFormat::handleMsg(std::string msg)
 {
     int i = 0;
     while(msg[i] && msg[i] != ':')
        i++;
     if(msg[i])
         i++;
-    std::string result = msg.substr(i, msg.length() - i);
-    return result;
+    return msg.substr(i, msg.length() - i);
 }
 
 
-void MsgFormatIrc::MsgforHex(int clientSocket, const std::string& message) 
+void MsgFormat::MsgforHex(int clientSocket, const std::string& message) 
 {
     std::string msg = message + "\r\n";
     std::cout << msg << std::endl;

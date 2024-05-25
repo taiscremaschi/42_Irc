@@ -32,21 +32,6 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
     return NULL;
 }
 
-
-
-void ServerManager::infoForChannel(Client &client, std::string channelName) //funcao para mandar msg pra todos os clientes do channel avisando que um entrou 
-{
-    Channel *channel = getChannelByName(channelName);
-    if(channel == NULL)
-        return;
-    std::vector<Client>  clients = channel->getAllClients();
-    for (size_t i = 0; i < clients.size(); ++i)
-    {
-        if(clients[i].getNickname() != client.getNickname())
-            MsgFormatIrc::MsgforHex(clients[i].getSocketClient(), MsgFormatIrc::joinMessage(client, channelName));
-    }
-}
-
 void ServerManager::handleJoinCommand(Client& client, const std::string& channelName) //funcao para join
 {
     Channel *channel = getChannelByName(channelName);
@@ -67,11 +52,18 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
         namesList += vecClients[j] + " ";
     }
 
-    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::joinMessage(client, channelName));
-    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::topicMessage(client, channelName, "Topic inicial of channel"));
-    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::topicCreatorMessage(client, channelName));
-    MsgFormatIrc::MsgforHex(client.getSocketClient(), namesList);
-    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::endOfNameMessage(client, channelName));
+    MsgFormat::MsgforHex(client.getSocket(), MsgFormat::join(client, channelName));
+    MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, "Topic initial of channel"));
+    MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topicCreator(client, channelName));
+    MsgFormat::MsgforHex(client.getSocket(), namesList);
+    MsgFormat::MsgforHex(client.getSocket(), MsgFormat::endOfName(client, channelName));
+
+    std::vector<Client>  clients = channel->getAllClients();
+    for (size_t i = 0; i < clients.size(); ++i)
+    {
+        if(clients[i].getNickname() != client.getNickname())
+            MsgFormat::MsgforHex(clients[i].getSocket(), MsgFormat::join(client, channelName));
+    }
 }
 
 bool ServerManager::changeNick(Client &client, const std::string &nick)
@@ -80,7 +72,7 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     for(size_t x = 0; x < _clients.size(); ++x)
     {
         if (_clients[x].getNickname() == nick){
-            MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::nickErrorMessage(_clients[x], nick));
+            MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickError(_clients[x], nick));
             return false;
         }
     }
@@ -88,31 +80,34 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     client.setNickname(nick);
     if(oldNick.empty())
         return false;
-    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::nickMessage(client, oldNick));
+    MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nick(client, oldNick));
     return true;
 }
 
+//TODO: preciso ver a questao de quando eu tiver no nome do nick ou channel : preciso ter certexza de onde começa my msg
+///TODO: o programa esta mandando msg pra grupo que n faz parte precisa de protecao. 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
 {
     if ( type[0] == '#')
     {
         Channel *ch = getChannelByName(type);
         if(ch == NULL){
-            MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
+            MsgFormat::MsgforHex(client.getSocket(), MsgFormat::privError(client, type));
             return;
         }
-        for(size_t i = 0; i < ch->getAllClients().size(); i++){
-            if (ch->getAllClients()[i].getSocketClient() != client.getSocketClient())
-                MsgFormatIrc::MsgforHex(ch->getAllClients()[i].getSocketClient(), MsgFormatIrc::privMessage(client, ch->getName(), MsgFormatIrc::handleMsg(messages._message)));
+        std::vector<Client> clients = ch->getAllClients();
+        for(size_t i = 0; i < clients.size(); i++){
+            if (clients[i].getSocket() != client.getSocket())
+                MsgFormat::MsgforHex(clients[i].getSocket(), MsgFormat::priv(client, ch->getName(), MsgFormat::handleMsg(messages._message)));
         }
     }
     else {
         Client *receiver = getClientByNick(type);
         if(receiver == NULL){
-            MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
+            MsgFormat::MsgforHex(client.getSocket(), MsgFormat::privError(client, type));
             return;
         }
-        MsgFormatIrc::MsgforHex(receiver->getSocketClient(), MsgFormatIrc::privMessage(client, receiver->getNickname(), MsgFormatIrc::handleMsg(messages._message)));
+        MsgFormat::MsgforHex(receiver->getSocket(), MsgFormat::priv(client, receiver->getNickname(), MsgFormat::handleMsg(messages._message)));
     }
 }
 
@@ -120,15 +115,15 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 {
     Channel *channel = getChannelByName(channelName);
     if(channel == NULL){
-        MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::partErrorMessage(client, channelName));
+        MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
         return;
     }
-    for(size_t i = 0; i < channel->getAllClients().size(); i++){
-            MsgFormatIrc::MsgforHex(channel->getAllClients()[i].getSocketClient(), MsgFormatIrc::partMessage(client, channel, MsgFormatIrc::handleMsg(messages._message)));
+    std::vector<Client> clients = channel->getAllClients();
+    for(size_t i = 0; i < clients.size(); i++){
+        MsgFormat::MsgforHex(clients[i].getSocket(), MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
     }
     channel->removeClient(client);
 }
-
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
     
@@ -140,11 +135,8 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         }
         else if (vec[i] == "JOIN"){
             handleJoinCommand(client, vec[i + 1]);
-            infoForChannel(client, vec[i + 1]);
             return;
         }
-        //TODO: preciso ver a questao de quando eu tiver no nome do nick ou channel : preciso ter certexza de onde começa my msg
-        ///TODO: o programa esta mandando msg pra grupo que n faz parte precisa de protecao. 
         else if(vec[i] == "PRIVMSG"){
             handlePrivMessage(client, vec[i + 1], messages);
             return;
@@ -180,12 +172,10 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 }
 
 void ServerManager::handleIrcCmds(std::string buff, int fd){
-    
     IrcMessages message(buff);
     for (size_t j = 0; j < _clients.size(); ++j) {
-        if (fd == _clients[j].getSocketClient()) 
+        if (fd == _clients[j].getSocket()) 
             findCmd(message._vecMsg, _clients[j], message);
     }
-
 }
 

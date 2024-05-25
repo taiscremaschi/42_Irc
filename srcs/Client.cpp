@@ -14,11 +14,11 @@ bool Client::operator==(Client const &client){
     return false;
 }
 
-int Client::getSocketClient(){
+int Client::getSocket(){
     return _socketClient;
 }
 
-void Client::setSocketClient(int socketClient){
+void Client::setSocket(int socketClient){
     _socketClient = socketClient;
 }
 

@@ -1,5 +1,5 @@
 NAME		= 		ircserv
-SRCS		=		main.cpp Server.cpp Client.cpp IrcMessages.cpp Channel.cpp ServerManager.cpp MsgFormatIrc.cpp
+SRCS		=		main.cpp Server.cpp Client.cpp IrcMessages.cpp Channel.cpp ServerManager.cpp MsgFormat.cpp
 OBJS 		=		$(addprefix objs/, $(SRCS:.cpp=.o))
 CXXFLAGS	=		-Wall -Wextra -Werror  -std=c++98 -g -Iincludes/
 RM			=		rm -f

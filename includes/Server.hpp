@@ -7,11 +7,11 @@
 
 class Server {
     private:
-        int                     _serverSocket;
-        int                     _port;
+        ServerManager           _manager;
         std::string             _password;
         std::vector<pollfd>     _fds;
-        ServerManager           _manager;
+        int                     _serverSocket;
+        int                     _port;
         int                     _myPortConvertor(char *av);
 
     public:
@@ -24,9 +24,6 @@ class Server {
         void        newClientConnection();
         std::string readData(int i);
         void        createServerSocket();
-
-
-
 };
 
 #endif
