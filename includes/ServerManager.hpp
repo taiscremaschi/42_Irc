@@ -16,18 +16,15 @@ class ServerManager{
     public:
         ServerManager();
         ~ServerManager();
-        //void        printChannels();
         void createClient(Client &client);
         void removeClient(int i);
         void handleIrcCmds(std::string buff, int fd);
-        void findClientBySocket(int socket);
         void handleJoinCommand(Client& client, const std::string& channel);
         void findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &mensage);
-        std::string channelExists(Client& client, const std::string& channelName);
         void infoForChannel(Client &client, std::string channel);
         bool changeNick(Client &client, const std::string &nick);
         Client *getClientByNick(const std::string &nick);
-        Channel *getChannelByNick(const std::string &nick);
+        Channel *getChannelByName(const std::string &nick);
         void handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages);
         
 

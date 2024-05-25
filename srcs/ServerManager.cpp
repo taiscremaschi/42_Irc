@@ -22,7 +22,7 @@ Client *ServerManager::getClientByNick(const std::string &nick)
     return NULL;
 }
 
-Channel *ServerManager::getChannelByNick(const std::string &channel)
+Channel *ServerManager::getChannelByName(const std::string &channel)
 {
     for (size_t i = 0; i < _channels.size(); ++i)
     {
@@ -51,17 +51,12 @@ void MsgforHex(int clientSocket, const std::string& message)
     send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
 }
 
-void ServerManager::infoForChannel(Client &client, std::string channelName)
+void ServerManager::infoForChannel(Client &client, std::string channelName) //funcao para mandar msg pra todos os clientes do channel avisando que um entrou 
 {
-    size_t i =  0;
-    for(; i < _channels.size(); ++i)
-    {
-        if(_channels[i].getName() == channelName)
-            break;
-    }
-    if (i == _channels.size())
-        return ;
-    std::vector<Client>  clients = _channels[i].getAllClients();
+    Channel *channel = getChannelByName(channelName);
+    if(channel == NULL)
+        return;
+    std::vector<Client>  clients = channel->getAllClients();
     for (size_t i = 0; i < clients.size(); ++i)
     {
         if(clients[i].getNickname() != client.getNickname())
@@ -69,19 +64,30 @@ void ServerManager::infoForChannel(Client &client, std::string channelName)
     }
 }
 
-void ServerManager::handleJoinCommand(Client& client, const std::string& channelName) 
+void ServerManager::handleJoinCommand(Client& client, const std::string& channelName) //funcao para join
 {
-    std::string namesMessage  = channelExists(client, channelName);
-    if(namesMessage.empty()){
-        Channel newchannel(channelName, client);
+    Channel *channel = getChannelByName(channelName);
+    Channel newchannel(channelName, client);
+    if(channel == NULL)
+    {
         _channels.push_back(newchannel);
-        namesMessage = ":server 353 " + client.getNickname() + " = " + channelName + " :@" + client.getNickname();
+        channel = &newchannel;
+    }
+    else
+        channel->addClient(client);
+    std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
+    std::vector<std::string> vecClients = channel->getAllClientsName();
+    for(size_t j = 0; j < vecClients.size(); ++j)
+    {
+        if(channel->searchOperator(vecClients[j]))
+            namesList += "@";
+        namesList += vecClients[j] + " ";
     }
 
     MsgforHex(client.getSocketClient(), MsgFormatIrc::joinMessage(client, channelName));
     MsgforHex(client.getSocketClient(), MsgFormatIrc::topicMessage(client, channelName, "Topic inicial of channel"));
     MsgforHex(client.getSocketClient(), MsgFormatIrc::topicCreatorMessage(client, channelName));
-    MsgforHex(client.getSocketClient(), namesMessage);
+    MsgforHex(client.getSocketClient(), namesList);
     MsgforHex(client.getSocketClient(), MsgFormatIrc::endOfNameMessage(client, channelName));
 }
 
@@ -108,14 +114,14 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
     std::string msg = handleMsg(messages._message);
     if ( type[0] == '#')
     {
-        Channel *ch = getChannelByNick(type);
+        Channel *ch = getChannelByName(type);
         if(ch == NULL){
             MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
             return;
         }
         for(size_t i = 0; i < ch->getAllClients().size(); i++){
             if (ch->getAllClients()[i].getSocketClient() != client.getSocketClient())
-                MsgforHex(ch->getAllClients()[i].getSocketClient(), MsgFormatIrc::privMessage(client, ch, msg));
+                MsgforHex(ch->getAllClients()[i].getSocketClient(), MsgFormatIrc::privMessage(client, ch->getName(), msg));
         }
     }
     else {
@@ -124,31 +130,9 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
             MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
             return;
         }
-        MsgforHex(receiver->getSocketClient(), MsgFormatIrc::privMessage(client, receiver, msg));
+        MsgforHex(receiver->getSocketClient(), MsgFormatIrc::privMessage(client, receiver->getNickname(), msg));
     }
 
-}
-
-//TODO: mudat o nome da funcao pra ficar mais claro o que ela faz (PODE IR PARA O CHANNEL)
-std::string ServerManager::channelExists(Client& client, const std::string& channelName)
-{
-    for(size_t i = 0; i < _channels.size(); ++i)
-    {
-        if(_channels[i].getName() == channelName)
-        {
-            std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
-            _channels[i].addClient(client);
-            std::vector<std::string> vecClients = _channels[i].getAllClientsName();
-            for(size_t j = 0; j < vecClients.size(); ++j)
-            {
-                if(_channels[i].searchOperator(vecClients[j]))
-                    namesList += "@";
-                namesList += vecClients[j] + " ";
-            }
-            return namesList;
-        }
-    }
-    return "";
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
@@ -176,7 +160,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         }
         else if(vec[i] == "PART"){
             std::string exitMsg = handleMsg(messages._message);
-            Channel *channel = getChannelByNick(vec[i + 1]);
+            Channel *channel = getChannelByName(vec[i + 1]);
             if(channel == NULL){
                 MsgforHex(client.getSocketClient(), MsgFormatIrc::partErrorMessage(client, vec[i + 1]));
                 return;
