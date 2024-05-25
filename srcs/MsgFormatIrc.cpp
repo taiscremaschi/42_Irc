@@ -8,7 +8,7 @@ std::string MsgFormatIrc::joinMessage(Client &client, const std::string &channel
 
 }
 
-std::string MsgFormatIrc::partMessage(Client &client, Channel *channel, std::string &exitMsg)
+std::string MsgFormatIrc::partMessage(Client &client, Channel *channel, std::string exitMsg)
 {
     return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg);
 }
@@ -49,4 +49,23 @@ std::string MsgFormatIrc::partErrorMessage(Client &client, std::string wrongChan
 std::string MsgFormatIrc::privErrorMessage(Client &client, std::string type)
 {
     return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
+}
+
+std::string MsgFormatIrc::handleMsg(std::string msg)
+{
+    int i = 0;
+    while(msg[i] && msg[i] != ':')
+       i++;
+    if(msg[i])
+        i++;
+    std::string result = msg.substr(i, msg.length() - i);
+    return result;
+}
+
+
+void MsgFormatIrc::MsgforHex(int clientSocket, const std::string& message) 
+{
+    std::string msg = message + "\r\n";
+    std::cout << msg << std::endl;
+    send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
 }

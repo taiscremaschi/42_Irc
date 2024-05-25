@@ -26,6 +26,8 @@ class ServerManager{
         Client *getClientByNick(const std::string &nick);
         Channel *getChannelByName(const std::string &nick);
         void handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages);
+        void handlePart(Client& client, IrcMessages &messages,const std::string& channelName);
+
         
 
 };

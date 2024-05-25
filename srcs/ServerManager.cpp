@@ -32,24 +32,7 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
     return NULL;
 }
 
-std::string handleMsg(std::string msg)
-{
-    int i = 0;
-    while(msg[i] && msg[i] != ':')
-       i++;
-    if(msg[i])
-        i++;
-    std::string result = msg.substr(i, msg.length() - i);
-    return result;
-}
 
-
-void MsgforHex(int clientSocket, const std::string& message) 
-{
-    std::string msg = message + "\r\n";
-    std::cout << msg << std::endl;
-    send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
-}
 
 void ServerManager::infoForChannel(Client &client, std::string channelName) //funcao para mandar msg pra todos os clientes do channel avisando que um entrou 
 {
@@ -60,7 +43,7 @@ void ServerManager::infoForChannel(Client &client, std::string channelName) //fu
     for (size_t i = 0; i < clients.size(); ++i)
     {
         if(clients[i].getNickname() != client.getNickname())
-            MsgforHex(clients[i].getSocketClient(), MsgFormatIrc::joinMessage(client, channelName));
+            MsgFormatIrc::MsgforHex(clients[i].getSocketClient(), MsgFormatIrc::joinMessage(client, channelName));
     }
 }
 
@@ -84,11 +67,11 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
         namesList += vecClients[j] + " ";
     }
 
-    MsgforHex(client.getSocketClient(), MsgFormatIrc::joinMessage(client, channelName));
-    MsgforHex(client.getSocketClient(), MsgFormatIrc::topicMessage(client, channelName, "Topic inicial of channel"));
-    MsgforHex(client.getSocketClient(), MsgFormatIrc::topicCreatorMessage(client, channelName));
-    MsgforHex(client.getSocketClient(), namesList);
-    MsgforHex(client.getSocketClient(), MsgFormatIrc::endOfNameMessage(client, channelName));
+    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::joinMessage(client, channelName));
+    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::topicMessage(client, channelName, "Topic inicial of channel"));
+    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::topicCreatorMessage(client, channelName));
+    MsgFormatIrc::MsgforHex(client.getSocketClient(), namesList);
+    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::endOfNameMessage(client, channelName));
 }
 
 bool ServerManager::changeNick(Client &client, const std::string &nick)
@@ -97,7 +80,7 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     for(size_t x = 0; x < _clients.size(); ++x)
     {
         if (_clients[x].getNickname() == nick){
-            MsgforHex(client.getSocketClient(), MsgFormatIrc::nickErrorMessage(_clients[x], nick));
+            MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::nickErrorMessage(_clients[x], nick));
             return false;
         }
     }
@@ -105,35 +88,47 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     client.setNickname(nick);
     if(oldNick.empty())
         return false;
-    MsgforHex(client.getSocketClient(), MsgFormatIrc::nickMessage(client, oldNick));
+    MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::nickMessage(client, oldNick));
     return true;
 }
 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
 {
-    std::string msg = handleMsg(messages._message);
     if ( type[0] == '#')
     {
         Channel *ch = getChannelByName(type);
         if(ch == NULL){
-            MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
+            MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
             return;
         }
         for(size_t i = 0; i < ch->getAllClients().size(); i++){
             if (ch->getAllClients()[i].getSocketClient() != client.getSocketClient())
-                MsgforHex(ch->getAllClients()[i].getSocketClient(), MsgFormatIrc::privMessage(client, ch->getName(), msg));
+                MsgFormatIrc::MsgforHex(ch->getAllClients()[i].getSocketClient(), MsgFormatIrc::privMessage(client, ch->getName(), MsgFormatIrc::handleMsg(messages._message)));
         }
     }
     else {
         Client *receiver = getClientByNick(type);
         if(receiver == NULL){
-            MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
+            MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
             return;
         }
-        MsgforHex(receiver->getSocketClient(), MsgFormatIrc::privMessage(client, receiver->getNickname(), msg));
+        MsgFormatIrc::MsgforHex(receiver->getSocketClient(), MsgFormatIrc::privMessage(client, receiver->getNickname(), MsgFormatIrc::handleMsg(messages._message)));
     }
-
 }
+
+void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::string& channelName)
+{
+    Channel *channel = getChannelByName(channelName);
+    if(channel == NULL){
+        MsgFormatIrc::MsgforHex(client.getSocketClient(), MsgFormatIrc::partErrorMessage(client, channelName));
+        return;
+    }
+    for(size_t i = 0; i < channel->getAllClients().size(); i++){
+            MsgFormatIrc::MsgforHex(channel->getAllClients()[i].getSocketClient(), MsgFormatIrc::partMessage(client, channel, MsgFormatIrc::handleMsg(messages._message)));
+    }
+    channel->removeClient(client);
+}
+
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
     
@@ -143,32 +138,20 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             changeNick(client, vec[++i]);
             return;
         }
-        else if (vec[i] == "JOIN")
-        {
-            std::string channelName = vec[i + 1];
-            handleJoinCommand(client, channelName);
-            infoForChannel(client, channelName);
-        }
-        else if(vec[i] == "PRIVMSG")
-        {
-            //TODO: preciso ver a questao de quando eu tiver no nome do nick ou channel : preciso ter certexza de onde começa my msg
-            ///TODO: o programa esta mandando msg pra grupo que n faz parte precisa de protecao. 
-            std::string type = vec[i + 1];
-            handlePrivMessage(client, type, messages);
+        else if (vec[i] == "JOIN"){
+            handleJoinCommand(client, vec[i + 1]);
+            infoForChannel(client, vec[i + 1]);
             return;
-
+        }
+        //TODO: preciso ver a questao de quando eu tiver no nome do nick ou channel : preciso ter certexza de onde começa my msg
+        ///TODO: o programa esta mandando msg pra grupo que n faz parte precisa de protecao. 
+        else if(vec[i] == "PRIVMSG"){
+            handlePrivMessage(client, vec[i + 1], messages);
+            return;
         }
         else if(vec[i] == "PART"){
-            std::string exitMsg = handleMsg(messages._message);
-            Channel *channel = getChannelByName(vec[i + 1]);
-            if(channel == NULL){
-                MsgforHex(client.getSocketClient(), MsgFormatIrc::partErrorMessage(client, vec[i + 1]));
-                return;
-            }
-            for(size_t i = 0; i < channel->getAllClients().size(); i++){
-                    MsgforHex(channel->getAllClients()[i].getSocketClient(), MsgFormatIrc::partMessage(client, channel, exitMsg));
-            }
-            channel->removeClient(client);
+            handlePart(client, messages, vec[i + 1]);
+            return;
         }        
         else if(vec[i] == "QUIT"){
 

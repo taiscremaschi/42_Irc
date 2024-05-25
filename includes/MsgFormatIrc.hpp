@@ -12,13 +12,14 @@ class MsgFormatIrc {
     static std::string topicMessage(Client &client, const std::string &channelName, std::string topic);
     static std::string topicCreatorMessage(Client &client, const std::string &channelName);
     static std::string endOfNameMessage(Client &client, const std::string &channelName);
-    static std::string partMessage(Client &client, Channel *channel, std::string &exitMsg);
+    static std::string partMessage(Client &client, Channel *channel, std::string exitMsg);
     static std::string partErrorMessage(Client &client, std::string WrongChannel);
     static std::string nickErrorMessage(Client &client, std::string nick);
     static std::string nickMessage(Client &client, const std::string &oldNick);
     static std::string privMessage(Client &client, std::string name, std::string message);
     static std::string privErrorMessage(Client &client, std::string type);
-
+    static void MsgforHex(int clientSocket, const std::string& message); 
+    static std::string handleMsg(std::string msg);
 
 
 };
