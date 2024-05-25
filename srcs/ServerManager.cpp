@@ -91,8 +91,7 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     for(size_t x = 0; x < _clients.size(); ++x)
     {
         if (_clients[x].getNickname() == nick){
-            std::string nickError = ":server 433 " + _clients[x].getNickname() + " " + nick + " :Nickname is already in use";
-            MsgforHex(client.getSocketClient(), nickError);
+            MsgforHex(client.getSocketClient(), MsgFormatIrc::nickErrorMessage(_clients[x], nick));
             return false;
         }
     }
@@ -100,38 +99,32 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     client.setNickname(nick);
     if(oldNick.empty())
         return false;
-    std::string response = ":" + oldNick + " NICK " + client.getNickname();
-    MsgforHex(client.getSocketClient(), response);
+    MsgforHex(client.getSocketClient(), MsgFormatIrc::nickMessage(client, oldNick));
     return true;
 }
 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
 {
+    std::string msg = handleMsg(messages._message);
     if ( type[0] == '#')
     {
-        std::string msgGruop = handleMsg(messages._message);
         Channel *ch = getChannelByNick(type);
         if(ch == NULL){
-            std::string erroMsg =  ":server 401 " + client.getNickname() + " " + type + " :No such nick/channel";
-            MsgforHex(client.getSocketClient(), erroMsg);
+            MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
             return;
         }
-        std::string myMsg = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + ch->getName() + " :" + msgGruop;
         for(size_t i = 0; i < ch->getAllClients().size(); i++){
             if (ch->getAllClients()[i].getSocketClient() != client.getSocketClient())
-                MsgforHex(ch->getAllClients()[i].getSocketClient(), myMsg);
+                MsgforHex(ch->getAllClients()[i].getSocketClient(), MsgFormatIrc::privMessage(client, ch, msg));
         }
     }
     else {
-        std::string result = handleMsg(messages._message);
         Client *receiver = getClientByNick(type);
         if(receiver == NULL){
-            std::string erroMsg =  ":server 401 " + client.getNickname() + " " + type + " :No such nick/channel";
-            MsgforHex(client.getSocketClient(), erroMsg);
+            MsgforHex(client.getSocketClient(), MsgFormatIrc::privErrorMessage(client, type));
             return;
         }
-        std::string hexMessage = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + receiver->getNickname() + ": " + result;
-        MsgforHex(receiver->getSocketClient(), hexMessage);
+        MsgforHex(receiver->getSocketClient(), MsgFormatIrc::privMessage(client, receiver, msg));
     }
 
 }
@@ -185,14 +178,12 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             std::string exitMsg = handleMsg(messages._message);
             Channel *channel = getChannelByNick(vec[i + 1]);
             if(channel == NULL){
-                std::string error = ":server 403 " + client.getNickname() + " " + vec[i + 1] + " :No such channel";
-                MsgforHex(client.getSocketClient(), error);
+                MsgforHex(client.getSocketClient(), MsgFormatIrc::partErrorMessage(client, vec[i + 1]));
                 return;
             }
-            std::string msgPart = ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg;
             for(size_t i = 0; i < channel->getAllClients().size(); i++){
-                    MsgforHex(channel->getAllClients()[i].getSocketClient(), msgPart);
-                }
+                    MsgforHex(channel->getAllClients()[i].getSocketClient(), MsgFormatIrc::partMessage(client, channel, exitMsg));
+            }
             channel->removeClient(client);
         }        
         else if(vec[i] == "QUIT"){

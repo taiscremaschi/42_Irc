@@ -20,20 +20,40 @@ std::string MsgFormatIrc::endOfNameMessage(Client &client, const std::string &ch
     return (":server 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.");
 }
 
+std::string MsgFormatIrc::partMessage(Client &client, Channel *channel, std::string &exitMsg)
+{
+    return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg);
+}
 
-// std::string MsgFormatIrc::partMessage(Client &client, std::string cmd, Channel &channel)
-// {
-//     return ;
-// }
+std::string MsgFormatIrc::partErrorMessage(Client &client, std::string wrongChannel)
+{
+    return (":server 403 " + client.getNickname() + " " + wrongChannel + " :No such channel");
+}
 
-// std::string MsgFormatIrc::nickMessage(Client &client, std::string cmd)
-// {
-//     return ; 
-// }
+std::string MsgFormatIrc::nickMessage(Client &client, const std::string &oldNick)
+{
+    return (":" + oldNick + " NICK " + client.getNickname()); 
+}
 
-// std::string MsgFormatIrc::privMessage(Client &client, std::string cmd)
-// {
-//     return ;
-// }
+std::string MsgFormatIrc::nickErrorMessage(Client &client, std::string nick)
+{
+    return (":server 433 " + client.getNickname() + " " + nick + " :Nickname is already in use");
+}
+
+std::string MsgFormatIrc::privMessage(Client &client, Client *receiver, std::string message)
+{
+    return ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + receiver->getNickname() + ": " + message;
+}
+
+std::string MsgFormatIrc::privMessage(Client &client, Channel *channel, std::string message)
+{
+    return ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + channel->getName() + " :" + message;
+}
+
+
+std::string MsgFormatIrc::privErrorMessage(Client &client, std::string type)
+{
+    return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
+}
 
 
