@@ -51,4 +51,20 @@ bool Channel::searchOperator(const std::string &name){
     }
     return false;
 }
+bool Channel::searchNames(const std::string name){
+    for(size_t i = 0; i <  _clientsChannel.size(); ++i)
+    {
+        if( _clientsChannel[i].getNickname() == name)
+            return true;
+    }
+    return false;
+}
+
+void Channel::sendMessageToClients(std::string msg)
+{
+     for(size_t j = 0; j < _clientsChannel.size(); j++)
+     {
+        MsgFormat::MsgforHex(_clientsChannel[j].getSocket(), msg);
+     }
+}
 

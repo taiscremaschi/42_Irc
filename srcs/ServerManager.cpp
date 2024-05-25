@@ -8,9 +8,20 @@ void ServerManager::createClient(Client &client){
     _clients.push_back(client);
 }
 
-void ServerManager::removeClient(int i){
-    _clients.erase(_clients.begin() + i);
+void ServerManager::removeClientByNick(std::string nick){
+
+    for(size_t i = 0; i < _clients.size(); ++i){
+        if(_clients[i].getNickname() == nick){
+            _clients.erase(_clients.begin() + i);
+            break;
+        }
+    }
 }
+
+void ServerManager::removeClient(int i){
+     _clients.erase(_clients.begin() + i);
+}
+
 
 Client *ServerManager::getClientByNick(const std::string &nick)
 {
@@ -86,6 +97,8 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
 
 //TODO: preciso ver a questao de quando eu tiver no nome do nick ou channel : preciso ter certexza de onde começa my msg
 ///TODO: o programa esta mandando msg pra grupo que n faz parte precisa de protecao. 
+//TODO: VER CENA DE GRUPOS CHEIOS 
+//TODO: VER PING PONG 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
 {
     if ( type[0] == '#')
@@ -125,6 +138,19 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
     channel->removeClient(client);
 }
 
+void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
+{
+    for(size_t i = 0; i < _channels.size(); i++)
+    {
+        if(_channels[i].searchNames(client.getNickname())){
+            _channels[i].removeClient(client);
+            _channels[i].sendMessageToClients(MsgFormat::quit(client, MsgFormat::handleMsg(quitMsg._message)));
+        }
+    }
+    close(client.getSocket());
+    removeClientByNick(client.getNickname());
+}
+
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
@@ -146,8 +172,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             return;
         }        
         else if(vec[i] == "QUIT"){
-
-
+            handleQuit(client, messages);
         }        
         else if(vec[i] == "WHO"){
 

@@ -17,6 +17,11 @@ std::string MsgFormat::priv(Client &client, std::string name, std::string messag
     return ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + name + " :" + message;
 }
 
+std::string MsgFormat::quit(Client &client, std::string message){
+    return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " QUIT :" + message);
+
+}
+
 std::string MsgFormat::endOfName(Client &client, const std::string &channelName){
     return (":server 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.");
 }
@@ -41,6 +46,7 @@ std::string MsgFormat::partError(Client &client, std::string wrongChannel) {
 std::string MsgFormat::privError(Client &client, std::string type) {
     return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
 }
+
 
 std::string MsgFormat::handleMsg(std::string msg)
 {

@@ -18,6 +18,7 @@ class MsgFormat {
         static std::string privError(Client &client, std::string type);
         static void MsgforHex(int clientSocket, const std::string& message); 
         static std::string handleMsg(std::string msg);
+        static std::string quit(Client &client, std::string message);
 };
 
 #endif
