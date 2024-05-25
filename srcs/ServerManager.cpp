@@ -131,10 +131,7 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
         MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
         return;
     }
-    std::vector<Client> clients = channel->getAllClients();
-    for(size_t i = 0; i < clients.size(); i++){
-        MsgFormat::MsgforHex(clients[i].getSocket(), MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
-    }
+    channel->sendMessageToClients(MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
     channel->removeClient(client);
 }
 
@@ -173,6 +170,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         }        
         else if(vec[i] == "QUIT"){
             handleQuit(client, messages);
+            return;
         }        
         else if(vec[i] == "WHO"){
 
