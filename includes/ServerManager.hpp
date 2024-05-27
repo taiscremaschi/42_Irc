@@ -26,10 +26,6 @@ class ServerManager{
         void handleQuit(Client& client, IrcMessages &quitMsg);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
-        void handleWho(Client& client, IrcMessages &messages,const std::string& arg);
-        bool isWhitesSpaces(std::string str);
-
-
 
 
 };
