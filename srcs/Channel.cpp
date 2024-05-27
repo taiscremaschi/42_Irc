@@ -68,3 +68,4 @@ void Channel::sendMessageToClients(std::string msg)
      }
 }
 
+teste
