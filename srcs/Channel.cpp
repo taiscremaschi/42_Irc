@@ -67,5 +67,3 @@ void Channel::sendMessageToClients(std::string msg)
         MsgFormat::MsgforHex(_clientsChannel[j].getSocket(), msg);
      }
 }
-
-teste
