@@ -9,12 +9,12 @@
 
 class ServerManager{
     private:
-        std::vector<Channel>    _channels;
-        std::vector<Client>     _clients;
+        std::vector<Channel*>    _channels;
+        std::vector<Client*>     _clients;
     public:
         ServerManager();
         ~ServerManager();
-        void createClient(Client &client);
+        void createClient(Client *client);
         void handleIrcCmds(std::string buff, int fd);
         void handleJoinCommand(Client& client, const std::string& channel);
         void findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &mensage);
@@ -26,6 +26,7 @@ class ServerManager{
         void handleQuit(Client& client, IrcMessages &quitMsg);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
+
 
 
 };
