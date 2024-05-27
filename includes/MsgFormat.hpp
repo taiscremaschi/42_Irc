@@ -19,6 +19,7 @@ class MsgFormat {
         static void MsgforHex(int clientSocket, const std::string& message); 
         static std::string handleMsg(std::string msg);
         static std::string quit(Client &client, std::string message);
+        static std::string notifyNickChanged(Client& client, std::string oldNickname);
 };
 
 #endif

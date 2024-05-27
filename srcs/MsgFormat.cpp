@@ -47,6 +47,9 @@ std::string MsgFormat::privError(Client &client, std::string type) {
     return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
 }
 
+std::string MsgFormat::notifyNickChanged(Client& client, std::string oldNickname) {
+    return (":" + oldNickname + "!" + client.getName() + "@" + client.getHostname() + " NICK :" + client.getNickname());
+}
 
 std::string MsgFormat::handleMsg(std::string msg)
 {
