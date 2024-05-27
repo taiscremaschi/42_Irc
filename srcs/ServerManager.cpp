@@ -190,5 +190,3 @@ void ServerManager::handleIrcCmds(std::string buff, int fd){
             findCmd(message._vecMsg, _clients[j], message);
     }
 }
-
-mss
