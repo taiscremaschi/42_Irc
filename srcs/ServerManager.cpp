@@ -148,6 +148,40 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
     removeClientByNick(client.getNickname());
 }
 
+bool ServerManager::isWhitesSpaces(std::string str)
+{
+    for(size_t i = 0; i < str.size(); ++i)
+    {
+        if(str[i] == '\0' || str[i] == ' ' || str[i] == '\t' || str[i] == '\n' || str[i] == '\r' )
+            i++;
+        else 
+            return false;
+    }
+    return true;
+
+}
+
+void ServerManager::handleWho(Client& client, IrcMessages &messages,const std::string& arg)
+{
+    if(arg[0] == '#')
+    {
+        //ele quer tudo do channel 
+    }
+    else if(arg.empty() || isWhitesSpaces(arg))
+    {
+        //ele quer o who default
+    }
+    else 
+    {
+        //ele quer nickname
+    }
+
+
+
+
+}
+
+
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
@@ -173,7 +207,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             return;
         }        
         else if(vec[i] == "WHO"){
-
+            handleWho(client, messages, vec[i + 1]);
         }        
         else if(vec[i] == "LIST"){
 
