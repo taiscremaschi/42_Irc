@@ -22,7 +22,6 @@ void ServerManager::removeClient(int i){
      _clients.erase(_clients.begin() + i);
 }
 
-
 Client *ServerManager::getClientByNick(const std::string &nick)
 {
     for (size_t i = 0; i < _clients.size(); ++i)
@@ -79,7 +78,7 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 
 bool ServerManager::changeNick(Client &client, const std::string &nick)
 {
-    //TODO: MANDAR MSG PRA TODOS OS CANAIS MUDANDO O NICK
+
     for(size_t x = 0; x < _clients.size(); ++x)
     {
         if (_clients[x].getNickname() == nick){
@@ -95,10 +94,6 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
     return true;
 }
 
-//TODO: preciso ver a questao de quando eu tiver no nome do nick ou channel : preciso ter certexza de onde começa my msg
-///TODO: o programa esta mandando msg pra grupo que n faz parte precisa de protecao. 
-//TODO: VER CENA DE GRUPOS CHEIOS 
-//TODO: VER PING PONG 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
 {
     if ( type[0] == '#')
@@ -172,9 +167,6 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             handleQuit(client, messages);
             return;
         }                
-        else if(vec[i] == "LIST"){
-
-        }
         //////////////////// aqui  pra baixo paulo 
         else if(vec[i] == "KICK"){
 
@@ -182,7 +174,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
         else if(vec[i] == "INVITE"){
 
         }
-         else if(vec[i] == "TOPIC"){
+        else if(vec[i] == "TOPIC"){
 
         }        
          else if(vec[i] == "MODE"){
