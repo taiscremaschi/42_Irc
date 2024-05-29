@@ -1,5 +1,6 @@
 
 #include "Server.hpp"
+ #include <signal.h>
 
 Server::Server() {}
 
@@ -85,6 +86,27 @@ void Server::newClientConnection()
 
 }
 
+// void	handle_sig(int sig)
+// {
+// 	(void)sig;
+//     close(3);   
+// }
+
+// void	ft_init_signal(void)
+// {
+// 	struct sigaction	sa_int; //ctrl c
+// 	struct sigaction	sa_quit;
+
+// 	sa_int.sa_handler = &handle_sig;
+// 	sa_int.sa_flags = 0;
+// 	sigemptyset(&sa_int.sa_mask);
+// 	sigaction(SIGINT, &sa_int, NULL);
+// 	sa_quit.sa_handler = SIG_IGN;
+// 	sa_quit.sa_flags = 0;
+// 	sigemptyset(&sa_quit.sa_mask);
+// 	sigaction(SIGQUIT, &sa_quit, NULL);
+// }
+
 void Server::runServer()
 {
     while (1) {
@@ -93,8 +115,9 @@ void Server::runServer()
             std::cerr << "Error in poll()\n";
             break;
         }
+        //ft_init_signal();
         for (size_t i = 0; i < _fds.size(); ++i) {
-            if (_fds[i].revents & POLLIN) {
+            if (_fds[i].revents & POLLIN) { //aqui ta dandoconditional jump por valor sem inicializar
                 if (_fds[i].fd == _serverSocket) 
                     newClientConnection();
                 else {

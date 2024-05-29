@@ -74,7 +74,7 @@ std::string MsgFormat::handleMsg(std::string msg)
 void MsgFormat::MsgforHex(int clientSocket, const std::string& message) 
 {
     std::string msg = message + "\r\n";
-    std::cout << msg << std::endl;
+    //std::cout << msg << std::endl;
     send(clientSocket, msg.c_str(), msg.length(), 0);
 }
 

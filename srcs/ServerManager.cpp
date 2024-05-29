@@ -2,7 +2,14 @@
 
 ServerManager::ServerManager(){}
 
-ServerManager::~ServerManager(){}
+ServerManager::~ServerManager(){
+    for(size_t i=0; i< _channels.size(); ++i){
+        delete _channels[i];
+    }
+    for(size_t i=0; i< _clients.size(); ++i){
+        delete _clients[i];
+    }
+}
 
 void ServerManager::createClient(Client *client){
     _clients.push_back(client);
@@ -63,7 +70,6 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
             namesList += "@";
         namesList += vecClients[j] + " ";
     }
-    std::cout << "sera que passou " << channelName << std::endl;
     MsgFormat::MsgforHex(client.getSocket(), MsgFormat::join(client, channelName));
     MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, "Topic initial of channel"));
     MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topicCreator(client, channelName));
@@ -166,7 +172,6 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             return;
         }
         else if (vec[i] == "JOIN"){
-            std::cout << "aqui devia mesmo" << vec[i] << std::endl;
             if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
                 return;
             handleJoinCommand(client, vec[i + 1]);
