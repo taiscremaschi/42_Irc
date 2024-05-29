@@ -79,7 +79,7 @@ void Server::newClientConnection()
     client.fd = clientSocket;
     client.events = POLLIN;
     _fds.push_back(client);
-    Client newClient(clientSocket);
+    Client *newClient = new Client(clientSocket);
     _manager.createClient(newClient);
     std::cout << "new client conected\n";
 

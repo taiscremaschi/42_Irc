@@ -47,6 +47,9 @@ std::string MsgFormat::privError(Client &client, std::string type) {
     return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
 }
 
+std::string MsgFormat::notifyNickChanged(Client& client, std::string oldNickname) {
+    return (":" + oldNickname + "!" + client.getName() + "@" + client.getHostname() + " NICK :" + client.getNickname());
+}
 
 std::string MsgFormat::handleMsg(std::string msg)
 {
@@ -65,3 +68,9 @@ void MsgFormat::MsgforHex(int clientSocket, const std::string& message)
     std::cout << msg << std::endl;
     send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
 }
+
+std::string MsgFormat::notifyUserNotInChannel(Client &client, const std::string &channelName)
+{
+    return (":server_name 404 " + client.getNickname() + " " + channelName + " :Cannot send to channel");
+}
+
