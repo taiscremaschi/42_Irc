@@ -28,6 +28,8 @@ void ServerManager::removeClientByNick(std::string nick){
 }
 
 void ServerManager::removeClient(int i){
+    std::cout << "meu caralho client   " << i <<  _clients[i]->getNickname() << std::endl;
+     delete _clients[i];
      _clients.erase(_clients.begin() + i);
 }
 
@@ -168,22 +170,22 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
-        if (vec[i] == "NICK") 
+        if (vec[i] == "NICK" && (vec.size() > i + 1)) 
         {
             changeNick(client, vec[i + 1]);
             return;
         }
-        else if (vec[i] == "JOIN"){
+        else if (vec[i] == "JOIN" && (vec.size() > i + 1)){
             if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
                 return;
             handleJoinCommand(client, vec[i + 1]);
             return;
         }
-        else if(vec[i] == "PRIVMSG"){
+        else if(vec[i] == "PRIVMSG" && (vec.size() > i + 1)){
             handlePrivMessage(client, vec[i + 1], messages);
             return;
         }
-        else if(vec[i] == "PART"){
+        else if(vec[i] == "PART" && (vec.size() > i + 1)){
             handlePart(client, messages, vec[i + 1]);
             return;
         }        
