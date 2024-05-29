@@ -45,14 +45,16 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
 void ServerManager::handleJoinCommand(Client& client, const std::string& channelName) //funcao para join
 {
     Channel *channel = getChannelByName(channelName);
-    Channel *newchannel = new Channel(channelName, &client);
     if(channel == NULL)
     {
+        Channel *newchannel = new Channel(channelName, &client);
         _channels.push_back(newchannel);
         channel = newchannel;
     }
     else
+    {
         channel->addClient(&client);
+    }
     std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
     std::vector<std::string> vecClients = channel->getAllClientsName();
     for(size_t j = 0; j < vecClients.size(); ++j)
@@ -61,7 +63,7 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
             namesList += "@";
         namesList += vecClients[j] + " ";
     }
-
+    std::cout << "sera que passou " << channelName << std::endl;
     MsgFormat::MsgforHex(client.getSocket(), MsgFormat::join(client, channelName));
     MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, "Topic initial of channel"));
     MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topicCreator(client, channelName));
@@ -100,7 +102,7 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
 {
-    if ( type[0] == '#')
+    if ( type[0] == '#' || type[0] == '&')
     {
         Channel *ch = getChannelByName(type);
         if(ch == NULL)
@@ -164,7 +166,8 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             return;
         }
         else if (vec[i] == "JOIN"){
-            if(vec[i + 1][0] != '#')
+            std::cout << "aqui devia mesmo" << vec[i] << std::endl;
+            if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
                 return;
             handleJoinCommand(client, vec[i + 1]);
             return;
