@@ -24,9 +24,7 @@ class Server {
         void        newClientConnection();
         std::string readData(int i);
         void        createServerSocket();
-        // void	handle_sig(int sig);
-        // void	ft_init_signal(void)
-
+        std::string getPass(std::string pass, std::string check);
 
 };
 
