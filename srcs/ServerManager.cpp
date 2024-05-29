@@ -156,6 +156,8 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             return;
         }
         else if (vec[i] == "JOIN"){
+            if(vec[i + 1][0] != '#')
+                return;
             handleJoinCommand(client, vec[i + 1]);
             return;
         }
