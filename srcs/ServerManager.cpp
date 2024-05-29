@@ -109,7 +109,7 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
         }
         std::vector<Client*> clients = ch->getAllClients();
         for(size_t i = 0; i < clients.size(); i++){
-            if (clients[i]->getSocket() != client.getSocket())
+            if (clients[i]->getSocket() != client.getSocket()) //colocqar aqi a protecao do grupo
                 MsgFormat::MsgforHex(clients[i]->getSocket(), MsgFormat::priv(client, ch->getName(), MsgFormat::handleMsg(messages._message)));
         }
     }
