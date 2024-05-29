@@ -2,11 +2,11 @@
 #include "Irc.hpp"
 #include "Server.hpp"
 #include <signal.h>
-
+#define MAX_FDS 1024
 
 void handleSig(int sig)
 {
-    for(int i = 0; i < 1020; ++i)
+    for(int i = 0; i < MAX_FDS; ++i)
         close(i);
 }
 
