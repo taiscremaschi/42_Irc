@@ -4,12 +4,8 @@
 #include <signal.h>
 
 
-bool server_help = false;
-
 void handleSig(int sig)
 {
-	if (sig == SIGINT)
-		server_help = true;
     for(int i = 0; i < 1020; ++i)
         close(i);
 }
