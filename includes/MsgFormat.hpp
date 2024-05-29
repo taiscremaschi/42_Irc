@@ -21,6 +21,9 @@ class MsgFormat {
         static std::string quit(Client &client, std::string message);
         static std::string notifyNickChanged(Client& client, std::string oldNickname);
         static std::string notifyUserNotInChannel(Client &client, const std::string &channelName);
+        static std::string passInvalid();
+        static std::string passValid();
+
 };
 
 #endif

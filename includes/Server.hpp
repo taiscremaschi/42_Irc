@@ -24,9 +24,8 @@ class Server {
         void        newClientConnection();
         std::string readData(int i);
         void        createServerSocket();
-        std::string getPass(std::string pass, std::string check);
+        bool checkPass(std::string pass);
 
 };
 
 #endif
-

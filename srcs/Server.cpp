@@ -1,7 +1,5 @@
 
 #include "Server.hpp"
- #include <signal.h>
- #include <fcntl.h>
 
 Server::Server() {}
 
@@ -40,6 +38,7 @@ int Server::setPort(char *av){
 
 void Server::savePass(char *av)
 {
+    std:: cout << " o queee??  " << av << std::endl;
     _password = av;
 }
 
@@ -106,11 +105,14 @@ void Server::runServer()
                     if(buff.empty())
                         continue ;
                     std::cout << "Received: " << buff << std::endl;
-                    _manager.handleIrcCmds(buff, _fds[i].fd);
+                    _manager.handleIrcCmds(buff, _fds[i].fd, this->_password);
                 }
             }
             else if (_fds[i].revents & POLLNVAL)
+            {
+                std::cout << " seu cuzinho " << _fds[i].fd << std::endl;
                 _fds.erase(_fds.begin() + i);
+            }
         }
     }
 }

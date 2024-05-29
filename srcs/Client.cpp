@@ -6,6 +6,8 @@ Client::Client(int clientSocket) {
 }
 
 Client:: ~Client(){
+        std::cout << "meu destructor client" << std::endl;
+
 }
 
 bool Client::operator==(Client const &client){
