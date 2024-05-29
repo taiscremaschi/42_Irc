@@ -1,7 +1,7 @@
 
 #include "Channel.hpp"
 
-Channel::Channel(const std::string &name, const Client &client){
+Channel::Channel(const std::string &name, Client *client){
     _name = name;
     _operators.push_back(client);
     _topic = name;
@@ -15,11 +15,11 @@ const std::string &Channel::getName() const {
 
 }
     
-void Channel::addClient(Client &client){
+void Channel::addClient(Client *client){
     _clientsChannel.push_back(client);
 }
 
-void Channel::removeClient(Client &client){
+void Channel::removeClient(Client *client){
     for(size_t i = 0; i < _clientsChannel.size(); ++i)
     {
         if (_clientsChannel[i] == client)
@@ -27,11 +27,11 @@ void Channel::removeClient(Client &client){
     }
 }
 
-std::vector<Client>  Channel::getOperator() const{
+std::vector<Client*>  &Channel::getOperator() {
     return _operators;
 }
 
-std::vector<Client> Channel::getAllClients(){
+std::vector<Client*> Channel::getAllClients(){
     return _clientsChannel;
 }
 
@@ -39,22 +39,23 @@ std::vector<std::string> Channel::getAllClientsName()
 {
     std::vector<std::string> result;    
     for(size_t i = 0; i < _clientsChannel.size(); ++i)
-        result.push_back(_clientsChannel[i].getNickname());
+        result.push_back(_clientsChannel[i]->getNickname());
     return result;
 }
 
 bool Channel::searchOperator(const std::string &name){
     for(size_t i = 0; i < _operators.size(); ++i)
     {
-        if(_operators[i].getNickname() == name)
+        if(_operators[i]->getNickname() == name)
             return true;
     }
     return false;
 }
+
 bool Channel::searchNames(const std::string name){
     for(size_t i = 0; i <  _clientsChannel.size(); ++i)
     {
-        if( _clientsChannel[i].getNickname() == name)
+        if( _clientsChannel[i]->getNickname() == name)
             return true;
     }
     return false;
@@ -64,6 +65,6 @@ void Channel::sendMessageToClients(std::string msg)
 {
      for(size_t j = 0; j < _clientsChannel.size(); j++)
      {
-        MsgFormat::MsgforHex(_clientsChannel[j].getSocket(), msg);
+        MsgFormat::MsgforHex(_clientsChannel[j]->getSocket(), msg);
      }
 }
