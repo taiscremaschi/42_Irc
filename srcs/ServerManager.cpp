@@ -28,7 +28,6 @@ void ServerManager::removeClientByNick(std::string nick){
 }
 
 void ServerManager::removeClient(int i){
-    std::cout << "meu caralho client   " << i <<  _clients[i]->getNickname() << std::endl;
      delete _clients[i];
      _clients.erase(_clients.begin() + i);
 }
