@@ -9,6 +9,7 @@ ServerManager::~ServerManager(){
     for(size_t i=0; i< _clients.size(); ++i){
         delete _clients[i];
     }
+    std::cout << "destruiu os clientes com o server manager" << std::endl;
 }
 
 void ServerManager::createClient(Client *client){
@@ -19,6 +20,7 @@ void ServerManager::removeClientByNick(std::string nick){
 
     for(size_t i = 0; i < _clients.size(); ++i){
         if(_clients[i]->getNickname() == nick){
+            delete _clients[i];
             _clients.erase(_clients.begin() + i);
             break;
         }
@@ -159,8 +161,8 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
             _channels[i]->sendMessageToClients(MsgFormat::quit(client, MsgFormat::handleMsg(quitMsg._message)));
         }
     }
-    removeClientByNick(client.getNickname());
     close(client.getSocket());
+    removeClientByNick(client.getNickname());
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {

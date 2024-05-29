@@ -96,8 +96,7 @@ void Server::runServer()
             break;
         }
         for (size_t i = 0; i < _fds.size(); ++i) {
-            std::cout << "my size is " << _fds.size() << " my i is " << i << " my fd is  " << _fds[i].fd << std::endl;
-            if (_fds[i].revents & POLLIN) { //aqui ta dandoconditional jump por valor sem inicializar
+            if (_fds[i].revents & POLLIN) {
                 if (_fds[i].fd == _serverSocket) 
                     newClientConnection();
                 else {
@@ -109,6 +108,8 @@ void Server::runServer()
                     _manager.handleIrcCmds(buff, _fds[i].fd);
                 }
             }
+            else if (_fds[i].revents & POLLNVAL)
+                _fds.erase(_fds.begin() + i);
         }
     }
 }
