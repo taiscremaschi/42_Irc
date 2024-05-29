@@ -4,15 +4,16 @@
 #include <signal.h>
 
 
-bool server_shutdown = false;
+bool server_help = false;
 
-void signalHandler(int signum)
+void handleSig(int sig)
 {
-	if (signum == SIGINT)
-	{
-		server_shutdown = true;
-		std::cout << std::endl;
-	}
+	if (sig == SIGINT)
+		server_help = true;
+    for(int i = 0; i < 1020; ++i)
+    {
+        close(i);
+    }
 }
 
 int errorMsg(std::string msg){
@@ -23,8 +24,8 @@ int errorMsg(std::string msg){
 int main(int ac, char **av)
 {
     Server serverClass;
-
-    signal(SIGINT, signalHandler);
+    
+    signal(SIGINT, handleSig);
     if(ac != 3)
         return (errorMsg("Wrong number of arguments"));
 
