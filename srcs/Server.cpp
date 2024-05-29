@@ -1,6 +1,7 @@
 
 #include "Server.hpp"
  #include <signal.h>
+ #include <fcntl.h>
 
 Server::Server() {}
 
@@ -56,7 +57,7 @@ std::string     Server::readData(int i){
         }
         close(_fds[i].fd);
         _fds.erase(_fds.begin() + i);
-        _manager.removeClient(i);
+        _manager.removeClient(i - 1);
         return std::string();
     }
     buffer[bytesReceived] = '\0';
@@ -120,6 +121,8 @@ void Server::createServerSocket()
     if(_serverSocket == -1)
         std::cerr << "error in creating server socket\n";
 
+
+    fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
     // Definir a opção SO_REUSEADDR no socket do servidor
     int opt = 1;
     if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
