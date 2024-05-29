@@ -53,7 +53,17 @@ std::string MsgFormat::notifyNickChanged(Client& client, std::string oldNickname
 
 std::string MsgFormat::notifyUserNotInChannel(Client &client, const std::string &channelName)
 {
-    return (":server_name 404 " + client.getNickname() + " " + channelName + " :Cannot send to channel");
+    return (":server 404 " + client.getNickname() + " " + channelName + " :Cannot send to channel");
+}
+
+std::string MsgFormat::passInvalid()
+{
+    return (":server 464 * :Password incorrect");
+}
+
+std::string MsgFormat::passValid()
+{
+    return (":server NOTICE * :Authentication successful");
 }
 
 std::string MsgFormat::handleMsg(std::string msg)

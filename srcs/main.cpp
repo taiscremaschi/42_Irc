@@ -6,6 +6,7 @@
 
 void handleSig(int sig)
 {
+    (void) sig;
     for(int i = 0; i < MAX_FDS; ++i)
         close(i);
 }
