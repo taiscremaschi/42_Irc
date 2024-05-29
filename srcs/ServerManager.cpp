@@ -181,7 +181,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
             handleQuit(client, messages);
             return;
         }                
-        //////////////////// aqui  pra baixo paulo 
+        //////////////////// aqui  pra baixo paulo  ///
         else if(vec[i] == "KICK"){
 
         }        
