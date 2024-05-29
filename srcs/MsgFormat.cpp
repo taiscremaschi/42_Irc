@@ -51,11 +51,20 @@ std::string MsgFormat::notifyNickChanged(Client& client, std::string oldNickname
     return (":" + oldNickname + "!" + client.getName() + "@" + client.getHostname() + " NICK :" + client.getNickname());
 }
 
+std::string MsgFormat::notifyUserNotInChannel(Client &client, const std::string &channelName)
+{
+    return (":server_name 404 " + client.getNickname() + " " + channelName + " :Cannot send to channel");
+}
+
 std::string MsgFormat::handleMsg(std::string msg)
 {
     int i = 0;
-    while(msg[i] && msg[i] != ':')
-       i++;
+    while(msg[i])
+    {
+        if(msg[i] == ':' && msg[i - 1] == ' ' )
+            break;
+        i++;
+    }
     if(msg[i])
         i++;
     return msg.substr(i, msg.length() - i);
@@ -66,11 +75,7 @@ void MsgFormat::MsgforHex(int clientSocket, const std::string& message)
 {
     std::string msg = message + "\r\n";
     std::cout << msg << std::endl;
-    send(clientSocket, msg.c_str(), msg.length(), 0); //funcao para mandar mensagem pra outro socket
+    send(clientSocket, msg.c_str(), msg.length(), 0);
 }
 
-std::string MsgFormat::notifyUserNotInChannel(Client &client, const std::string &channelName)
-{
-    return (":server_name 404 " + client.getNickname() + " " + channelName + " :Cannot send to channel");
-}
 
