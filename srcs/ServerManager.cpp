@@ -159,8 +159,8 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
             _channels[i]->sendMessageToClients(MsgFormat::quit(client, MsgFormat::handleMsg(quitMsg._message)));
         }
     }
-    close(client.getSocket());
     removeClientByNick(client.getNickname());
+    close(client.getSocket());
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages) {
