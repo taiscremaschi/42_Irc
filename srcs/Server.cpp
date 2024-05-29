@@ -79,6 +79,7 @@ void Server::newClientConnection()
     pollfd client;
     client.fd = clientSocket;
     client.events = POLLIN;
+    client.revents = 0;
     _fds.push_back(client);
     Client *newClient = new Client(clientSocket);
     _manager.createClient(newClient);
@@ -86,16 +87,16 @@ void Server::newClientConnection()
 
 }
 
-
 void Server::runServer()
 {
     while (1) {
-        int result = poll(_fds.data(), _fds.size(), 1000);
+        int result = poll(_fds.data(), _fds.size(), -1);
         if (result < 0) {
             std::cerr << "Error in poll()\n";
             break;
         }
         for (size_t i = 0; i < _fds.size(); ++i) {
+            std::cout << "my size is " << _fds.size() << " my i is " << i << " my fd is  " << _fds[i].fd << std::endl;
             if (_fds[i].revents & POLLIN) { //aqui ta dandoconditional jump por valor sem inicializar
                 if (_fds[i].fd == _serverSocket) 
                     newClientConnection();
