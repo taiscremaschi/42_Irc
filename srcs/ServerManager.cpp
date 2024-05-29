@@ -103,15 +103,23 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
     if ( type[0] == '#')
     {
         Channel *ch = getChannelByName(type);
-        if(ch == NULL){
+        if(ch == NULL)
+        {
             MsgFormat::MsgforHex(client.getSocket(), MsgFormat::privError(client, type));
             return;
         }
-        std::vector<Client*> clients = ch->getAllClients();
-        for(size_t i = 0; i < clients.size(); i++){
-            if (clients[i]->getSocket() != client.getSocket()) //colocqar aqi a protecao do grupo
-                MsgFormat::MsgforHex(clients[i]->getSocket(), MsgFormat::priv(client, ch->getName(), MsgFormat::handleMsg(messages._message)));
+        if (ch->searchNames(client.getNickname()))
+        {
+            std::vector<Client*> clients = ch->getAllClients();
+            for(size_t i = 0; i < clients.size(); i++)
+            {
+                if (clients[i]->getSocket() != client.getSocket()) //colocqar aqi a protecao do grupo
+                    MsgFormat::MsgforHex(clients[i]->getSocket(), MsgFormat::priv(client, ch->getName(), MsgFormat::handleMsg(messages._message)));
+
+            }
         }
+        else
+            MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notifyUserNotInChannel(client, ch->getName()));
     }
     else {
         Client *receiver = getClientByNick(type);
