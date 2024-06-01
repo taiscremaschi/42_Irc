@@ -66,6 +66,11 @@ std::string MsgFormat::passValid()
     return (":server NOTICE * :Authentication successful");
 }
 
+std::string MsgFormat::UserNotAutenticated()
+{
+    return ( ":server 451 * :You have not registered");
+}
+
 std::string MsgFormat::handleMsg(std::string msg)
 {
     int i = 0;

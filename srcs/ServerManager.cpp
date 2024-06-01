@@ -191,27 +191,28 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
                 return;            
             }
             else {
+                client.isAuthenticated();
                 MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passValid());
                 continue ;
             }
         }
-        if (vec[i] == "NICK" && (vec.size() > i + 1)) 
+        if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
         {
             changeNick(client, vec[++i]);
         }
-        if (vec[i] == "USER" && (vec.size() > i + 1)) 
+        if ((vec[i] == "USER" && (vec.size() > i + 1) ) && client.getAuthenticated()) 
         {
             client.setName(vec[i + 1]);
         }
-        else if (vec[i] == "JOIN" && (vec.size() > i + 1)){
+        else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData()){
             if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
                 continue;
             handleJoinCommand(client, vec[++i]);
         }
-        else if(vec[i] == "PRIVMSG" && (vec.size() > i + 1)){
+        else if((vec[i] == "PRIVMSG" && (vec.size() > i + 1)) && client.checkLoginData()){
             handlePrivMessage(client, vec[++i], messages);
         }
-        else if(vec[i] == "PART" && (vec.size() > i + 1)){
+        else if((vec[i] == "PART" && (vec.size() > i + 1)) && client.checkLoginData()){
             handlePart(client, messages, vec[++i]);
         }        
         else if(vec[i] == "QUIT"){

@@ -2,7 +2,10 @@
 #ifndef MSGFORMAT_HPP
 #define MSGFORMAT_HPP
 
-#include <Channel.hpp>
+#include <string>
+
+class Channel;
+class Client;
 
 class MsgFormat {
     public:
@@ -23,7 +26,10 @@ class MsgFormat {
         static std::string notifyUserNotInChannel(Client &client, const std::string &channelName);
         static std::string passInvalid();
         static std::string passValid();
+        static std::string UserNotAutenticated();
 
 };
+
+#include "Channel.hpp"
 
 #endif
