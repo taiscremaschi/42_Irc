@@ -179,45 +179,45 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
     removeClientByNick(client.getNickname());
 }
 
+bool ServerManager::handlePass(Client& client, std::string pass, std::string vec)
+{
+    if (vec != pass){
+        MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passInvalid());
+        removeClientByFd(client.getSocket());
+        return false;
+    }
+    else {
+        client.isAuthenticated();
+        MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passValid());
+        return true;
+    }
+}
+
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
     
     for (size_t i = 0; i < vec.size(); ++i) {
 
         if (vec[i] == "PASS" && (vec.size() > i + 1))
         {
-            if (vec[i + 1] != pass){
-                MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passInvalid());
-                removeClientByFd(client.getSocket());
-                return;            
-            }
-            else {
-                client.isAuthenticated();
-                MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passValid());
-                continue ;
-            }
+            if (!handlePass(client, pass, vec[i + 1]))
+                return;
         }
-        if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
-        {
+        else if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
             changeNick(client, vec[++i]);
-        }
-        if ((vec[i] == "USER" && (vec.size() > i + 1) ) && client.getAuthenticated()) 
-        {
+        else if ((vec[i] == "USER" && (vec.size() > i + 1) ) && client.getAuthenticated()) 
             client.setName(vec[i + 1]);
-        }
-        else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData()){
+        else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData())
+        {
             if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
                 continue;
             handleJoinCommand(client, vec[++i]);
         }
-        else if((vec[i] == "PRIVMSG" && (vec.size() > i + 1)) && client.checkLoginData()){
+        else if((vec[i] == "PRIVMSG" && (vec.size() > i + 1)) && client.checkLoginData())
             handlePrivMessage(client, vec[++i], messages);
-        }
-        else if((vec[i] == "PART" && (vec.size() > i + 1)) && client.checkLoginData()){
+        else if((vec[i] == "PART" && (vec.size() > i + 1)) && client.checkLoginData())
             handlePart(client, messages, vec[++i]);
-        }        
-        else if(vec[i] == "QUIT"){
+        else if(vec[i] == "QUIT")
             handleQuit(client, messages);
-        }                
         //////////////////// aqui  pra baixo paulo  ///
         else if(vec[i] == "KICK"){
 
