@@ -38,7 +38,6 @@ int Server::setPort(char *av){
 
 void Server::savePass(char *av)
 {
-    std:: cout << " o queee??  " << av << std::endl;
     _password = av;
 }
 

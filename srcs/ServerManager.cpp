@@ -64,7 +64,7 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
     return NULL;
 }
 
-void ServerManager::handleJoinCommand(Client& client, const std::string& channelName) //funcao para join
+void ServerManager::handleJoinCommand(Client& client, const std::string& channelName)
 {
     Channel *channel = getChannelByName(channelName);
     if(channel == NULL)
@@ -75,7 +75,8 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
     }
     else
     {
-        channel->addClient(&client);
+        if(!channel->addClient(&client))
+            return;
     }
     std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
     std::vector<std::string> vecClients = channel->getAllClientsName();
@@ -193,8 +194,6 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
                 MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passValid());
                 continue ;
             }
-
-
         }
         
         if (vec[i] == "NICK" && (vec.size() > i + 1)) 
