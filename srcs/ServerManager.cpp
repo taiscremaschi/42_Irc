@@ -195,10 +195,13 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
                 continue ;
             }
         }
-        
         if (vec[i] == "NICK" && (vec.size() > i + 1)) 
         {
             changeNick(client, vec[++i]);
+        }
+        if (vec[i] == "USER" && (vec.size() > i + 1)) 
+        {
+            client.setName(vec[i + 1]);
         }
         else if (vec[i] == "JOIN" && (vec.size() > i + 1)){
             if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')

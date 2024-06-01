@@ -109,7 +109,6 @@ void Server::runServer()
             }
             else if (_fds[i].revents & POLLNVAL)
             {
-                std::cout << " seu cuzinho " << _fds[i].fd << std::endl;
                 _fds.erase(_fds.begin() + i);
             }
         }
