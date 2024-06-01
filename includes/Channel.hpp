@@ -18,7 +18,7 @@ class Channel {
         ~Channel();
         const std::string &getName() const;
         std::vector<Client*>  &getOperator();
-        void addClient(Client *client);
+        bool addClient(Client *client);
         void removeClient(Client *client);
         std::vector<std::string> getAllClientsName();
         std::vector<Client*> getAllClients();
