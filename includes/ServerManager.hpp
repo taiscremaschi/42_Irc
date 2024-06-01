@@ -4,7 +4,6 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
-#include "MsgFormat.hpp"
 #include "IrcMessages.hpp"
 
 class ServerManager{
