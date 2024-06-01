@@ -235,10 +235,14 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 }
 
 void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
-    IrcMessages message(buff);
     for (size_t j = 0; j < _clients.size(); ++j) {
-        if (fd == _clients[j]->getSocket()) 
-            findCmd(message._vecMsg, *_clients[j], message, pass);
+        if (fd == _clients[j]->getSocket()) {
+            if(_clients[j]->saveBuffer(buff))
+            {
+                IrcMessages message(_clients[j]->getBuffer());
+                findCmd(message._vecMsg, *_clients[j], message, pass);
+            }
+        }
     }
 }
 

@@ -75,3 +75,24 @@ bool Client::checkLoginData(){
     }
     return true;
 }
+
+bool Client::saveBuffer(std::string buff)
+{
+
+    _bufferMsg += buff;
+    
+    if( buff[buff.size() - 1] == '\n')
+    {
+        std::cout << "meu buffer ta completo"  << std::endl;
+        return true;
+    }
+    else {
+
+        std::cout << "entrou aqui sera que devia? " << _bufferMsg << std::endl;
+        return false;
+    }
+}
+
+std::string Client::getBuffer(){
+    return _bufferMsg;
+}

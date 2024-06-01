@@ -16,6 +16,7 @@ class Client {
         int                     _socketClient;
         std::string             _hostname;
         bool                    _authenticated;
+        std::string             _bufferMsg;
 
     public:
         Client(int clientSocket);
@@ -31,6 +32,9 @@ class Client {
         void isAuthenticated();
         bool getAuthenticated() const;
         bool checkLoginData();
+        bool saveBuffer(std::string buff);
+        std::string getBuffer();
+
 
 };
 
