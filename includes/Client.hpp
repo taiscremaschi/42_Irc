@@ -34,6 +34,7 @@ class Client {
         bool checkLoginData();
         bool saveBuffer(std::string buff);
         std::string getBuffer();
+        void clearBuffer();
 
 
 };
