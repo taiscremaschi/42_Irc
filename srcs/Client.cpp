@@ -3,6 +3,7 @@
 
 Client::Client(int clientSocket) {
    _socketClient =  clientSocket;
+   _authenticated = false;
 }
 
 Client:: ~Client(){
@@ -54,4 +55,37 @@ std::string Client::getHostname() { //help 4
         return "";
     }
     return std::string(buff);
+}
+
+void Client::isAuthenticated() {
+    _authenticated = true;
+}
+
+bool Client::getAuthenticated() const{
+    if(!_authenticated)
+        MsgFormat::MsgforHex(_socketClient, MsgFormat::UserNotAutenticated());
+    return _authenticated;
+}
+
+bool Client::checkLoginData(){
+    if( _name.empty() || _nickname.empty())
+    {
+        MsgFormat::MsgforHex(_socketClient, MsgFormat::UserNotAutenticated());
+        return false;
+    }
+    return true;
+}
+
+bool Client::saveBuffer(std::string buff)
+{
+    _bufferMsg += buff;
+    return (buff[buff.size() - 1] == '\n');
+}
+
+std::string Client::getBuffer(){
+    return _bufferMsg;
+}
+
+void Client::clearBuffer(){
+    _bufferMsg.clear();
 }
