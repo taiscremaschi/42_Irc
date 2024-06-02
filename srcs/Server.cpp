@@ -55,7 +55,7 @@ std::string     Server::readData(int i){
         }
         close(_fds[i].fd);
         _fds.erase(_fds.begin() + i);
-        _manager.removeClient(i);
+        _manager.removeClient(i - 1);
         return std::string();
     }
     buffer[bytesReceived] = '\0';
@@ -78,6 +78,7 @@ void Server::newClientConnection()
     pollfd client;
     client.fd = clientSocket;
     client.events = POLLIN;
+    client.revents = 0;
     _fds.push_back(client);
     Client *newClient = new Client(clientSocket);
     _manager.createClient(newClient);
@@ -88,7 +89,7 @@ void Server::newClientConnection()
 void Server::runServer()
 {
     while (1) {
-        int result = poll(_fds.data(), _fds.size(), -1); // Espera indefinidamente por eventos
+        int result = poll(_fds.data(), _fds.size(), -1);
         if (result < 0) {
             std::cerr << "Error in poll()\n";
             break;
@@ -103,8 +104,12 @@ void Server::runServer()
                     if(buff.empty())
                         continue ;
                     std::cout << "Received: " << buff << std::endl;
-                    _manager.handleIrcCmds(buff, _fds[i].fd);
+                    _manager.handleIrcCmds(buff, _fds[i].fd, this->_password);
                 }
+            }
+            else if (_fds[i].revents & POLLNVAL)
+            {
+                _fds.erase(_fds.begin() + i);
             }
         }
     }
@@ -116,6 +121,8 @@ void Server::createServerSocket()
     if(_serverSocket == -1)
         std::cerr << "error in creating server socket\n";
 
+
+    fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
     // Definir a opção SO_REUSEADDR no socket do servidor
     int opt = 1;
     if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {

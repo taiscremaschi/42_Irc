@@ -5,8 +5,6 @@
 #include "Client.hpp"
 #include <vector>
 
-class MsgFormat;
-
 class Channel {
     private:
         std::vector<Client*> _clientsChannel;
@@ -18,7 +16,7 @@ class Channel {
         ~Channel();
         const std::string &getName() const;
         std::vector<Client*>  &getOperator();
-        void addClient(Client *client);
+        bool addClient(Client *client);
         void removeClient(Client *client);
         std::vector<std::string> getAllClientsName();
         std::vector<Client*> getAllClients();
@@ -26,8 +24,6 @@ class Channel {
         bool searchNames(const std::string name);
         void sendMessageToClients(std::string msg);
 };
-
-#include "MsgFormat.hpp"
 
 #endif
 

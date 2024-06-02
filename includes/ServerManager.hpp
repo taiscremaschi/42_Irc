@@ -4,7 +4,6 @@
 
 #include "Client.hpp"
 #include "Channel.hpp"
-#include "MsgFormat.hpp"
 #include "IrcMessages.hpp"
 
 class ServerManager{
@@ -15,9 +14,9 @@ class ServerManager{
         ServerManager();
         ~ServerManager();
         void createClient(Client *client);
-        void handleIrcCmds(std::string buff, int fd);
+        void handleIrcCmds(std::string buff, int fd, std::string pass);
         void handleJoinCommand(Client& client, const std::string& channel);
-        void findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &mensage);
+        void findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &, std::string pass);
         bool changeNick(Client &client, const std::string &nick);
         Client *getClientByNick(const std::string &nick);
         Channel *getChannelByName(const std::string &nick);
@@ -26,6 +25,9 @@ class ServerManager{
         void handleQuit(Client& client, IrcMessages &quitMsg);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
+        void removeClientByFd(int fd);
+        bool handlePass(Client& client, std::string pass, std::string vec);
+
 
 
 

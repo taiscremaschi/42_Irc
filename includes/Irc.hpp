@@ -13,6 +13,8 @@
 #include <vector>
 #include <netdb.h>
 #include <cstdio>
+ #include <signal.h>
+ #include <fcntl.h>
 
 
 #endif

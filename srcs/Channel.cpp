@@ -15,8 +15,15 @@ const std::string &Channel::getName() const {
 
 }
     
-void Channel::addClient(Client *client){
+bool Channel::addClient(Client *client){
+
+    for(size_t i = 0; i < _clientsChannel.size(); ++i)
+    {
+        if (_clientsChannel[i] == client)
+           return false;
+    }
     _clientsChannel.push_back(client);
+    return true;
 }
 
 void Channel::removeClient(Client *client){
