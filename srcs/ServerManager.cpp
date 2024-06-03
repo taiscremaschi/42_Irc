@@ -193,6 +193,24 @@ bool ServerManager::handlePass(Client& client, std::string pass, std::string vec
 	}
 }
 
+
+void ServerManager::handleTopic(Client &client, const std::string &channelName, const std::string &topic)
+{
+	Channel *channel = getChannelByName(channelName);
+
+	if (!channel)
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
+	else if (topic.empty())
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
+	else if (channel->searchOperator(client.getNickname()))
+	{
+		channel->setTopic(topic);
+		channel->sendMessageToClients(MsgFormat::topic(client, channelName, topic));
+	}
+	else
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+}
+
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
 	
 	for (size_t i = 0; i < vec.size(); ++i) {
@@ -224,8 +242,10 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		else if(vec[i] == "INVITE"){
 
 		}
-		else if(vec[i] == "TOPIC"){
-
+		else if(vec[i] == "TOPIC" && (vec.size() > i + 1)){
+			std::string topic = (vec.size() > i + 2) ? vec[i + 2] : "";
+			handleTopic(client, vec[i + 1], topic);
+			i += 2;
 		}		
 		else if(vec[i] == "MODE"){
 

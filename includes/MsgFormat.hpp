@@ -27,7 +27,7 @@ class MsgFormat {
         static std::string passInvalid();
         static std::string passValid();
         static std::string UserNotAutenticated();
-
+		static std::string notChannelOperator(const Client &client, const std::string &channelName);
 };
 
 #endif
