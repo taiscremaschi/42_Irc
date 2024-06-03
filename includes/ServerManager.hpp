@@ -1,10 +1,9 @@
-
 #ifndef SERVERMANAGER_HPP
-#define SERVERMANAGER_HPP
+# define SERVERMANAGER_HPP
 
-#include "Client.hpp"
-#include "Channel.hpp"
-#include "IrcMessages.hpp"
+# include "Client.hpp"
+# include "Channel.hpp"
+# include "IrcMessages.hpp"
 
 class ServerManager{
     private:
