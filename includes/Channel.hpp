@@ -14,6 +14,8 @@ class Channel {
         Channel(const std::string &name, Client *client);
         ~Channel();
         const std::string &getName() const;
+		const std::string &getTopic() const;
+		void setTopic(const std::string &topic);
         std::vector<Client*>  &getOperator();
         bool addClient(Client *client);
         void removeClient(Client *client);

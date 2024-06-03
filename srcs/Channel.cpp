@@ -11,7 +11,16 @@ Channel::~Channel(){}
 
 const std::string &Channel::getName() const {
 	return _name;
+}
 
+const std::string &Channel::getTopic() const
+{	
+	return (this->_topic);
+}
+
+void Channel::setTopic(const std::string &topic)
+{
+	this->_topic = topic;
 }
 	
 bool Channel::addClient(Client *client){

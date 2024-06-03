@@ -67,7 +67,12 @@ std::string MsgFormat::passValid()
 
 std::string MsgFormat::UserNotAutenticated()
 {
-	return ( ":server 451 * :You have not registered");
+	return (":server 451 * :You have not registered");
+}
+
+std::string MsgFormat::notChannelOperator(const Client &client, const std::string &channelName)
+{
+	return (":server 482 " + client.getNickname() + " " + channelName + " :You're not channel operator");
 }
 
 std::string MsgFormat::handleMsg(std::string msg)
