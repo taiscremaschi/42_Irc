@@ -194,13 +194,26 @@ bool ServerManager::handlePass(Client& client, std::string pass, std::string vec
 }
 
 
-void ServerManager::handleTopic(Client &client, const std::string &channelName, const std::string &topic)
+void ServerManager::handleTopic(Client &client, const std::vector<std::string> &vec, size_t *i)
 {
-	Channel *channel = getChannelByName(channelName);
+	std::string channelName = vec[*i];
+	std::string topic = "";
+	if (vec.size() > *i + 1)
+	{
+		for (size_t j = *i + 1; j < vec.size(); ++j)
+			topic += vec[j] + " ";
 
+		if (!topic.empty() && topic[topic.size() - 1] == ' ')
+			topic.erase(topic.size() - 1);
+		if (!topic.empty() && topic[0] == ':')
+			topic = topic.substr(1);
+	}
+
+	Channel *channel = getChannelByName(channelName);
 	if (!channel)
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
-	else if (topic.empty())
+
+	if (topic.empty())
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
 	else if (channel->searchOperator(client.getNickname()))
 	{
@@ -243,9 +256,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 
 		}
 		else if(vec[i] == "TOPIC" && (vec.size() > i + 1)){
-			std::string topic = (vec.size() > i + 2) ? vec[i + 2] : "";
-			handleTopic(client, vec[i + 1], topic);
-			i += 2;
+			handleTopic(client, vec, &(++i));
 		}		
 		else if(vec[i] == "MODE"){
 
@@ -266,4 +277,3 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 		}
 	}
 }
-

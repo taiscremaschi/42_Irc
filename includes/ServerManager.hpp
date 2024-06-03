@@ -22,7 +22,7 @@ class ServerManager{
         void handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages);
         void handlePart(Client& client, IrcMessages &messages,const std::string& channelName);
         void handleQuit(Client& client, IrcMessages &quitMsg);
-		void handleTopic(Client &client, const std::string &channelName, const std::string &topic);
+		void handleTopic(Client &client, const std::vector<std::string> &vec, size_t *i);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
         void removeClientByFd(int fd);
