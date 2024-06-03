@@ -1,8 +1,8 @@
-
 #ifndef MSGFORMAT_HPP
-#define MSGFORMAT_HPP
+# define MSGFORMAT_HPP
 
-#include <string>
+# include "Channel.hpp"
+# include <string>
 
 class Channel;
 class Client;
@@ -29,7 +29,5 @@ class MsgFormat {
         static std::string UserNotAutenticated();
 
 };
-
-#include "Channel.hpp"
 
 #endif
