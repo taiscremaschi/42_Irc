@@ -194,13 +194,13 @@ bool ServerManager::handlePass(Client& client, std::string pass, std::string vec
 }
 
 
-void ServerManager::handleTopic(Client &client, const std::vector<std::string> &vec, size_t *i)
+void ServerManager::handleTopic(Client &client, const std::vector<std::string> &vec, size_t i)
 {
-	std::string channelName = vec[*i];
+	std::string channelName = vec[i];
 	std::string topic = "";
-	if (vec.size() > *i + 1)
+	if (vec.size() > i + 1)
 	{
-		for (size_t j = *i + 1; j < vec.size(); ++j)
+		for (size_t j = i + 1; j < vec.size(); ++j)
 			topic += vec[j] + " ";
 
 		if (!topic.empty() && topic[topic.size() - 1] == ' ')
@@ -211,7 +211,10 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
+	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
+		return;
+	}
 
 	if (topic.empty())
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
@@ -222,6 +225,27 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 	}
 	else
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+}
+
+void ServerManager::handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec, size_t i)
+{
+	Channel *channel = getChannelByName(channelName);
+	if (!channel)
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
+		return;
+	}	
+	else if (!channel->searchOperator(client.getNickname()))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+		return;
+	}
+
+	Client *target = getClientByNick(targetNick);
+	if (!target)
+	{
+		
+	}
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
@@ -250,13 +274,13 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handleQuit(client, messages);
 		//////////////////// aqui  pra baixo paulo  ///
 		else if(vec[i] == "KICK"){
-
+			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
 		}		
 		else if(vec[i] == "INVITE"){
 
 		}
 		else if(vec[i] == "TOPIC" && (vec.size() > i + 1)){
-			handleTopic(client, vec, &(++i));
+			handleTopic(client, vec, ++i);
 		}		
 		else if(vec[i] == "MODE"){
 
