@@ -28,6 +28,9 @@ class MsgFormat {
         static std::string passValid();
         static std::string UserNotAutenticated();
 		static std::string notChannelOperator(const Client &client, const std::string &channelName);
+		static std::string nickNotFound(Client &client, const std::string &targetNick);
+		static std::string userNotInChannel(Client &client, const std::string &channelName, const std::string &targetNick);
+		static std::string kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason);
 };
 
 #endif

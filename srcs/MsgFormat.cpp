@@ -75,6 +75,21 @@ std::string MsgFormat::notChannelOperator(const Client &client, const std::strin
 	return (":server 482 " + client.getNickname() + " " + channelName + " :You're not channel operator");
 }
 
+std::string MsgFormat::nickNotFound(Client &client, const std::string &targetNick)
+{
+	return (":server 401 " + client.getNickname() + " " + targetNick + " :No such nick/channel");
+}
+
+std::string MsgFormat::userNotInChannel(Client &client, const std::string &channelName, const std::string &targetNick)
+{
+	return (":server 441 " + client.getNickname() + " " + targetNick + " "+ channelName + " :They aren't on that channel");
+}
+
+std::string MsgFormat::kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason)
+{
+	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " KICK " + channelName + " " + targetNick + " :" + reason);
+}
+
 std::string MsgFormat::handleMsg(std::string msg)
 {
 	int i = 0;
