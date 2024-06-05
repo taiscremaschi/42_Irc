@@ -2,3 +2,4 @@
 *.txt
 objs/
 .vscode/
+ircserv

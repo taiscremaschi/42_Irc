@@ -10,11 +10,13 @@ class Client;
 class MsgFormat {
     public:
         static std::string join(Client &client, const std::string &channelName);
+		static std::string invite(Client &client, const std::string &channelName, const std::string &targetNick);
+		static std::string inviteConfirm(Client &client, const std::string &channelName, const std::string &targetNick);
         static std::string topic(Client &client, const std::string &channelName, std::string topic);
         static std::string topicCreator(Client &client, const std::string &channelName);
         static std::string endOfName(Client &client, const std::string &channelName);
         static std::string part(Client &client, Channel *channel, std::string exitMsg);
-        static std::string partError(Client &client, std::string WrongChannel);
+        static std::string channelNotFound(Client &client, std::string WrongChannel);
         static std::string nickError(Client &client, std::string nick);
         static std::string nick(Client &client, const std::string &oldNick);
         static std::string priv(Client &client, std::string name, std::string message);
@@ -30,6 +32,7 @@ class MsgFormat {
 		static std::string notChannelOperator(const Client &client, const std::string &channelName);
 		static std::string nickNotFound(Client &client, const std::string &targetNick);
 		static std::string userNotInChannel(Client &client, const std::string &channelName, const std::string &targetNick);
+		static std::string userAlreadyInChannel(Client &client, const std::string &channelName, const std::string &targetNick);
 		static std::string kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason);
 };
 
