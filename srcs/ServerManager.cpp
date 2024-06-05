@@ -159,7 +159,7 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 {
 	Channel *channel = getChannelByName(channelName);
 	if(channel == NULL){
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
 	channel->sendMessageToClients(MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
@@ -212,7 +212,7 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
 	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
 
@@ -232,7 +232,7 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
 	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::partError(client, channelName));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}	
 	else if (!channel->searchOperator(client.getNickname()))
@@ -265,6 +265,37 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	channel->removeClient(target);
 }
 
+void ServerManager::handleInvite(Client &client, const std::string &targetNick, const std::string &channelName)
+{
+	Channel *channel = getChannelByName(channelName);
+	if (!channel)
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
+		return;
+	}
+	else if (!channel->searchNames(client.getNickname()))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
+		return;
+	}
+
+	Client	*target = getClientByNick(targetNick);
+	if (!target)
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
+		return;
+	}
+	else if (channel->searchNames(targetNick))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInChannel(client, targetNick, channelName));
+		return;
+	}
+
+	std::string inviteMsg = MsgFormat::invite(client, channelName, targetNick);
+	MsgFormat::MsgforHex(target->getSocket(), inviteMsg);
+	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::inviteConfirm(client, channelName, targetNick));
+}
+
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
 	
 	for (size_t i = 0; i < vec.size(); ++i) {
@@ -294,7 +325,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
 		}		
 		else if(vec[i] == "INVITE"){
-
+			handleInvite(client, vec[i + 1], vec[i + 2]);
 		}
 		else if(vec[i] == "TOPIC" && (vec.size() > i + 1)){
 			handleTopic(client, vec, ++i);

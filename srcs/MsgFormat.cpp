@@ -4,6 +4,16 @@ std::string MsgFormat::join(Client &client, const std::string &channelName){
 	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName);
 }
 
+std::string MsgFormat::invite(Client &client, const std::string &channelName, const std::string &targetNick)
+{
+	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " INVITE " + targetNick + ":" + channelName);
+}
+
+std::string MsgFormat::inviteConfirm(Client &client, const std::string &channelName, const std::string &targetNick)
+{
+	return ("server 341 " + client.getNickname() + " " + targetNick + ":" + channelName);
+}
+
 std::string MsgFormat::part(Client &client, Channel *channel, std::string exitMsg) {
 	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg);
 }
@@ -38,7 +48,7 @@ std::string MsgFormat::nickError(Client &client, std::string nick) {
 	return (":server 433 " + client.getNickname() + " " + nick + " :Nickname is already in use");
 }
 
-std::string MsgFormat::partError(Client &client, std::string wrongChannel) {
+std::string MsgFormat::channelNotFound(Client &client, std::string wrongChannel) {
 	return (":server 403 " + client.getNickname() + " " + wrongChannel + " :No such channel");
 }
 
@@ -83,6 +93,11 @@ std::string MsgFormat::nickNotFound(Client &client, const std::string &targetNic
 std::string MsgFormat::userNotInChannel(Client &client, const std::string &channelName, const std::string &targetNick)
 {
 	return (":server 441 " + client.getNickname() + " " + targetNick + " "+ channelName + " :They aren't on that channel");
+}
+
+std::string MsgFormat::userAlreadyInChannel(Client &client, const std::string &channelName, const std::string &targetNick)
+{
+	return (":server 443 " + client.getNickname() + " " + targetNick + " " + channelName + " :is already on channel");
 }
 
 std::string MsgFormat::kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason)
