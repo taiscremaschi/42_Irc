@@ -22,6 +22,7 @@ class Channel {
         std::vector<std::string> getAllClientsName();
         std::vector<Client*> getAllClients();
         bool searchOperator(const std::string &name);
+		void removeOperator(Client *client);
         bool searchNames(const std::string name);
         void sendMessageToClients(std::string msg);
 };

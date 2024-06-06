@@ -67,6 +67,18 @@ bool Channel::searchOperator(const std::string &name){
 	return false;
 }
 
+void Channel::removeOperator(Client *client)
+{
+	for (size_t i = 0; i < _operators.size(); ++i)
+	{
+		if (_operators[i] == client)
+		{
+			_operators.erase(_operators.begin() + i);
+			break;
+		}
+	}
+}
+
 bool Channel::searchNames(const std::string name){
 	for(size_t i = 0; i <  _clientsChannel.size(); ++i)
 	{
