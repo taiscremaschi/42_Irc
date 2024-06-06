@@ -257,6 +257,8 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
 	}
 
+	if (channel->searchOperator(target->getNickname()))
+		channel->removeOperator(target);
 	std::string reason;
 	for (size_t j = i; j < vec.size(); ++j)
 		reason += vec[j] + " ";
