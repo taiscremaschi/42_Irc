@@ -283,6 +283,11 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
 		return;
 	}
+	else if (!channel->searchOperator(client.getNickname()))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+		return;
+	}
 
 	Client	*target = getClientByNick(targetNick);
 	if (!target)
