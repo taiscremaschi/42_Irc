@@ -3,7 +3,7 @@
 Channel::Channel(const std::string &name, Client *client){
 	_name = name;
 	_operators.push_back(client);
-	_topic = name;
+	_topic = "Default topic";
 	_clientsChannel.push_back(client);
 }
 

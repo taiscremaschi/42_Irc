@@ -87,7 +87,7 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		namesList += vecClients[j] + " ";
 	}
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::join(client, channelName));
-	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, "Topic initial of channel"));
+	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topicCreator(client, channelName));
 	MsgFormat::MsgforHex(client.getSocket(), namesList);
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::endOfName(client, channelName));
@@ -103,7 +103,6 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 
 bool ServerManager::changeNick(Client &client, const std::string &nick)
 {
-
 	for(size_t x = 0; x < _clients.size(); ++x)
 	{
 		if (_clients[x]->getNickname() == nick){
@@ -218,10 +217,16 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 
 	if (topic.empty())
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
+	else if (!channel->searchNames(client.getNickname()))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::youNotInChannel(client, channelName));
+		return;
+	}
 	else if (channel->searchOperator(client.getNickname()))
 	{
 		channel->setTopic(topic);
 		channel->sendMessageToClients(MsgFormat::topic(client, channelName, topic));
+	channel->sendMessageToClients(MsgFormat::topicCreator(client, channelName));
 	}
 	else
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
