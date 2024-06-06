@@ -32,6 +32,7 @@ class MsgFormat {
 		static std::string notChannelOperator(const Client &client, const std::string &channelName);
 		static std::string nickNotFound(Client &client, const std::string &targetNick);
 		static std::string userNotInChannel(Client &client, const std::string &channelName, const std::string &targetNick);
+		static std::string youNotInChannel(Client &client, const std::string &channelName);
 		static std::string userAlreadyInChannel(Client &client, const std::string &channelName, const std::string &targetNick);
 		static std::string kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason);
 };

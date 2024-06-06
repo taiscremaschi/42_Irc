@@ -95,6 +95,11 @@ std::string MsgFormat::userNotInChannel(Client &client, const std::string &chann
 	return (":server 441 " + client.getNickname() + " " + targetNick + " "+ channelName + " :They aren't on that channel");
 }
 
+std::string MsgFormat::youNotInChannel(Client &client, const std::string &channelName)
+{
+	return (":server 442 " + client.getNickname() + " " + channelName + " :You're not on that channel");
+}
+
 std::string MsgFormat::userAlreadyInChannel(Client &client, const std::string &channelName, const std::string &targetNick)
 {
 	return (":server 443 " + client.getNickname() + " " + targetNick + " " + channelName + " :is already on channel");
