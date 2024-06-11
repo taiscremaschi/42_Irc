@@ -3,6 +3,7 @@
 
 #include "Client.hpp"
 #include <vector>
+#include <algorithm>
 
 class Channel {
     private:

@@ -110,6 +110,16 @@ std::string MsgFormat::kickUser(Client &client, const std::string &channelName, 
 	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " KICK " + channelName + " " + targetNick + " :" + reason);
 }
 
+std::string MsgFormat::mode(Client &client, const std::string &channelName, const std::string &modeMsg)
+{
+	return (":" + client.getNickname() + " MODE " + channelName + " " + modeMsg);
+}
+
+std::string MsgFormat::inviteOnlyChannel(Client &client, const std::string &channelName)
+{
+	return (":" + client.getNickname() + " 475 " + channelName + " :Cannot join channel (+i)");
+}
+
 std::string MsgFormat::handleMsg(std::string msg)
 {
 	int i = 0;
@@ -131,5 +141,3 @@ void MsgFormat::MsgforHex(int clientSocket, const std::string& message)
 	std::cout << msg << std::endl;
 	send(clientSocket, msg.c_str(), msg.length(), 0);
 }
-
-
