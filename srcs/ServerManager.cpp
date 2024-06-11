@@ -67,17 +67,19 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
 void ServerManager::handleJoinCommand(Client& client, const std::string& channelName)
 {
 	Channel *channel = getChannelByName(channelName);
-	if(channel == NULL)
+	if (!channel)
 	{
 		Channel *newchannel = new Channel(channelName, &client);
 		_channels.push_back(newchannel);
 		channel = newchannel;
 	}
-	else
+	else if (channel->isInviteOnly() && !channel->isInvited(&client))
 	{
-		if(!channel->addClient(&client))
-			return;
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::inviteOnlyChannel(client, channelName));
 	}
+	else if(!channel->addClient(&client))
+		return;
+
 	std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
 	std::vector<std::string> vecClients = channel->getAllClientsName();
 	for(size_t j = 0; j < vecClients.size(); ++j)
@@ -86,6 +88,7 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 			namesList += "@";
 		namesList += vecClients[j] + " ";
 	}
+
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::join(client, channelName));
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topicCreator(client, channelName));
@@ -306,6 +309,29 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 	std::string inviteMsg = MsgFormat::invite(client, channelName, targetNick);
 	MsgFormat::MsgforHex(target->getSocket(), inviteMsg);
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::inviteConfirm(client, channelName, targetNick));
+	channel->addInvite(target);
+}
+
+void ServerManager::handleMode(Client &client, const std::string &channelName, char mode, bool set)
+{
+	Channel	*channel = getChannelByName(channelName);
+	if (!channel)
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
+		return;
+	}
+	else if (!channel->searchOperator(client.getNickname()))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+		return;
+	}
+
+	if (mode == 'i')
+	{
+		channel->setInviteOnly(set);
+		std::string modeMsg = set ? "+i" : "-i";
+		channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
+	}
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
@@ -330,20 +356,22 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handlePrivMessage(client, vec[++i], messages);
 		else if((vec[i] == "PART" && (vec.size() > i + 1)) && client.checkLoginData())
 			handlePart(client, messages, vec[++i]);
-		else if(vec[i] == "QUIT")
+		else if(vec[i] == "QUIT" && vec.size() > i + 2 && client.checkLoginData())
 			handleQuit(client, messages);
 		//////////////////// aqui  pra baixo paulo  ///
-		else if(vec[i] == "KICK"){
+		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
 		}		
-		else if(vec[i] == "INVITE"){
+		else if(vec[i] == "INVITE" && vec.size() > i + 2 && client.checkLoginData()){
 			handleInvite(client, vec[i + 1], vec[i + 2]);
 		}
-		else if(vec[i] == "TOPIC" && (vec.size() > i + 1)){
+		else if(vec[i] == "TOPIC" && (vec.size() > i + 1) && client.checkLoginData()){
 			handleTopic(client, vec, ++i);
 		}		
-		else if(vec[i] == "MODE"){
-
+		else if(vec[i] == "MODE" && vec.size() > i + 2 && client.checkLoginData()){
+			bool set = (vec[i + 2][0] == '+');
+			handleMode(client, vec[i + 1], vec[i + 2][1], set);
+			i += 2;
 		}
 	}
 }

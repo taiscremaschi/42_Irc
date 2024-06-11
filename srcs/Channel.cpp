@@ -58,6 +58,27 @@ std::vector<std::string> Channel::getAllClientsName()
 	return result;
 }
 
+bool Channel::isInviteOnly() const
+{
+	return (_inviteOnly);
+}
+
+void Channel::setInviteOnly(bool inviteOnly)
+{
+	_inviteOnly = inviteOnly;
+}
+
+bool Channel::isInvited(Client *client) const
+{
+	return (std::find(_invitedClients.begin(), _invitedClients.end(), client) != _invitedClients.end());
+}
+
+void Channel::addInvite(Client *client)
+{
+	if (!isInvited(client))
+		_invitedClients.push_back(client);
+}
+
 bool Channel::searchOperator(const std::string &name){
 	for(size_t i = 0; i < _operators.size(); ++i)
 	{

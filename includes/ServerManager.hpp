@@ -25,6 +25,7 @@ class ServerManager{
 		void handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec, size_t i);
 		void handleInvite(Client &client, const std::string &targetNick, const std::string &channelName);
 		void handleTopic(Client &client, const std::vector<std::string> &vec, size_t i);
+		void handleMode(Client &client, const std::string &channelName, char mode, bool set);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
         void removeClientByFd(int fd);
