@@ -36,6 +36,8 @@ class MsgFormat {
 		static std::string userAlreadyInChannel(Client &client, const std::string &channelName, const std::string &targetNick);
 		static std::string kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason);
 		static std::string mode(Client &client, const std::string &channelName, const std::string &modeMsg);
+		static std::string invalidMode(Client &client, const std::string &mode);
+		static std::string unsupportedMode(Client &client, const std::string &mode);
 		static std::string inviteOnlyChannel(Client &client, const std::string &channelName);
 };
 
