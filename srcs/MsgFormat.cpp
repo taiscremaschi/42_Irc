@@ -115,6 +115,16 @@ std::string MsgFormat::mode(Client &client, const std::string &channelName, cons
 	return (":" + client.getNickname() + " MODE " + channelName + " " + modeMsg);
 }
 
+std::string MsgFormat::invalidMode(Client &client, const std::string &mode)
+{
+	return (":server 472 " + client.getNickname() + " " + mode + " :is an unknown mode character");
+}
+
+std::string MsgFormat::unsupportedMode(Client &client, const std::string &mode)
+{
+	return (":server 501 " + client.getNickname() + " " + mode + " :is an unsupported mode");
+}
+
 std::string MsgFormat::inviteOnlyChannel(Client &client, const std::string &channelName)
 {
 	return (":" + client.getNickname() + " 475 " + channelName + " :Cannot join channel (+i)");

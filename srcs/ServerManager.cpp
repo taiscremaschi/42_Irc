@@ -312,7 +312,7 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 	channel->addInvite(target);
 }
 
-void ServerManager::handleMode(Client &client, const std::string &channelName, char mode, bool set)
+void ServerManager::handleMode(Client &client, const std::string &channelName, std::string mode)
 {
 	Channel	*channel = getChannelByName(channelName);
 	if (!channel)
@@ -325,13 +325,22 @@ void ServerManager::handleMode(Client &client, const std::string &channelName, c
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
 	}
-
-	if (mode == 'i')
+	else if (mode.size() != 2 || mode[0] != '+' || mode[0] != '-')
 	{
-		channel->setInviteOnly(set);
-		std::string modeMsg = set ? "+i" : "-i";
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidMode(client, mode));
+		return;
+	}
+
+	std::cout << "mode is " << mode << "!!!" << std::endl;
+	if (mode[1] == 'i')
+	{
+		bool inviteOnly = (mode[0] == '+');
+		channel->setInviteOnly(inviteOnly);
+		std::string modeMsg = inviteOnly ? "+i" : "-i";
 		channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 	}
+	else
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, mode));
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
@@ -369,9 +378,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handleTopic(client, vec, ++i);
 		}		
 		else if(vec[i] == "MODE" && vec.size() > i + 2 && client.checkLoginData()){
-			bool set = (vec[i + 2][0] == '+');
-			handleMode(client, vec[i + 1], vec[i + 2][1], set);
-			i += 2;
+			handleMode(client, vec[i + 1], vec[i + 2]);
 		}
 	}
 }
