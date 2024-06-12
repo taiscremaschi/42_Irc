@@ -325,7 +325,7 @@ void ServerManager::handleMode(Client &client, const std::string &channelName, s
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
 	}
-	else if (mode.size() != 2 || mode[0] != '+' || mode[0] != '-')
+	else if (mode.size() != 2 || (mode[0] != '+' && mode[0] != '-'))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidMode(client, mode));
 		return;
