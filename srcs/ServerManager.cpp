@@ -73,12 +73,14 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		_channels.push_back(newchannel);
 		channel = newchannel;
 	}
-	else if (channel->isInviteOnly() && !channel->isInvited(&client))
-	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::inviteOnlyChannel(client, channelName));
-	}
 	else if(!channel->addClient(&client))
 		return;
+
+	if (channel->isInviteOnly() && !channel->isInvited(&client))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::inviteOnlyChannel(client, channelName));
+		return;
+	}
 
 	std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
 	std::vector<std::string> vecClients = channel->getAllClientsName();
@@ -262,6 +264,8 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 
 	if (channel->searchOperator(target->getNickname()))
 		channel->removeOperator(target);
+	if (channel->isInvited(target))
+		channel->removeInvite(target);
 	std::string reason;
 	for (size_t j = i; j < vec.size(); ++j)
 		reason += vec[j] + " ";

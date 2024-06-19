@@ -24,6 +24,7 @@ class Channel {
 		void setInviteOnly(bool inviteOnly);
 		bool isInvited(Client *client) const;
 		void addInvite(Client *client);
+		void removeInvite(Client *client);
 
         std::vector<Client*>  &getOperator();
         bool addClient(Client *client);
