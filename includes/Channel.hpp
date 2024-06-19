@@ -13,6 +13,9 @@ class Channel {
         std::vector<Client*> _operators;
 		bool				_inviteOnly;
 		std::vector<Client*> _invitedClients;
+		bool				_keySet;
+		std::string			_key;
+
     public:
         Channel(const std::string &name, Client *client);
         ~Channel();
@@ -35,6 +38,11 @@ class Channel {
 		void removeOperator(Client *client);
         bool searchNames(const std::string name);
         void sendMessageToClients(std::string msg);
+
+		void setKey(const std::string &key);
+		void unsetKey(void);
+		bool hasKey(void) const;
+		bool checkKey(const std::string & key) const;
 };
 
 #endif

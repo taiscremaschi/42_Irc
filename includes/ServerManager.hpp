@@ -14,7 +14,7 @@ class ServerManager{
         ~ServerManager();
         void createClient(Client *client);
         void handleIrcCmds(std::string buff, int fd, std::string pass);
-        void handleJoinCommand(Client& client, const std::string& channel);
+        void handleJoinCommand(Client& client, const std::string& channel, const std::string &key);
         void findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &, std::string pass);
         bool changeNick(Client &client, const std::string &nick);
         Client *getClientByNick(const std::string &nick);
@@ -23,9 +23,9 @@ class ServerManager{
         void handlePart(Client& client, IrcMessages &messages,const std::string& channelName);
         void handleQuit(Client& client, IrcMessages &quitMsg);
 		void handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec, size_t i);
-		void handleInvite(Client &client, const std::string &targetNick, const std::string &channelName);
 		void handleTopic(Client &client, const std::vector<std::string> &vec, size_t i);
-		void handleMode(Client &client, const std::string &channelName, std::string mode);
+		void handleInviteMode(Client &client, const std::string &targetNick, const std::string &channelName);
+		void handleMode(Client &client, const std::string &channelName, std::string mode, const std::string &optArg);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
         void removeClientByFd(int fd);

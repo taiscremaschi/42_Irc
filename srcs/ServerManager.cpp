@@ -64,7 +64,7 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
 	return NULL;
 }
 
-void ServerManager::handleJoinCommand(Client& client, const std::string& channelName)
+void ServerManager::handleJoinCommand(Client& client, const std::string& channelName, const std::string &key)
 {
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
@@ -80,6 +80,14 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::inviteOnlyChannel(client, channelName));
 		return;
+	}
+	else if (!key.empty())
+	{
+		if (channel->hasKey() && !channel->checkKey(key))
+		{
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidKey(client, channelName));
+			return;
+		}
 	}
 
 	std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
@@ -279,7 +287,7 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	channel->removeClient(target);
 }
 
-void ServerManager::handleInvite(Client &client, const std::string &targetNick, const std::string &channelName)
+void ServerManager::handleInviteMode(Client &client, const std::string &targetNick, const std::string &channelName)
 {
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
@@ -316,7 +324,7 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 	channel->addInvite(target);
 }
 
-void ServerManager::handleMode(Client &client, const std::string &channelName, std::string mode)
+void ServerManager::handleMode(Client &client, const std::string &channelName, std::string mode, const std::string &optArg)
 {
 	Channel	*channel = getChannelByName(channelName);
 	if (!channel)
@@ -329,19 +337,33 @@ void ServerManager::handleMode(Client &client, const std::string &channelName, s
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
 	}
-	else if (mode.size() != 2 || (mode[0] != '+' && mode[0] != '-'))
+	else if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidMode(client, mode));
 		return;
 	}
 
 	std::cout << "mode is " << mode << "!!!" << std::endl;
-	if (mode[1] == 'i')
+	if (mode[1] == 'i' && optArg.empty())
 	{
 		bool inviteOnly = (mode[0] == '+');
 		channel->setInviteOnly(inviteOnly);
 		std::string modeMsg = inviteOnly ? "+i" : "-i";
 		channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
+	}
+	else if (mode[1] == 'k' && !optArg.empty())
+	{
+		if (mode[0] == '+')
+		{
+			std::string key = optArg;
+			channel->setKey(key);
+			channel->sendMessageToClients(MsgFormat::mode(client, channelName, "+k" + key));
+		}
+		else
+		{
+			channel->unsetKey();
+			channel->sendMessageToClients(MsgFormat::mode(client, channelName, "-k"));
+		}
 	}
 	else
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, mode));
@@ -363,7 +385,8 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		{
 			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
 				continue;
-			handleJoinCommand(client, vec[++i]);
+			handleJoinCommand(client, vec[i + 1], vec[i + 2]);
+			i += 2;
 		}
 		else if((vec[i] == "PRIVMSG" && (vec.size() > i + 1)) && client.checkLoginData())
 			handlePrivMessage(client, vec[++i], messages);
@@ -376,13 +399,15 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
 		}		
 		else if(vec[i] == "INVITE" && vec.size() > i + 2 && client.checkLoginData()){
-			handleInvite(client, vec[i + 1], vec[i + 2]);
+			handleInviteMode(client, vec[i + 1], vec[i + 2]);
+			i += 2;
 		}
 		else if(vec[i] == "TOPIC" && (vec.size() > i + 1) && client.checkLoginData()){
 			handleTopic(client, vec, ++i);
 		}		
 		else if(vec[i] == "MODE" && vec.size() > i + 2 && client.checkLoginData()){
-			handleMode(client, vec[i + 1], vec[i + 2]);
+			handleMode(client, vec[i + 1], vec[i + 2], vec[i + 3]);
+			i += 2;
 		}
 	}
 }
