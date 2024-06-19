@@ -79,6 +79,18 @@ void Channel::addInvite(Client *client)
 		_invitedClients.push_back(client);
 }
 
+void Channel::removeInvite(Client *client)
+{
+	for (size_t i = 0; i < _invitedClients.size(); ++i)
+	{
+		if (_invitedClients[i] == client)
+		{
+			_invitedClients.erase(_invitedClients.begin() + i);
+			break;
+		}
+	}
+}
+
 bool Channel::searchOperator(const std::string &name){
 	for(size_t i = 0; i < _operators.size(); ++i)
 	{
