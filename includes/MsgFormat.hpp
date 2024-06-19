@@ -39,6 +39,7 @@ class MsgFormat {
 		static std::string invalidMode(Client &client, const std::string &mode);
 		static std::string unsupportedMode(Client &client, const std::string &mode);
 		static std::string inviteOnlyChannel(Client &client, const std::string &channelName);
+		static std::string invalidKey(Client &client, const std::string &channelName);
 };
 
 #endif

@@ -128,3 +128,25 @@ void Channel::sendMessageToClients(std::string msg)
 		MsgFormat::MsgforHex(_clientsChannel[j]->getSocket(), msg);
 	 }
 }
+
+void Channel::setKey(const std::string &key)
+{
+	_key = key;
+	_keySet = true;
+}
+
+void Channel::unsetKey(void)
+{
+	_key.clear();
+	_keySet = false;
+}
+
+bool Channel::hasKey(void) const
+{
+	return (_keySet);
+}
+
+bool Channel::checkKey(const std::string &key) const
+{
+	return (_key == key);
+}
