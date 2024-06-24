@@ -82,6 +82,8 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		channel->removeClient(&client);
 		return;
 	}
+
+	(void)key;
 	/*
 	if (!key.empty())
 	{
@@ -239,14 +241,15 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::youNotInChannel(client, channelName));
 		return;
 	}
-	else if (channel->searchOperator(client.getNickname()))
+	else if (channel->isTopicOpOnly() && !channel->searchOperator(client.getName()))
 	{
-		channel->setTopic(topic);
-		channel->sendMessageToClients(MsgFormat::topic(client, channelName, topic));
-	channel->sendMessageToClients(MsgFormat::topicCreator(client, channelName));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+		return;
 	}
-	else
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+
+	channel->setTopic(topic);
+	channel->sendMessageToClients(MsgFormat::topic(client, channelName, topic));
+	channel->sendMessageToClients(MsgFormat::topicCreator(client, channelName));
 }
 
 void ServerManager::handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec, size_t i)
@@ -351,9 +354,13 @@ void ServerManager::handleMode(Client &client, const std::string &channelName, s
 	{
 		bool inviteOnly = (mode[0] == '+');
 		channel->setInviteOnly(inviteOnly);
-		std::string modeMsg = inviteOnly ? "+i" : "-i";
-		channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 	}
+	else if (mode[1] == 't' && optArg.empty())
+	{
+		bool topicOpOnly = (mode[0] == '+');
+		channel->setTopicOpOnly(topicOpOnly);
+	}
+	/*
 	else if (mode[1] == 'k' && !optArg.empty())
 	{
 		if (mode[0] == '+')
@@ -368,8 +375,15 @@ void ServerManager::handleMode(Client &client, const std::string &channelName, s
 			channel->sendMessageToClients(MsgFormat::mode(client, channelName, "-k"));
 		}
 	}
+	*/
 	else
+	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, mode));
+		return;
+	}
+
+	std::string modeMsg = mode[0] + std::string(1, mode[1]);
+	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {

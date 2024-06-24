@@ -4,6 +4,8 @@ Channel::Channel(const std::string &name, Client *client){
 	_name = name;
 	_operators.push_back(client);
 	_topic = "Default topic";
+	_inviteOnly = false;
+	_topicOpOnly = false;
 	_clientsChannel.push_back(client);
 }
 
@@ -127,6 +129,16 @@ void Channel::sendMessageToClients(std::string msg)
 	 {
 		MsgFormat::MsgforHex(_clientsChannel[j]->getSocket(), msg);
 	 }
+}
+
+void Channel::setTopicOpOnly(bool value)
+{
+	_topicOpOnly = value;
+}
+
+bool Channel::isTopicOpOnly() const
+{
+	return (_topicOpOnly);
 }
 
 void Channel::setKey(const std::string &key)

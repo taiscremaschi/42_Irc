@@ -12,6 +12,7 @@ class Channel {
         std::string         _topic;
         std::vector<Client*> _operators;
 		bool				_inviteOnly;
+		bool				_topicOpOnly;
 		std::vector<Client*> _invitedClients;
 		bool				_keySet;
 		std::string			_key;
@@ -39,6 +40,8 @@ class Channel {
         bool searchNames(const std::string name);
         void sendMessageToClients(std::string msg);
 
+		void setTopicOpOnly(bool value);
+		bool isTopicOpOnly() const;
 		void setKey(const std::string &key);
 		void unsetKey(void);
 		bool hasKey(void) const;
