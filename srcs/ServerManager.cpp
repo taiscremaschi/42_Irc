@@ -73,14 +73,18 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		_channels.push_back(newchannel);
 		channel = newchannel;
 	}
-	else if(!channel->addClient(&client))
-		return;
+	else 
+		channel->addClient(&client);
 
 	if (channel->isInviteOnly() && !channel->isInvited(&client))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::inviteOnlyChannel(client, channelName));
+		channel->removeClient(&client);
 		return;
 	}
+
+	(void)key;
+	/*
 	else if (!key.empty())
 	{
 		if (channel->hasKey() && !channel->checkKey(key))
@@ -89,6 +93,7 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 			return;
 		}
 	}
+	*/
 
 	std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
 	std::vector<std::string> vecClients = channel->getAllClientsName();
