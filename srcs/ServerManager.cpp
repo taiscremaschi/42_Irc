@@ -82,14 +82,13 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		channel->removeClient(&client);
 		return;
 	}
-
-	(void)key;
 	/*
-	else if (!key.empty())
+	if (!key.empty())
 	{
 		if (channel->hasKey() && !channel->checkKey(key))
 		{
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidKey(client, channelName));
+			channel->removeClient(&client);
 			return;
 		}
 	}
@@ -348,7 +347,6 @@ void ServerManager::handleMode(Client &client, const std::string &channelName, s
 		return;
 	}
 
-	std::cout << "mode is " << mode << "!!!" << std::endl;
 	if (mode[1] == 'i' && optArg.empty())
 	{
 		bool inviteOnly = (mode[0] == '+');
