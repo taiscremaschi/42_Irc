@@ -52,7 +52,7 @@ std::string MsgFormat::channelNotFound(Client &client, std::string wrongChannel)
 	return (":server 403 " + client.getNickname() + " " + wrongChannel + " :No such channel");
 }
 
-std::string MsgFormat::privError(Client &client, std::string type) {
+std::string MsgFormat::userNotFound(Client &client, std::string type) {
 	return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
 }
 
@@ -133,6 +133,13 @@ std::string MsgFormat::inviteOnlyChannel(Client &client, const std::string &chan
 std::string MsgFormat::invalidKey(Client &client, const std::string &channelName)
 {
 	return (":" + client.getNickname() + " 475 " + channelName + " :Cannot join channel (+k) - incorrect key");
+}
+
+std::string MsgFormat::changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set)
+{
+	std::string action = set ? "gives" : "removes";
+	std::string mode = set ? "channel operator status to " : "channel operator status from ";
+	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " " + action + " " + mode + target->getNickname() + " in " + channelName);
 }
 
 std::string MsgFormat::handleMsg(std::string msg)

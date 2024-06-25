@@ -147,7 +147,7 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
 		Channel *ch = getChannelByName(type);
 		if(ch == NULL)
 		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::privError(client, type));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotFound(client, type));
 			return;
 		}
 		if (ch->searchNames(client.getNickname()))
@@ -166,7 +166,7 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
 	else {
 		Client *receiver = getClientByNick(type);
 		if(receiver == NULL){
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::privError(client, type));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotFound(client, type));
 			return;
 		}
 		MsgFormat::MsgforHex(receiver->getSocket(), MsgFormat::priv(client, receiver->getNickname(), MsgFormat::handleMsg(messages._message)));
@@ -294,7 +294,7 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	channel->removeClient(target);
 }
 
-void ServerManager::handleInviteMode(Client &client, const std::string &targetNick, const std::string &channelName)
+void ServerManager::handleInvite(Client &client, const std::string &targetNick, const std::string &channelName)
 {
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
@@ -331,8 +331,9 @@ void ServerManager::handleInviteMode(Client &client, const std::string &targetNi
 	channel->addInvite(target);
 }
 
-void ServerManager::handleMode(Client &client, const std::string &channelName, std::string mode, const std::string &optArg)
+void ServerManager::handleMode(Client &client, std::vector<std::string> vec, size_t i)
 {
+	std::string channelName = vec[i++];
 	Channel	*channel = getChannelByName(channelName);
 	if (!channel)
 	{
@@ -344,45 +345,40 @@ void ServerManager::handleMode(Client &client, const std::string &channelName, s
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
 	}
-	else if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
+
+	std::string mode = vec[i++];
+	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidMode(client, mode));
 		return;
 	}
 
-	if (mode[1] == 'i' && optArg.empty())
+	bool set = (mode[0] == '+');
+	char modeFlag = mode[1];
+	if (modeFlag == 'i')
+		channel->setInviteOnly(set);
+	else if (modeFlag == 't')
+		channel->setTopicOpOnly(set);
+	else if (modeFlag == 'o')
 	{
-		bool inviteOnly = (mode[0] == '+');
-		channel->setInviteOnly(inviteOnly);
-	}
-	else if (mode[1] == 't' && optArg.empty())
-	{
-		bool topicOpOnly = (mode[0] == '+');
-		channel->setTopicOpOnly(topicOpOnly);
-	}
-	/*
-	else if (mode[1] == 'k' && !optArg.empty())
-	{
-		if (mode[0] == '+')
+		std::string targetNick = vec[i];
+		Client *target = getClientByNick(targetNick);
+		if (!target)
 		{
-			std::string key = optArg;
-			channel->setKey(key);
-			channel->sendMessageToClients(MsgFormat::mode(client, channelName, "+k" + key));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotFound(client, targetNick));
+			return;
 		}
-		else
-		{
-			channel->unsetKey();
-			channel->sendMessageToClients(MsgFormat::mode(client, channelName, "-k"));
-		}
+
+		set ? channel->addOperator(target) : channel->removeOperator(target);
+		channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
 	}
-	*/
 	else
 	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, mode));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName));
 		return;
 	}
 
-	std::string modeMsg = mode[0] + std::string(1, mode[1]);
+	std::string modeMsg = mode[0] + std::string(1, modeFlag);
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
@@ -416,15 +412,14 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
 		}		
 		else if(vec[i] == "INVITE" && vec.size() > i + 2 && client.checkLoginData()){
-			handleInviteMode(client, vec[i + 1], vec[i + 2]);
+			handleInvite(client, vec[i + 1], vec[i + 2]);
 			i += 2;
 		}
 		else if(vec[i] == "TOPIC" && (vec.size() > i + 1) && client.checkLoginData()){
 			handleTopic(client, vec, ++i);
 		}		
 		else if(vec[i] == "MODE" && vec.size() > i + 2 && client.checkLoginData()){
-			handleMode(client, vec[i + 1], vec[i + 2], vec[i + 3]);
-			i += 2;
+			handleMode(client, vec, ++i);
 		}
 	}
 }

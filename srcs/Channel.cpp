@@ -102,6 +102,12 @@ bool Channel::searchOperator(const std::string &name){
 	return false;
 }
 
+void Channel::addOperator(Client *client)
+{
+	if (!searchOperator(client->getNickname()))
+		_operators.push_back(client);
+}
+
 void Channel::removeOperator(Client *client)
 {
 	for (size_t i = 0; i < _operators.size(); ++i)
