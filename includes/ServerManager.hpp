@@ -24,8 +24,8 @@ class ServerManager{
         void handleQuit(Client& client, IrcMessages &quitMsg);
 		void handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec, size_t i);
 		void handleTopic(Client &client, const std::vector<std::string> &vec, size_t i);
-		void handleInviteMode(Client &client, const std::string &targetNick, const std::string &channelName);
-		void handleMode(Client &client, const std::string &channelName, std::string mode, const std::string &optArg);
+		void handleInvite(Client &client, const std::string &targetNick, const std::string &channelName);
+		void handleMode(Client &client, std::vector<std::string> vec, size_t i);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
         void removeClientByFd(int fd);

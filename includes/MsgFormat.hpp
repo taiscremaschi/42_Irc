@@ -20,7 +20,7 @@ class MsgFormat {
         static std::string nickError(Client &client, std::string nick);
         static std::string nick(Client &client, const std::string &oldNick);
         static std::string priv(Client &client, std::string name, std::string message);
-        static std::string privError(Client &client, std::string type);
+        static std::string userNotFound(Client &client, std::string type);
         static void MsgforHex(int clientSocket, const std::string& message); 
         static std::string handleMsg(std::string msg);
         static std::string quit(Client &client, std::string message);
@@ -40,6 +40,7 @@ class MsgFormat {
 		static std::string unsupportedMode(Client &client, const std::string &mode);
 		static std::string inviteOnlyChannel(Client &client, const std::string &channelName);
 		static std::string invalidKey(Client &client, const std::string &channelName);
+		static std::string changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set);
 };
 
 #endif
