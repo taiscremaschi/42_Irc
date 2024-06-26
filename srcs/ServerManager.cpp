@@ -371,6 +371,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 
 		set ? channel->addOperator(target) : channel->removeOperator(target);
 		channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
+		return;
 	}
 	else
 	{
