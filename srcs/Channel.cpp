@@ -6,6 +6,8 @@ Channel::Channel(const std::string &name, Client *client){
 	_topic = "Default topic";
 	_inviteOnly = false;
 	_topicOpOnly = false;
+	_userLimit = 0;
+	_limitEnabled = false;
 	_clientsChannel.push_back(client);
 }
 
@@ -25,8 +27,8 @@ void Channel::setTopic(const std::string &topic)
 	this->_topic = topic;
 }
 	
-bool Channel::addClient(Client *client){
-
+bool Channel::addClient(Client *client)
+{
 	for(size_t i = 0; i < _clientsChannel.size(); ++i)
 	{
 		if (_clientsChannel[i] == client)
@@ -167,4 +169,30 @@ bool Channel::hasKey(void) const
 bool Channel::checkKey(const std::string &key) const
 {
 	return (_key == key);
+}
+
+void Channel::setUserLimit(int limit)
+{
+	if (limit > 0)
+	{
+		_userLimit = limit;
+		_limitEnabled = true;
+	}
+	else
+		_limitEnabled = false;
+}
+
+int Channel::getUserLimit(void) const
+{
+	return (_userLimit);
+}
+
+bool Channel::isLimitEnabled(void) const
+{
+	return (_limitEnabled);
+}
+
+int Channel::getClientNumber(void) const
+{
+	return (_clientsChannel.size());
 }

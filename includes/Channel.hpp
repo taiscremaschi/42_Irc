@@ -16,6 +16,8 @@ class Channel {
 		std::vector<Client*> _invitedClients;
 		bool				_keySet;
 		std::string			_key;
+		int					_userLimit;
+		bool				_limitEnabled;
 
     public:
         Channel(const std::string &name, Client *client);
@@ -47,6 +49,10 @@ class Channel {
 		void unsetKey(void);
 		bool hasKey(void) const;
 		bool checkKey(const std::string & key) const;
+		void setUserLimit(int limit);
+		int getUserLimit(void) const;
+		bool isLimitEnabled(void) const;
+		int getClientNumber(void) const;
 };
 
 #endif
