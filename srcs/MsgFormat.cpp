@@ -138,8 +138,8 @@ std::string MsgFormat::invalidKey(Client &client, const std::string &channelName
 std::string MsgFormat::changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set)
 {
 	std::string action = set ? "gives" : "removes";
-	std::string mode = set ? "channel operator status to " : "channel operator status from ";
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " " + action + " " + mode + target->getNickname() + " in " + channelName);
+	std::string mode = set ? "+o" : "-o";
+	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " MODE " + channelName + " " + mode + " " + target->getNickname());
 }
 
 std::string MsgFormat::handleMsg(std::string msg)
