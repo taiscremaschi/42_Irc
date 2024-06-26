@@ -41,6 +41,7 @@ class MsgFormat {
 		static std::string inviteOnlyChannel(Client &client, const std::string &channelName);
 		static std::string invalidKey(Client &client, const std::string &channelName);
 		static std::string changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set);
+		static std::string channelFull(Client &client, const std::string &channelName);
 };
 
 #endif

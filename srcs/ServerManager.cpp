@@ -1,5 +1,6 @@
 #include "../includes/ServerManager.hpp"
 #include "../includes/Server.hpp"
+#include <string>
 
 ServerManager::ServerManager(){}
 
@@ -73,7 +74,12 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		_channels.push_back(newchannel);
 		channel = newchannel;
 	}
-	else 
+	else if (channel->isLimitEnabled() && channel->getUserLimit() >= channel->getClientNumber())
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelFull(client, channelName));
+		return;
+	}	
+	else
 		channel->addClient(&client);
 
 	if (channel->isInviteOnly() && !channel->isInvited(&client))
@@ -372,6 +378,19 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		set ? channel->addOperator(target) : channel->removeOperator(target);
 		channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
 		return;
+	}
+	else if (modeFlag == 'l')
+	{
+		for (size_t j = 0; vec[i][j]; j++)
+		{
+			if (vec[i].c_str()[j] < '0' || vec[i].c_str()[j] > '9')
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, mode));
+				return;
+			}
+		}
+
+		channel->setUserLimit(set ? std::atoi(vec[i].c_str()) : 0);
 	}
 	else
 	{
