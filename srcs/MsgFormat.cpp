@@ -115,14 +115,14 @@ std::string MsgFormat::mode(Client &client, const std::string &channelName, cons
 	return (":" + client.getNickname() + " MODE " + channelName + " " + modeMsg);
 }
 
-std::string MsgFormat::invalidMode(Client &client, const std::string &mode)
-{
-	return (":server 472 " + client.getNickname() + " " + mode + " :is an unknown mode character");
-}
-
 std::string MsgFormat::unsupportedMode(Client &client, const std::string &mode)
 {
 	return (":server 501 " + client.getNickname() + " " + mode + " :is an unsupported mode");
+}
+
+std::string MsgFormat::invalidModeParams(Client &client, const std::string &mode)
+{
+	return (":server 472 " + client.getNickname() + " " + mode + " :is an unknown mode character to me");
 }
 
 std::string MsgFormat::inviteOnlyChannel(Client &client, const std::string &channelName)
@@ -132,7 +132,7 @@ std::string MsgFormat::inviteOnlyChannel(Client &client, const std::string &chan
 
 std::string MsgFormat::invalidKey(Client &client, const std::string &channelName)
 {
-	return (":" + client.getNickname() + " 475 " + channelName + " :Cannot join channel (+k) - incorrect key");
+	return (":server 475 " + client.getNickname() + " " + channelName + " :Cannot join channel (+k) - incorrect key");
 }
 
 std::string MsgFormat::changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set)
