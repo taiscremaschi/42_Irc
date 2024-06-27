@@ -88,6 +88,12 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		channel->removeClient(&client);
 		return;
 	}
+	if (channel->hasKey() && !channel->checkKey(key))
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidKey(client, channelName));
+		channel->removeClient(&client);
+		return;
+	}
 
 	(void)key;
 	/*
@@ -355,7 +361,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	std::string mode = vec[i++];
 	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidMode(client, mode));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, mode));
 		return;
 	}
 
@@ -385,12 +391,23 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		{
 			if (vec[i].c_str()[j] < '0' || vec[i].c_str()[j] > '9')
 			{
-				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, mode));
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, mode));
 				return;
 			}
 		}
 
 		channel->setUserLimit(set ? std::atoi(vec[i].c_str()) : 0);
+	}
+	else if (modeFlag == 'k')
+	{
+		std::string key = vec[i];
+		if (set && key.empty())
+		{
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, mode));
+			return;
+		}
+
+		set ? channel->setKey(key) : channel->unsetKey();
 	}
 	else
 	{
