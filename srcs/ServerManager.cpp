@@ -74,7 +74,7 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		_channels.push_back(newchannel);
 		channel = newchannel;
 	}
-	else if (channel->isLimitEnabled() && channel->getUserLimit() >= channel->getClientNumber())
+	else if (channel->isLimitEnabled() && (channel->getClientNumber() >= channel->getUserLimit()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelFull(client, channelName));
 		return;
