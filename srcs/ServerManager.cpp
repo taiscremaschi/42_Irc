@@ -413,7 +413,14 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 			return;
 		}
 
-		set ? channel->setKey(key) : channel->unsetKey();
+		if (set)
+		{
+			channel->setKey(key);
+			channel->sendMessageToClients(MsgFormat::keySet(client, channelName, key));
+			return;
+		}
+		else
+			channel->unsetKey();
 	}
 	else
 	{

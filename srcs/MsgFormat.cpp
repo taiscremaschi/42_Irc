@@ -135,6 +135,11 @@ std::string MsgFormat::invalidKey(Client &client, const std::string &channelName
 	return (":server 475 " + client.getNickname() + " " + channelName + " :Cannot join channel (+k) - incorrect key");
 }
 
+std::string MsgFormat::keySet(Client &client, const std::string &channelName, const std::string &key)
+{
+	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " MODE " + channelName + " +k " + key);
+}
+
 std::string MsgFormat::changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set)
 {
 	std::string action = set ? "gives" : "removes";
