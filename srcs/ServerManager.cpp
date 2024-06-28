@@ -361,7 +361,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	std::string mode = vec[i++];
 	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, mode));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName, mode));
 		return;
 	}
 
@@ -387,11 +387,17 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	}
 	else if (modeFlag == 'l')
 	{
+		if (vec[i].empty())
+		{
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
+			return;
+		}
+
 		for (size_t j = 0; vec[i][j]; j++)
 		{
 			if (vec[i].c_str()[j] < '0' || vec[i].c_str()[j] > '9')
 			{
-				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, mode));
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 				return;
 			}
 		}
@@ -403,7 +409,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		std::string key = vec[i];
 		if (set && key.empty())
 		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, mode));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 			return;
 		}
 
@@ -411,7 +417,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	}
 	else
 	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName));
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName, mode));
 		return;
 	}
 
