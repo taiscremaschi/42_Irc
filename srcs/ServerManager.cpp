@@ -95,19 +95,6 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		return;
 	}
 
-	(void)key;
-	/*
-	if (!key.empty())
-	{
-		if (channel->hasKey() && !channel->checkKey(key))
-		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidKey(client, channelName));
-			channel->removeClient(&client);
-			return;
-		}
-	}
-	*/
-
 	std::string namesList = ":server 353 " + client.getNickname() + " = " + channelName + " :";
 	std::vector<std::string> vecClients = channel->getAllClientsName();
 	for(size_t j = 0; j < vecClients.size(); ++j)
@@ -228,9 +215,21 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 {
 	std::string channelName = vec[i];
 	std::string topic = "";
+	Channel *channel = getChannelByName(channelName);
+	if (!channel)
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
+		return;
+	}
+	else if (vec[++i].empty())
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
+		return;
+	}
+
 	if (vec.size() > i + 1)
 	{
-		for (size_t j = i + 1; j < vec.size(); ++j)
+		for (size_t j = i; j < vec.size(); j++)
 			topic += vec[j] + " ";
 
 		if (!topic.empty() && topic[topic.size() - 1] == ' ')
@@ -239,16 +238,9 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 			topic = topic.substr(1);
 	}
 
-	Channel *channel = getChannelByName(channelName);
-	if (!channel)
-	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
-		return;
-	}
+	std::cout << "topic: " << topic << std::endl;
 
-	if (topic.empty())
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
-	else if (!channel->searchNames(client.getNickname()))
+	if (!channel->searchNames(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::youNotInChannel(client, channelName));
 		return;

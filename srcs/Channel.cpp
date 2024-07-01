@@ -5,7 +5,7 @@ Channel::Channel(const std::string &name, Client *client){
 	_operators.push_back(client);
 	_topic = "Default topic";
 	_inviteOnly = false;
-	_topicOpOnly = false;
+	_topicOpOnly = true;
 	_userLimit = 0;
 	_limitEnabled = false;
 	_clientsChannel.push_back(client);
