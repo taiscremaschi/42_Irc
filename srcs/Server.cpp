@@ -117,19 +117,20 @@ void Server::runServer()
 void Server::createServerSocket()
 {
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
-	if(_serverSocket == -1)
+	if(_serverSocket == -1){
 		std::cerr << "error in creating server socket\n";
+		return;
+	}
 
-
-	fcntl(_serverSocket, F_SETFL, O_NONBLOCK);
-	// Definir a opção SO_REUSEADDR no socket do servidor
+	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1)
+		return;
+ 	// Definir a opção SO_REUSEADDR no socket do servidor
 	int opt = 1;
 	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
 		std::cerr << "Error setting SO_REUSEADDR\n";
 		close(_serverSocket);
 		return;
 	}
-
 	sockaddr_in serverAddr; // now I need configure the server address (read help 2)
 	serverAddr.sin_family = AF_INET; 
 	serverAddr.sin_addr.s_addr = INADDR_ANY; 
