@@ -92,7 +92,7 @@ std::string MsgFormat::nickNotFound(Client &client, const std::string &targetNic
 
 std::string MsgFormat::userNotInChannel(Client &client, const std::string &channelName, const std::string &targetNick)
 {
-	return (":server 441 " + client.getNickname() + " " + targetNick + " "+ channelName + " :They aren't on that channel");
+	return (":server 441 " + client.getNickname() + " " + channelName + " "+ targetNick + " :User not in channel");
 }
 
 std::string MsgFormat::youNotInChannel(Client &client, const std::string &channelName)
