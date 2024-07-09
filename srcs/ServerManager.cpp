@@ -79,8 +79,8 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelFull(client, channelName));
 		return;
 	}	
-	else
-		channel->addClient(&client);
+	else if (!channel->addClient(&client))
+		return;
 
 	if (channel->isInviteOnly() && !channel->isInvited(&client))
 	{
