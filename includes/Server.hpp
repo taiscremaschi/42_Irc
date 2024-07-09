@@ -1,5 +1,4 @@
-
-# ifndef SERVER_HPP
+#ifndef SERVER_HPP
 # define SERVER_HPP
 
 #include "Irc.hpp"
