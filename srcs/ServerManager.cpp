@@ -271,14 +271,15 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	}
 
 	Client *target = getClientByNick(targetNick);
-	if (!target)
-	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
-		return;
-	}
-	else if (!channel->searchNames(targetNick))
+	// if (!target)
+	// {
+	// 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
+	// 	return;
+	// }
+	if (!channel->searchNames(targetNick) || channel->searchOperator(targetNick))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
+		return;
 	}
 
 	if (channel->searchOperator(target->getNickname()))
@@ -449,7 +450,6 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handlePart(client, messages, vec[++i]);
 		else if(vec[i] == "QUIT" && vec.size() > i + 2 && client.checkLoginData())
 			handleQuit(client, messages);
-		//////////////////// aqui  pra baixo paulo  ///
 		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
 		}		
