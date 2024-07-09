@@ -413,7 +413,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName, mode));
 		return;
 	}
-
 	std::string modeMsg = mode[0] + std::string(1, modeFlag);
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
@@ -441,8 +440,10 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handlePrivMessage(client, vec[++i], messages);
 		else if((vec[i] == "PART" && (vec.size() > i + 1)) && client.checkLoginData())
 			handlePart(client, messages, vec[++i]);
-		else if(vec[i] == "QUIT" && vec.size() > i + 2 && client.checkLoginData())
+		else if(vec[i] == "QUIT" && vec.size() > i + 1 && client.checkLoginData())
+		{
 			handleQuit(client, messages);
+		}
 		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
 		}		
