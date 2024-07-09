@@ -271,19 +271,12 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	}
 
 	Client *target = getClientByNick(targetNick);
-	// if (!target)
-	// {
-	// 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
-	// 	return;
-	// }
+
 	if (!channel->searchNames(targetNick) || channel->searchOperator(targetNick))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
 		return;
 	}
-
-	// if (channel->searchOperator(target->getNickname()))
-	// 	channel->removeOperator(target);
 	if (channel->isInvited(target))
 		channel->removeInvite(target);
 	std::string reason;
