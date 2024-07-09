@@ -1,2 +1,5 @@
 *.o 
 *.txt
+objs/
+.vscode/
+ircserv

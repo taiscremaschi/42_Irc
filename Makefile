@@ -20,7 +20,7 @@ ${NAME}: ${OBJS}
 all: ${NAME}
 
 clean:
-	@rm -f ${OBJS} ${OBJS_T}
+	@rm -rf ${OBJS} ${OBJS_T} ./objs
 	@echo "$(COLOUR_RED)Deleting all objs! ⌐(ಠ۾ಠ)¬\n$(COLOUR_END)"
 
 fclean: clean

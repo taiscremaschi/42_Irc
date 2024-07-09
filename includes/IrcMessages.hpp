@@ -1,4 +1,3 @@
-
 #ifndef IRCMESSAGE_HPP
 #define IRCMESSAGE_HPP
 
