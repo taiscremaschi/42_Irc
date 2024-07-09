@@ -282,8 +282,8 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		return;
 	}
 
-	if (channel->searchOperator(target->getNickname()))
-		channel->removeOperator(target);
+	// if (channel->searchOperator(target->getNickname()))
+	// 	channel->removeOperator(target);
 	if (channel->isInvited(target))
 		channel->removeInvite(target);
 	std::string reason;
