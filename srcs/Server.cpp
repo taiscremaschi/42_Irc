@@ -69,6 +69,11 @@ void Server::newClientConnection()
 	sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	int clientSocket = accept(_serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
+	if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1)
+	{
+		std::cerr << "Error in connection" << std::endl;
+		return;
+	}
 	if (clientSocket == -1) 
 	{
 		std::cerr << "Erro in accept conection\n";
@@ -122,8 +127,10 @@ void Server::createServerSocket()
 		return;
 	}
 
-	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1)
+	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1){
+		std::cerr << "Error in connection server" << std::endl;
 		return;
+	}
  	// Definir a opção SO_REUSEADDR no socket do servidor
 	int opt = 1;
 	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
