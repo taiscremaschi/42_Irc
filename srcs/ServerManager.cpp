@@ -189,7 +189,7 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
 	{
 		if(_channels[i]->searchNames(client.getNickname())){
 			_channels[i]->removeClient(&client);
-			_channels[i]->sendMessageToClients(MsgFormat::quit(client, MsgFormat::handleMsg(quitMsg._message)));
+			_channels[i]->sendMessageToClients(MsgFormat::part(client, _channels[i], MsgFormat::handleMsg(quitMsg._message)));
 		}
 	}
 	close(client.getSocket());
