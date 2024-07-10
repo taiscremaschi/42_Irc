@@ -243,9 +243,9 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 	if (!channel->searchNames(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::youNotInChannel(client, channelName));
-		return;
+		return;	
 	}
-	else if (channel->isTopicOpOnly() && !channel->searchOperator(client.getName()))
+	else if (channel->isTopicOpOnly() && !channel->searchOperator(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
