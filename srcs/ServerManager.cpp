@@ -351,6 +351,8 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	}
 
 	std::string mode = vec[i++];
+	if (mode.empty())
+		return;
 	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName, mode));
