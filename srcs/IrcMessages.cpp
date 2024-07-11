@@ -6,9 +6,7 @@ IrcMessages::IrcMessages(std::string msg)
 	_vecMsg = splitNewlineAndSpace();
 }
 
-IrcMessages::~IrcMessages(){
-
-}
+IrcMessages::~IrcMessages() {}
 
 std::vector<std::string> IrcMessages::splitNewlineAndSpace(){
 	size_t i = 0;

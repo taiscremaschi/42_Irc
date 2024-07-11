@@ -28,7 +28,11 @@ std::string MsgFormat::priv(Client &client, std::string name, std::string messag
 
 std::string MsgFormat::quit(Client &client, std::string message){
 	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " QUIT :" + message);
+}
 
+std::string MsgFormat::mode(Client &client, const std::string &channelName, const std::string &modeMsg)
+{
+	return (":" + client.getNickname() + " MODE " + channelName + " " + modeMsg);
 }
 
 std::string MsgFormat::endOfName(Client &client, const std::string &channelName){
@@ -108,11 +112,6 @@ std::string MsgFormat::userAlreadyInChannel(Client &client, const std::string &c
 std::string MsgFormat::kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason)
 {
 	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " KICK " + channelName + " " + targetNick + " :" + reason);
-}
-
-std::string MsgFormat::mode(Client &client, const std::string &channelName, const std::string &modeMsg)
-{
-	return (":" + client.getNickname() + " MODE " + channelName + " " + modeMsg);
 }
 
 std::string MsgFormat::unsupportedMode(Client &client, const std::string &channelName, const std::string &mode)

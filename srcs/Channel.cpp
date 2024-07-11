@@ -8,6 +8,7 @@ Channel::Channel(const std::string &name, Client *client){
 	_topicOpOnly = true;
 	_userLimit = 0;
 	_limitEnabled = false;
+	_key = "";
 	_clientsChannel.push_back(client);
 }
 

@@ -118,7 +118,6 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 	}
 }
 
-
 bool ServerManager::changeNick(Client &client, const std::string &nick)
 {
 	for(size_t x = 0; x < _clients.size(); ++x)
@@ -338,6 +337,7 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 void ServerManager::handleMode(Client &client, std::vector<std::string> vec, size_t i)
 {
 	std::string channelName = vec[i++];
+	std::string mode = vec[i++];
 	Channel	*channel = getChannelByName(channelName);
 	if (!channel)
 	{
@@ -350,7 +350,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		return;
 	}
 
-	std::string mode = vec[i++];
 	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName, mode));
@@ -425,7 +424,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 }
 
 void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
-	
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
