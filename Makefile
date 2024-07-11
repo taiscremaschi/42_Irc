@@ -26,6 +26,9 @@ clean:
 fclean: clean
 	@rm -f ${NAME}
 	@clear
+
+leaks: $(NAME)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=valgrind-output.txt ./$(NAME) 8081 123
 	
 re:			fclean all
 
