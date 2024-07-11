@@ -15,7 +15,7 @@ class ServerManager{
         void createClient(Client *client);
         void handleIrcCmds(std::string buff, int fd, std::string pass);
         void handleJoinCommand(Client& client, const std::string& channel, const std::string &key);
-        void findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &, std::string pass);
+        bool findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &, std::string pass);
         bool changeNick(Client &client, const std::string &nick);
         Client *getClientByNick(const std::string &nick);
         Channel *getChannelByName(const std::string &nick);

@@ -9,6 +9,9 @@ Channel::Channel(const std::string &name, Client *client){
 	_userLimit = 0;
 	_limitEnabled = false;
 	_clientsChannel.push_back(client);
+	_keySet = false;
+	_key = "";
+	
 }
 
 Channel::~Channel(){}

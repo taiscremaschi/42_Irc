@@ -189,6 +189,7 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
 	{
 		if(_channels[i]->searchNames(client.getNickname())){
 			_channels[i]->removeClient(&client);
+			_channels[i]->removeOperator(&client);
 			_channels[i]->sendMessageToClients(MsgFormat::part(client, _channels[i], MsgFormat::handleMsg(quitMsg._message)));
 		}
 	}
@@ -417,13 +418,13 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
-void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
+bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
 	
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
 			if (!handlePass(client, pass, vec[i + 1]))
-				return;
+				return true;
 		}
 		else if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
 			changeNick(client, vec[++i]);
@@ -443,6 +444,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		else if(vec[i] == "QUIT" && vec.size() > i + 1 && client.checkLoginData())
 		{
 			handleQuit(client, messages);
+			return false;
 		}
 		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
@@ -458,6 +460,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handleMode(client, vec, ++i);
 		}
 	}
+	return true;
 }
 
 void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
@@ -466,9 +469,8 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 			if(_clients[j]->saveBuffer(buff))
 			{
 				IrcMessages message(_clients[j]->getBuffer());
-				findCmd(message._vecMsg, *_clients[j], message, pass);
-				_clients[j]->clearBuffer();
-				
+				if(findCmd(message._vecMsg, *_clients[j], message, pass))
+					_clients[j]->clearBuffer();
 			}
 		}
 	}
