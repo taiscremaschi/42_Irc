@@ -206,6 +206,11 @@ bool Channel::isNew(void) const
 	return (_newChannel);
 }
 
+void Channel::setNew(bool isnew)
+{
+	_newChannel = isnew;
+}
+
 std::string Channel::getModes() const {
 	std::string result = "+";
 	if(_inviteOnly){
