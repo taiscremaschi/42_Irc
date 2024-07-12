@@ -113,6 +113,7 @@ std::string MsgFormat::kickUser(Client &client, const std::string &channelName, 
 std::string MsgFormat::mode(Client &client, const std::string &channelName, const std::string &modeMsg)
 {
 	return (":" + client.getNickname() + " MODE " + channelName + " " + modeMsg);
+
 }
 
 std::string MsgFormat::unsupportedMode(Client &client, const std::string &channelName, const std::string &mode)
@@ -150,6 +151,11 @@ std::string MsgFormat::changeOpStatus(Client &client, Client *target, const std:
 std::string MsgFormat::channelFull(Client &client, const std::string &channelName)
 {
 	return (":server 471 " + client.getNickname() + " " + channelName + " :Cannot join channel (+l)");
+}
+
+std::string MsgFormat::modeactive(const std::string &channelName, std::string mode){
+	return(":server MODE " + channelName + " " + mode);
+
 }
 
 std::string MsgFormat::handleMsg(std::string msg)
