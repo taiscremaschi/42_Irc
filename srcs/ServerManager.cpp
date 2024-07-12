@@ -425,7 +425,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 }
 
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
-	
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
@@ -475,8 +474,9 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 			if(_clients[j]->saveBuffer(buff))
 			{
 				IrcMessages message(_clients[j]->getBuffer());
+
 				if(findCmd(message._vecMsg, *_clients[j], message, pass))
-					_clients[j]->clearBuffer();
+					  _clients[j]->clearBuffer();
 			}
 		}
 	}

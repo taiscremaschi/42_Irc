@@ -57,6 +57,7 @@ class Channel {
 		bool isNew(void) const;
 		std::string getModes() const;
 		void setNew(bool isnew);
+
 };
 
 #endif

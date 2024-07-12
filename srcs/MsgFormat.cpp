@@ -95,6 +95,16 @@ std::string MsgFormat::userNotInChannel(Client &client, const std::string &chann
 	return (":server 441 " + client.getNickname() + " " + targetNick + " "+ channelName + " :User not in channel");
 }
 
+std::string MsgFormat::nickNotFound(Client &client, const std::string &targetNick)
+{
+	return (":server 401 " + client.getNickname() + " " + targetNick + " :No such nick/channel");
+}
+
+std::string MsgFormat::userNotInChannel(Client &client, const std::string &channelName, const std::string &targetNick)
+{
+	return (":server 441 " + client.getNickname() + " " + targetNick + " "+ channelName + " :User not in channel");
+}
+
 std::string MsgFormat::youNotInChannel(Client &client, const std::string &channelName)
 {
 	return (":server 442 " + client.getNickname() + " " + channelName + " :You're not on that channel");
@@ -113,7 +123,6 @@ std::string MsgFormat::kickUser(Client &client, const std::string &channelName, 
 std::string MsgFormat::mode(Client &client, const std::string &channelName, const std::string &modeMsg)
 {
 	return (":" + client.getNickname() + " MODE " + channelName + " " + modeMsg);
-
 }
 
 std::string MsgFormat::unsupportedMode(Client &client, const std::string &channelName, const std::string &mode)
