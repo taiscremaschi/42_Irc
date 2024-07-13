@@ -23,6 +23,8 @@ std::string MsgFormat::nick(Client &client, const std::string &oldNick) {
 }
 
 std::string MsgFormat::priv(Client &client, std::string name, std::string message) {
+	if(message[message.size()-1] == '\n')
+		message.erase(message.size() - 1, 1);
 	return ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + name + " :" + message;
 }
 

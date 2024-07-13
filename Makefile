@@ -1,7 +1,7 @@
 NAME		= 		ircserv
 SRCS		=		main.cpp Server.cpp Client.cpp IrcMessages.cpp Channel.cpp ServerManager.cpp MsgFormat.cpp
 OBJS 		=		$(addprefix objs/, $(SRCS:.cpp=.o))
-CXXFLAGS	=		-Wall -Wextra -Werror  -std=c++98 -g -Iincludes/
+CXXFLAGS	=		-Wall -Wextra -Werror  -std=c++98 -Iincludes/ -g 
 RM			=		rm -f
 
 COLOUR_GREEN=\033[32m
