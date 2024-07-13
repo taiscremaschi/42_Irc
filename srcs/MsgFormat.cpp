@@ -15,6 +15,8 @@ std::string MsgFormat::inviteConfirm(Client &client, const std::string &channelN
 }
 
 std::string MsgFormat::part(Client &client, Channel *channel, std::string exitMsg) {
+	if(exitMsg[exitMsg.size()-1] == '\n')
+		exitMsg.erase(exitMsg.size() - 1, 1);
 	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg);
 }
 
