@@ -385,32 +385,33 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
 			return;
 		}
-
 		set ? channel->addOperator(target) : channel->removeOperator(target);
 		channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
 		return;
 	}
 	else if (modeFlag == 'l')
 	{
+		if (i > vec.size() - 1)
+			return;
 		if (vec[i].empty())
 		{
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 			return;
 		}
-
 		for (size_t j = 0; vec[i][j]; j++)
 		{
-			if (vec[i].c_str()[j] < '0' || vec[i].c_str()[j] > '9')
+			if (vec[i][j] < '0' || vec[i][j] > '9')
 			{
 				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 				return;
 			}
 		}
-
 		channel->setUserLimit(set ? std::atoi(vec[i].c_str()) : 0);
 	}
 	else if (modeFlag == 'k')
 	{
+		if (i > vec.size() - 1)
+			return;
 		std::string key = vec[i];
 		if (set && key.empty())
 		{
