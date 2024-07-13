@@ -49,15 +49,14 @@ std::string MsgFormat::topicCreator(Client &client, const std::string &channelNa
 }
 /// error handling
 std::string MsgFormat::nickError(Client &client, std::string nick) {
-	return (":server 433 " + client.getNickname() + " " + nick + " :Nickname is already in use");
+	std::string myNick = client.getNickname();
+	if (myNick.empty())
+		myNick = "*";
+	return (":server 433 " + myNick + " " + nick + " :Nickname is already in use");
 }
 
 std::string MsgFormat::channelNotFound(Client &client, std::string wrongChannel) {
 	return (":server 403 " + client.getNickname() + " " + wrongChannel + " :No such channel");
-}
-
-std::string MsgFormat::userNotFound(Client &client, std::string type) {
-	return (":server 401 " + client.getNickname() + " " + type + " :No such nick/channel");
 }
 
 std::string MsgFormat::notifyNickChanged(Client& client, std::string oldNickname) {
@@ -161,6 +160,14 @@ std::string MsgFormat::modeactive(const std::string &channelName, std::string mo
 
 }
 
+
+std::string MsgFormat::userAlreadyInUse(const std::string &username){
+	return(":server 400 " + username + " :Username is already in use");
+
+}
+
+
+
 std::string MsgFormat::handleMsg(std::string msg)
 {
 	int i = 0;
@@ -182,3 +189,4 @@ void MsgFormat::MsgforHex(int clientSocket, const std::string& message)
 	std::cout << msg << std::endl;
 	send(clientSocket, msg.c_str(), msg.length(), 0);
 }
+

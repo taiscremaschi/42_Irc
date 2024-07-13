@@ -43,7 +43,9 @@ class MsgFormat {
 		static std::string keySet(Client &client, const std::string &channelName, const std::string &key);
 		static std::string changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set);
 		static std::string channelFull(Client &client, const std::string &channelName);
-    static std::string modeactive(const std::string &channelName, std::string mode);
+        static std::string modeactive(const std::string &channelName, std::string mode);
+        static std::string userAlreadyInUse(const std::string &username);
+
 
 };
 
