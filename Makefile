@@ -1,7 +1,7 @@
 NAME		= 		ircserv
 SRCS		=		main.cpp Server.cpp Client.cpp IrcMessages.cpp Channel.cpp ServerManager.cpp MsgFormat.cpp
 OBJS 		=		$(addprefix objs/, $(SRCS:.cpp=.o))
-CXXFLAGS	=		-Wall -Wextra -Werror  -std=c++98 -g -Iincludes/ -fsanitize=address 
+CXXFLAGS	=		-Wall -Wextra -Werror  -std=c++98 -Iincludes/ -g 
 RM			=		rm -f
 
 COLOUR_GREEN=\033[32m
@@ -26,6 +26,9 @@ clean:
 fclean: clean
 	@rm -f ${NAME}
 	@clear
+
+leaks: $(NAME)
+	valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes --log-file=valgrind-output.txt ./$(NAME) 8081 123
 	
 re:			fclean all
 

@@ -18,6 +18,7 @@ class Channel {
 		std::string			_key;
 		int					_userLimit;
 		bool				_limitEnabled;
+		bool  				_newChannel;
 
     public:
         Channel(const std::string &name, Client *client);
@@ -53,6 +54,10 @@ class Channel {
 		int getUserLimit(void) const;
 		bool isLimitEnabled(void) const;
 		int getClientNumber(void) const;
+		bool isNew(void) const;
+		std::string getModes() const;
+		void setNew(bool isnew);
+
 };
 
 #endif

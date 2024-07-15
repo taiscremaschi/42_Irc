@@ -55,6 +55,16 @@ Client *ServerManager::getClientByNick(const std::string &nick)
 	return NULL;
 }
 
+Client *ServerManager::getClientByUser(const std::string &user)
+{
+	for (size_t i = 0; i < _clients.size(); ++i)
+	{
+		if (_clients[i]->getName() == user)
+			return _clients[i];
+	}
+	return NULL;
+}
+
 Channel *ServerManager::getChannelByName(const std::string &channel)
 {
 	for (size_t i = 0; i < _channels.size(); ++i)
@@ -124,7 +134,7 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
 	for(size_t x = 0; x < _clients.size(); ++x)
 	{
 		if (_clients[x]->getNickname() == nick){
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickError(*_clients[x], nick));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickError(client, nick));
 			return false;
 		}
 	}
@@ -146,7 +156,7 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
 		Channel *ch = getChannelByName(type);
 		if(ch == NULL)
 		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotFound(client, type));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, type));
 			return;
 		}
 		if (ch->searchNames(client.getNickname()))
@@ -165,7 +175,7 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
 	else {
 		Client *receiver = getClientByNick(type);
 		if(receiver == NULL){
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotFound(client, type));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, type));
 			return;
 		}
 		MsgFormat::MsgforHex(receiver->getSocket(), MsgFormat::priv(client, receiver->getNickname(), MsgFormat::handleMsg(messages._message)));
@@ -189,6 +199,7 @@ void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
 	{
 		if(_channels[i]->searchNames(client.getNickname())){
 			_channels[i]->removeClient(&client);
+			_channels[i]->removeOperator(&client);
 			_channels[i]->sendMessageToClients(MsgFormat::part(client, _channels[i], MsgFormat::handleMsg(quitMsg._message)));
 		}
 	}
@@ -343,6 +354,12 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
 	}
+	else if(channel->searchOperator(client.getNickname()) && channel->isNew())
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::modeactive(channel->getName(), channel->getModes()));
+		channel->setNew(false);
+		return;
+	}
 
 	std::string mode = vec[i++];
 	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
@@ -359,39 +376,42 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		channel->setTopicOpOnly(set);
 	else if (modeFlag == 'o')
 	{
+		if (i > vec.size() - 1)
+			return;
 		std::string targetNick = vec[i];
 		Client *target = getClientByNick(targetNick);
 		if (!target)
 		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotFound(client, targetNick));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
 			return;
 		}
-
 		set ? channel->addOperator(target) : channel->removeOperator(target);
 		channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
 		return;
 	}
 	else if (modeFlag == 'l')
 	{
+		if (i > vec.size() - 1)
+			return;
 		if (vec[i].empty())
 		{
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 			return;
 		}
-
 		for (size_t j = 0; vec[i][j]; j++)
 		{
-			if (vec[i].c_str()[j] < '0' || vec[i].c_str()[j] > '9')
+			if (vec[i][j] < '0' || vec[i][j] > '9')
 			{
 				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 				return;
 			}
 		}
-
 		channel->setUserLimit(set ? std::atoi(vec[i].c_str()) : 0);
 	}
 	else if (modeFlag == 'k')
 	{
+		if (i > vec.size() - 1)
+			return;
 		std::string key = vec[i];
 		if (set && key.empty())
 		{
@@ -417,18 +437,23 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
-void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
-	
+bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
 			if (!handlePass(client, pass, vec[i + 1]))
-				return;
+				return false;
 		}
 		else if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
 			changeNick(client, vec[++i]);
 		else if ((vec[i] == "USER" && (vec.size() > i + 1) ) && client.getAuthenticated()) 
+		{
+			if(getClientByUser(vec[i + 1]) != NULL){
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[i + 1]));
+				return true;
+			}
 			client.setName(vec[i + 1]);
+		}
 		else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData())
 		{
 			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
@@ -443,6 +468,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		else if(vec[i] == "QUIT" && vec.size() > i + 1 && client.checkLoginData())
 		{
 			handleQuit(client, messages);
+			return false;
 		}
 		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){
 			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
@@ -458,6 +484,7 @@ void ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handleMode(client, vec, ++i);
 		}
 	}
+	return true;
 }
 
 void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
@@ -466,9 +493,8 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 			if(_clients[j]->saveBuffer(buff))
 			{
 				IrcMessages message(_clients[j]->getBuffer());
-				findCmd(message._vecMsg, *_clients[j], message, pass);
-				_clients[j]->clearBuffer();
-				
+				if(findCmd(message._vecMsg, *_clients[j], message, pass))
+					_clients[j]->clearBuffer();
 			}
 		}
 	}

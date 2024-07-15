@@ -15,9 +15,10 @@ class ServerManager{
         void createClient(Client *client);
         void handleIrcCmds(std::string buff, int fd, std::string pass);
         void handleJoinCommand(Client& client, const std::string& channel, const std::string &key);
-        void findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &, std::string pass);
+        bool findCmd(const std::vector<std::string> &vec, Client  &client, IrcMessages &, std::string pass);
         bool changeNick(Client &client, const std::string &nick);
         Client *getClientByNick(const std::string &nick);
+        Client *getClientByUser(const std::string &user);
         Channel *getChannelByName(const std::string &nick);
         void handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages);
         void handlePart(Client& client, IrcMessages &messages,const std::string& channelName);
@@ -30,6 +31,7 @@ class ServerManager{
         void removeClient(int i);
         void removeClientByFd(int fd);
         bool handlePass(Client& client, std::string pass, std::string vec);
+
 };
 
 # endif
