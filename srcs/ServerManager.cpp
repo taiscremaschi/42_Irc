@@ -91,8 +91,6 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 	}	
 	else if (!channel->addClient(&client))
 		return;
-	else
-		channel->setNew(false);
 
 	if (channel->isInviteOnly() && !channel->isInvited(&client))
 	{
@@ -299,8 +297,6 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		reason = reason.substr(1);
 	if (!reason.empty() && reason[reason.size() - 2] == ' ')
 		reason.erase(reason.size() - 2);
-	else
-		reason = "Kicked by " + client.getNickname();
 
 	std::string kickMsg = MsgFormat::kickUser(client, channelName, targetNick, reason);
 	channel->sendMessageToClients(kickMsg);
@@ -353,8 +349,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
-	else if (!channel->isNew())
-		return;
 	else if (!channel->searchOperator(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
