@@ -353,6 +353,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	}
 	else if (channel->isNew())
 	{
+		std::cout << "New channel, returning..." << std::endl;
 		channel->setNew(false);
 		return;
 	}
@@ -367,6 +368,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		return;
 	}
 
+	std::cout << "Not a new channel, continuing" << std::endl;
 	std::string mode = vec[i++];
 	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
