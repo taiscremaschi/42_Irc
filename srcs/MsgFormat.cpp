@@ -150,6 +150,11 @@ std::string MsgFormat::changeOpStatus(Client &client, Client *target, const std:
 	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " MODE " + channelName + " " + mode + " " + target->getNickname());
 }
 
+std::string MsgFormat::channelLimit(Client &client, const std::string &channelName, const std::string &limit)
+{
+	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " MODE " + channelName + " +l " + limit);
+}
+
 std::string MsgFormat::channelFull(Client &client, const std::string &channelName)
 {
 	return (":server 471 " + client.getNickname() + " " + channelName + " :Cannot join channel (+l)");

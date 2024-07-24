@@ -416,7 +416,14 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 				return;
 			}
 		}
-		channel->setUserLimit(set ? std::atoi(vec[i].c_str()) : 0);
+
+		int limit = std::atoi(vec[i].c_str());
+		channel->setUserLimit(set ? limit : 0);
+		if (set)
+		{
+			channel->sendMessageToClients(MsgFormat::channelLimit(client, channelName, vec[i]));
+			return;
+		}
 	}
 	else if (modeFlag == 'k')
 	{
