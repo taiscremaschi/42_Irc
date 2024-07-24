@@ -299,6 +299,8 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		reason = reason.substr(1);
 	if (!reason.empty() && reason[reason.size() - 2] == ' ')
 		reason.erase(reason.size() - 2);
+	else
+		reason = "Kicked by " + client.getNickname();
 
 	std::string kickMsg = MsgFormat::kickUser(client, channelName, targetNick, reason);
 	channel->sendMessageToClients(kickMsg);
