@@ -192,7 +192,9 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 		return;
 	}
 	channel->sendMessageToClients(MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
+	channel->removeOperator(&client);
 	channel->removeClient(&client);
+
 }
 
 void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
