@@ -91,8 +91,6 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 	}	
 	else if (!channel->addClient(&client))
 		return;
-	else
-		channel->setNew(false);
 
 	if (channel->isInviteOnly() && !channel->isInvited(&client))
 	{
@@ -353,8 +351,11 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
-	else if (!channel->isNew())
+	else if (channel->isNew())
+	{
+		channel->setNew(false);
 		return;
+	}
 	else if (!channel->searchOperator(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
@@ -363,7 +364,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	else if(channel->searchOperator(client.getNickname()) && channel->isNew())
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::modeactive(channel->getName(), channel->getModes()));
-		channel->setNew(false);
 		return;
 	}
 
