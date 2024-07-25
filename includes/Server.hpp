@@ -30,6 +30,11 @@ class Server {
                 return"error in creating server socket";
             }
         };
+        class  conectionError : public std::exception {
+            virtual const char* what() const throw(){
+                return"error in connection server";
+            }
+        };
 
         class errorReuseador : public std::exception {
             virtual const char* what() const throw(){

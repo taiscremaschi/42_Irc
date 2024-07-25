@@ -122,15 +122,12 @@ void Server::runServer()
 void Server::createServerSocket()
 {
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
-	if(_serverSocket == -1){
+	if(_serverSocket == -1)
 		throw createSocket();
 
-	}
+	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1)
+		throw conectionError();
 
-	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1){
-		std::cerr << "Error in connection server" << std::endl;
-		return;
-	}
  	// Definir a opção SO_REUSEADDR no socket do servidor
 	int opt = 1;
 	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
@@ -141,7 +138,6 @@ void Server::createServerSocket()
 	serverAddr.sin_family = AF_INET; 
 	serverAddr.sin_addr.s_addr = INADDR_ANY; 
 	serverAddr.sin_port = htons(_port); 
-
 	if(bind(_serverSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) {
 		close(_serverSocket);
 		throw errorInBind();
