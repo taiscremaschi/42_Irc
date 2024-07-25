@@ -3,6 +3,7 @@
 Client::Client(int clientSocket) {
    _socketClient =  clientSocket;
    _authenticated = false;
+   _newChannel = true;
 }
 
 Client:: ~Client(){
@@ -64,6 +65,16 @@ bool Client::getAuthenticated() const{
 	if(!_authenticated)
 		MsgFormat::MsgforHex(_socketClient, MsgFormat::UserNotAutenticated());
 	return _authenticated;
+}
+
+void Client::setNewChannel(bool set)
+{
+	_newChannel = set;
+}
+
+bool Client::hasEnteredNewChannel(void) const
+{
+	return (_newChannel);
 }
 
 bool Client::checkLoginData(){

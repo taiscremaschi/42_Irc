@@ -349,16 +349,17 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 
 void ServerManager::handleMode(Client &client, std::vector<std::string> vec, size_t i)
 {
+	if (client.hasEnteredNewChannel())
+	{
+		client.setNewChannel(false);
+		return;
+	}
+
 	std::string channelName = vec[i++];
 	Channel	*channel = getChannelByName(channelName);
 	if (!channel)
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
-		return;
-	}
-	else if (channel->isNew())
-	{
-		channel->setNew(false);
 		return;
 	}
 	else if (!channel->searchOperator(client.getNickname()))
