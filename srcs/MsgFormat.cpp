@@ -155,15 +155,8 @@ std::string MsgFormat::channelFull(Client &client, const std::string &channelNam
 	return (":server 471 " + client.getNickname() + " " + channelName + " :Cannot join channel (+l)");
 }
 
-std::string MsgFormat::modeactive(const std::string &channelName, std::string mode){
-	return(":server MODE " + channelName + " " + mode);
-
-}
-
-
 std::string MsgFormat::userAlreadyInUse(const std::string &username){
 	return(":server 400 " + username + " :Username is already in use");
-
 }
 
 
