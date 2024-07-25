@@ -25,6 +25,27 @@ class Server {
         void        createServerSocket();
         bool checkPass(std::string pass);
 
+        class  createSocket : public std::exception {
+            virtual const char* what() const throw(){
+                return"error in creating server socket";
+            }
+        };
+
+        class errorReuseador : public std::exception {
+            virtual const char* what() const throw(){
+                return "Error setting SO_REUSEADDR";
+            }
+        };
+        class errorInBind : public std::exception {
+            virtual const char* what() const throw(){
+                return "error in bind";
+            }
+         };
+        class errorInListen : public std::exception {
+            virtual const char* what() const throw(){
+                return "error in listen";
+            }
+         };
 };
 
 #endif
