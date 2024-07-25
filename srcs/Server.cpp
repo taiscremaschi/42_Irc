@@ -153,7 +153,8 @@ void Server::inicializeServer() {
 		createServerSocket();
     } 
     catch (const std::exception &err) { 
-        std:: cerr << "ERROR: " << err.what() <<std::endl; //aqui deberia dar um retorno ???
+        std:: cerr << "ERROR: " << err.what() <<std::endl;
+		return;
     }
 	std::cout << "Server waiting for connections...\n";
 	pollfd server;
