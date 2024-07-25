@@ -123,8 +123,8 @@ void Server::createServerSocket()
 {
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
 	if(_serverSocket == -1){
-		std::cerr << "error in creating server socket\n";
-		return;
+		throw createSocket();
+
 	}
 
 	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1){
@@ -134,9 +134,8 @@ void Server::createServerSocket()
  	// Definir a opção SO_REUSEADDR no socket do servidor
 	int opt = 1;
 	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
-		std::cerr << "Error setting SO_REUSEADDR\n";
 		close(_serverSocket);
-		return;
+		throw errorReuseador();
 	}
 	sockaddr_in serverAddr; // now I need configure the server address (read help 2)
 	serverAddr.sin_family = AF_INET; 
@@ -145,19 +144,21 @@ void Server::createServerSocket()
 
 	if(bind(_serverSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) {
 		close(_serverSocket);
-		std::cerr << "error in bind" << std::endl; //help 3
-		return;
+		throw errorInBind();
 	}
-	if(listen(_serverSocket, 5) == -1) {
-		std::cerr << "error in listen\n"; // max_nbr of connections
+	if(listen(_serverSocket, 5) == -1) { // max_nbr of connections
 		close(_serverSocket);
-		return;
+		throw errorInListen();
 	}
 }
 
 void Server::inicializeServer() {
-	
-	createServerSocket();
+	try{
+		createServerSocket();
+    } 
+    catch (const std::exception &err) { 
+        std:: cerr << "ERROR: " << err.what() <<std::endl; //aqui deberia dar um retorno ???
+    }
 	std::cout << "Server waiting for connections...\n";
 	pollfd server;
 	server.fd = _serverSocket;
