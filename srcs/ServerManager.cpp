@@ -245,7 +245,7 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 		return;
 	}
 
-	if (vec.size() > i + 1)
+	if (vec.size() >= i + 1)
 	{
 		for (size_t j = i; j < vec.size(); j++)
 			topic += vec[j] + " ";
@@ -350,24 +350,28 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 void ServerManager::handleMode(Client &client, std::vector<std::string> vec, size_t i)
 {
 	std::string channelName = vec[i++];
+	std::string mode = vec[i++];
+	if (mode.empty())
+		return;
 	Channel	*channel = getChannelByName(channelName);
 	if (!channel)
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
+	/*
 	else if (channel->isNew())
 	{
 		channel->setNew(false);
 		return;
 	}
+	*/
 	else if (!channel->searchOperator(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
 	}
 
-	std::string mode = vec[i++];
 	if (mode.size() != 2 && mode[0] != '+' && mode[0] != '-')
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::unsupportedMode(client, channelName, mode));
@@ -464,7 +468,9 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		{
 			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
 				continue;
-			handleJoinCommand(client, vec[i + 1], vec[i + 2]);
+			std::string key;
+			(vec.size() > i + 2) ? key = "" : key = vec[i + 2];
+			handleJoinCommand(client, vec[i + 1], key);
 			i += 2;
 		}
 		else if((vec[i] == "PRIVMSG" && (vec.size() > i + 1)) && client.checkLoginData())
