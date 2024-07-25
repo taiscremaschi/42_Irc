@@ -189,6 +189,11 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
+	if(!channel->searchNames(client.getNickname())){
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notifyUserNotInChannel(client, channel->getName()));
+		return;
+	}
+
 	channel->sendMessageToClients(MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
 	channel->removeOperator(&client);
 	channel->removeClient(&client);
