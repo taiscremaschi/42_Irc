@@ -469,7 +469,7 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
 				continue;
 			std::string key;
-			(vec.size() > i + 2) ? key = "" : key = vec[i + 2];
+			(vec.size() == i + 2) ? key = "" : key = vec[i + 2];
 			handleJoinCommand(client, vec[i + 1], key);
 			i += 2;
 		}
