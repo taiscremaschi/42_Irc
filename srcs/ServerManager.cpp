@@ -290,13 +290,15 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 
 	Client *target = getClientByNick(targetNick);
 
-	if (!channel->searchNames(targetNick) || channel->searchOperator(targetNick))
+	if (!channel->searchNames(targetNick))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
 		return;
 	}
 	if (channel->isInvited(target))
 		channel->removeInvite(target);
+	if (channel->searchOperator(targetNick))
+		channel->removeOperator(target);
 	std::string reason;
 	for (size_t j = i; j < vec.size(); ++j)
 		reason += vec[j] + " ";
