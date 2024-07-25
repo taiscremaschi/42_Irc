@@ -289,7 +289,6 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	}
 
 	Client *target = getClientByNick(targetNick);
-
 	if (!channel->searchNames(targetNick))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
@@ -299,6 +298,7 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		channel->removeInvite(target);
 	if (channel->searchOperator(targetNick))
 		channel->removeOperator(target);
+
 	std::string reason;
 	for (size_t j = i; j < vec.size(); ++j)
 		reason += vec[j] + " ";
@@ -306,6 +306,8 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		reason = reason.substr(1);
 	if (!reason.empty() && reason[reason.size() - 2] == ' ')
 		reason.erase(reason.size() - 2);
+	else if (reason == " ")
+		reason = "Kicked by " + client.getName();
 
 	std::string kickMsg = MsgFormat::kickUser(client, channelName, targetNick, reason);
 	channel->sendMessageToClients(kickMsg);
