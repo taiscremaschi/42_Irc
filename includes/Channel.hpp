@@ -49,7 +49,7 @@ class Channel {
 		void setKey(const std::string &key);
 		void unsetKey(void);
 		bool hasKey(void) const;
-		bool checkKey(const std::string & key) const;
+		bool checkKey(const std::string &key) const;
 		void setUserLimit(int limit);
 		int getUserLimit(void) const;
 		bool isLimitEnabled(void) const;

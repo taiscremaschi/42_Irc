@@ -171,6 +171,8 @@ bool Channel::hasKey(void) const
 
 bool Channel::checkKey(const std::string &key) const
 {
+	if (key.empty())
+		return (false);
 	return (_key == key);
 }
 
