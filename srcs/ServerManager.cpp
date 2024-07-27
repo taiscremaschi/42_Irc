@@ -451,7 +451,7 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 
 	if(vec.size() != 5 || vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
 	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageUser());
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
 		return false;
 	}
 
@@ -469,8 +469,14 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			if (!handlePass(client, pass, vec[i + 1]))
 				return false;
 		}
-		else if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
+		else if (vec[i] == "NICK" && client.getAuthenticated()) {
+			if(vec.size() < 2)
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("NICK", "NICK: <nickname>, sets your nick"));
+				return true;
+			}
 			changeNick(client, vec[++i]);
+		}
 		else if (vec[i] == "USER" && client.getAuthenticated()) 
 		{
 			if(!validateUser(vec, client))
