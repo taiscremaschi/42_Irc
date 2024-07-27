@@ -218,7 +218,7 @@ bool ServerManager::handlePass(Client& client, std::string pass, std::string vec
 {
 	if (vec != pass){
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passInvalid());
-		removeClientByFd(client.getSocket());
+		//removeClientByFd(client.getSocket());
 		return false;
 	}
 	else {
@@ -467,8 +467,8 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
-			if (!handlePass(client, pass, vec[i + 1]))
-				return false;
+			if (!handlePass(client, pass, vec[++i]))
+				return true;
 		}
 		else if (vec[i] == "NICK" && client.getAuthenticated()) {
 			if(vec.size() < 2)
