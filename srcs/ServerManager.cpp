@@ -447,9 +447,13 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
-bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client){
+bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client, size_t i){
 
-	if(vec.size() != 5 || vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
+	std::cout << " my vec size is " << vec.size()  << std::endl;
+	for(std::size_t i = 0; i < vec.size(); i++){
+		std::cout << " " << vec[i] << std::endl;
+	}
+	if(vec.size() < 5 || vec[i + 2] != "0" || vec[i + 3] != "*" || vec[i + 4] != ":realname")
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
 		return false;
@@ -463,6 +467,7 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 }
 
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
+	std::cout << "comando recebido;   " << vec[0] << std::endl;
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
@@ -479,12 +484,17 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		}
 		else if (vec[i] == "USER" && client.getAuthenticated()) 
 		{
-			if(!validateUser(vec, client))
+			if(!validateUser(vec, client, i))
 				return true;
 			client.setName(vec[i + 1]);
 		}
-		else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData())
+		else if (vec[i] == "JOIN" && client.checkLoginData())
 		{
+			if(vec.size() < 2)
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN <channel>, joins the channel"));
+				return true;
+			}
 			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
 				continue;
 			std::string key;
