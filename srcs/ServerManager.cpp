@@ -449,10 +449,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 
 bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client, size_t i){
 
-	std::cout << " my vec size is " << vec.size()  << std::endl;
-	for(std::size_t i = 0; i < vec.size(); i++){
-		std::cout << " " << vec[i] << std::endl;
-	}
 	if(vec.size() < 5 || vec[i + 2] != "0" || vec[i + 3] != "*" || vec[i + 4] != ":realname")
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
@@ -467,7 +463,7 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 }
 
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
-	std::cout << "comando recebido;   " << vec[0] << std::endl;
+
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
