@@ -45,6 +45,9 @@ class MsgFormat {
 		static std::string channelFull(Client &client, const std::string &channelName);
         static std::string modeactive(const std::string &channelName, std::string mode);
         static std::string userAlreadyInUse(const std::string &username);
+        static std::string errorUserParameter();
+        static std::string usageUser();
+
 
 
 };

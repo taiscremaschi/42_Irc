@@ -159,6 +159,13 @@ std::string MsgFormat::userAlreadyInUse(const std::string &username){
 	return(":server 400 " + username + " :Username is already in use");
 }
 
+std::string  MsgFormat::errorUserParameter(){
+	return(":server 461 USER :Not enough parameters");
+
+}
+std::string  MsgFormat::usageUser(){
+	return(":server 461 USER :usage: USER <username> 0 * :realname");
+}
 
 
 std::string MsgFormat::handleMsg(std::string msg)

@@ -447,6 +447,21 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
+bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client){
+
+	if(vec.size() != 5 || vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageUser());
+		return false;
+	}
+
+	if(getClientByUser(vec[1]) != NULL){
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[1]));
+		return false;
+	}
+	return true;
+}
+
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
@@ -456,12 +471,10 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		}
 		else if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
 			changeNick(client, vec[++i]);
-		else if ((vec[i] == "USER" && (vec.size() > i + 1) ) && client.getAuthenticated()) 
+		else if (vec[i] == "USER" && client.getAuthenticated()) 
 		{
-			if(getClientByUser(vec[i + 1]) != NULL){
-				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[i + 1]));
+			if(!validateUser(vec, client))
 				return true;
-			}
 			client.setName(vec[i + 1]);
 		}
 		else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData())
