@@ -134,6 +134,8 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
 	for(size_t x = 0; x < _clients.size(); ++x)
 	{
 		if (_clients[x]->getNickname() == nick){
+			if(client.getNickname().empty())
+				client.setNickname(nick);
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickError(client, nick));
 			return false;
 		}
