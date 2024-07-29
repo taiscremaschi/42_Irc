@@ -26,7 +26,6 @@ class Client {
         void setNickname(std::string nickname);
         std::string getName() const;
         std::string getNickname() const;
-        std::string getHostname();
         bool operator==(Client const &client);
         void isAuthenticated();
         bool getAuthenticated() const;
