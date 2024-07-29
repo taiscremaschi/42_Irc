@@ -41,8 +41,10 @@ void ServerManager::removeClientByFd(int fd){
 }
 
 void ServerManager::removeClient(int i){
-	 delete _clients[i];
-	 _clients.erase(_clients.begin() + i);
+
+	handleQuit(*_clients[i], ":leaving");
+	// delete _clients[i];
+	// _clients.erase(_clients.begin() + i);
 }
 
 Client *ServerManager::getClientByNick(const std::string &nick)
@@ -202,14 +204,14 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 
 }
 
-void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
+void ServerManager::handleQuit(Client& client, const std::string &quitMsg)
 {
 	for(size_t i = 0; i < _channels.size(); i++)
 	{
 		if(_channels[i]->searchNames(client.getNickname())){
 			_channels[i]->removeClient(&client);
 			_channels[i]->removeOperator(&client);
-			_channels[i]->sendMessageToClients(MsgFormat::part(client, _channels[i], MsgFormat::handleMsg(quitMsg._message)));
+			_channels[i]->sendMessageToClients(MsgFormat::part(client, _channels[i], MsgFormat::handleMsg(quitMsg)));
 		}
 	}
 	close(client.getSocket());
@@ -506,7 +508,7 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handlePart(client, messages, vec[++i]);
 		else if(vec[i] == "QUIT" && vec.size() > i + 1 && client.checkLoginData())
 		{
-			handleQuit(client, messages);
+			handleQuit(client, messages._message);
 			return false;
 		}
 		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){
