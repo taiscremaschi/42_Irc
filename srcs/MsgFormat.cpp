@@ -160,6 +160,10 @@ std::string MsgFormat::userAlreadyInUse(const std::string &username){
 }
 
 
+std::string  MsgFormat::usageMsg(std::string cmd, std::string usage){
+	return(":server 461 " + cmd + " :Usage: " + usage);
+}
+
 
 std::string MsgFormat::handleMsg(std::string msg)
 {
