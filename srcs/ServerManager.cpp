@@ -218,7 +218,7 @@ bool ServerManager::handlePass(Client& client, std::string pass, std::string vec
 {
 	if (vec != pass){
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passInvalid());
-		removeClientByFd(client.getSocket());
+		//removeClientByFd(client.getSocket());
 		return false;
 	}
 	else {
@@ -447,25 +447,50 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
+bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client, size_t i){
+
+	if(vec.size() < 5 || vec[i + 2] != "0" || vec[i + 3] != "*" || vec[i + 4] != ":realname")
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
+		return false;
+	}
+
+	if(getClientByUser(vec[1]) != NULL){
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[1]));
+		return false;
+	}
+	return true;
+}
+
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
+
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
-			if (!handlePass(client, pass, vec[i + 1]))
-				return false;
+			if (!handlePass(client, pass, vec[++i]))
+				return true;
 		}
-		else if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
-			changeNick(client, vec[++i]);
-		else if ((vec[i] == "USER" && (vec.size() > i + 1) ) && client.getAuthenticated()) 
-		{
-			if(getClientByUser(vec[i + 1]) != NULL){
-				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[i + 1]));
+		else if (vec[i] == "NICK" && client.getAuthenticated()) {
+			if(vec.size() < 2)
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("NICK", "NICK: <nickname>, sets your nick"));
 				return true;
 			}
+			changeNick(client, vec[++i]);
+		}
+		else if (vec[i] == "USER" && client.getAuthenticated()) 
+		{
+			if(!validateUser(vec, client, i))
+				return true;
 			client.setName(vec[i + 1]);
 		}
-		else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData())
+		else if (vec[i] == "JOIN" && client.checkLoginData())
 		{
+			if(vec.size() < 2)
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN <channel>, joins the channel"));
+				return true;
+			}
 			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
 				continue;
 			std::string key;

@@ -43,7 +43,7 @@ std::string Client::getHostname() { //help 4
 	sockaddr_storage addr;
 	socklen_t addr_len = sizeof(addr);
 
-	if (getpeername(_socketClient, (sockaddr*)&addr, &addr_len) == -1) { //funcao pra obter o ip e a porta do cliente. paramentris, o fd o endereli para armazenar o add, e o size da estrutura
+	if (getsockname(_socketClient, (sockaddr*)&addr, &addr_len) == -1) { //funcao pra obter o ip e a porta do cliente. paramentris, o fd o endereli para armazenar o add, e o size da estrutura
 		std:: cerr << "Error in getting IP address" << std::endl;
 		return "";
 	}
