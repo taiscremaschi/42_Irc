@@ -1,20 +1,28 @@
-GREEN='\033[32m'
-RED='\033[31m'
-END='\033[0m'
-MAG='\001\e[0;35m\002'
 
-WHO=$1
-WHERE=$2
-PORT=$3
-echo $GREEN Testing JOIN in channel $END
-echo "\n"
+echo Testing JOIN in channel
 
-nc 0 $PORT << EOF
+nc 0 8081 -w 1 << EOF
 PASS 123
-NICK $WHO
-USER $WHO 0 * :realname
-PRIVMSG tataa :testando 23
-PRIVMSG tataa :mais
-PRIVMSG tataa :hahahahaa
+NICK paula
+USER paula 0 * :realname
+JOIN #g3
+PRIVMSG #g3 :oi grupo
+PART #g3 :xau!
+QUIT :xau!cau!
+
+
+
+
+EOF
+
+nc 0 8081 -w 1 << EOF
+PASS 123
+NICK tata
+USER tata 0 * :realname
+JOIN #g3
+QUIT :Leaving
+QUIT
+
+
 
 EOF

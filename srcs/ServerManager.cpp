@@ -539,6 +539,7 @@ std::vector<std::string> splitNewLine(std::string buff){
 }
 
 void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
+	
 	for (size_t j = 0; j < _clients.size(); ++j) {
 		if (fd == _clients[j]->getSocket()) {
 			if(_clients[j]->saveBuffer(buff))
@@ -550,8 +551,9 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 				for(size_t i = 0; i < vecLines.size(); ++i)
 				{
 					IrcMessages message(vecLines[i]);
-					if(findCmd(message._vecMsg, *_clients[j], message, pass))
-						_clients[j]->clearBuffer();
+					if(!findCmd(message._vecMsg, *_clients[j], message, pass))
+						return;
+					_clients[j]->clearBuffer();
 
 				}
 			}
