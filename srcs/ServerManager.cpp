@@ -466,7 +466,7 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 }
 
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
-	
+
 	if (vec[0] == "PASS" && (vec.size() > 1))
 		handlePass(client, pass, vec[1]);
 	else if (vec[0] == "NICK" && client.getAuthenticated()) {
@@ -522,6 +522,9 @@ std::vector<std::string> splitNewLine(std::string buff){
 	std::string node;
 	size_t start = 0;
 	std::vector<std::string> result;
+	if(buff[0] == '\n' || buff[0] == '\r' || buff[0] == '\0'){
+		return result;
+	}
 
 	for(size_t i = 0; i < buff.size(); ++i)
 	{
