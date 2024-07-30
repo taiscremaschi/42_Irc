@@ -41,8 +41,10 @@ void ServerManager::removeClientByFd(int fd){
 }
 
 void ServerManager::removeClient(int i){
-	 delete _clients[i];
-	 _clients.erase(_clients.begin() + i);
+
+	handleQuit(*_clients[i], ":leaving");
+	// delete _clients[i];
+	// _clients.erase(_clients.begin() + i);
 }
 
 Client *ServerManager::getClientByNick(const std::string &nick)
@@ -134,6 +136,8 @@ bool ServerManager::changeNick(Client &client, const std::string &nick)
 	for(size_t x = 0; x < _clients.size(); ++x)
 	{
 		if (_clients[x]->getNickname() == nick){
+			if(client.getNickname().empty())
+				client.setNickname(nick);
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickError(client, nick));
 			return false;
 		}
@@ -199,14 +203,14 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 	channel->removeClient(&client);
 }
 
-void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
+void ServerManager::handleQuit(Client& client, const std::string &quitMsg)
 {
 	for(size_t i = 0; i < _channels.size(); i++)
 	{
 		if(_channels[i]->searchNames(client.getNickname())){
 			_channels[i]->removeClient(&client);
 			_channels[i]->removeOperator(&client);
-			_channels[i]->sendMessageToClients(MsgFormat::part(client, _channels[i], MsgFormat::handleMsg(quitMsg._message)));
+			_channels[i]->sendMessageToClients(MsgFormat::part(client, _channels[i], MsgFormat::handleMsg(quitMsg)));
 		}
 	}
 	close(client.getSocket());
@@ -217,7 +221,7 @@ bool ServerManager::handlePass(Client& client, std::string pass, std::string vec
 {
 	if (vec != pass){
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passInvalid());
-		removeClientByFd(client.getSocket());
+		//removeClientByFd(client.getSocket());
 		return false;
 	}
 	else {
@@ -362,6 +366,13 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
+	/*
+	else if (channel->isNew())
+	{
+		channel->setNew(false);
+		return;
+	}
+	*/
 	else if (!channel->searchOperator(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
@@ -443,25 +454,50 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
+bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client, size_t i){
+
+	if(vec.size() < 5 || vec[i + 2] != "0" || vec[i + 3] != "*" || vec[i + 4] != ":realname")
+	{
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
+		return false;
+	}
+
+	if(getClientByUser(vec[1]) != NULL){
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[1]));
+		return false;
+	}
+	return true;
+}
+
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
+
 	for (size_t i = 0; i < vec.size(); ++i) {
 		if (vec[i] == "PASS" && (vec.size() > i + 1))
 		{
-			if (!handlePass(client, pass, vec[i + 1]))
-				return false;
+			if (!handlePass(client, pass, vec[++i]))
+				return true;
 		}
-		else if ((vec[i] == "NICK" && (vec.size() > i + 1)) && client.getAuthenticated()) 
-			changeNick(client, vec[++i]);
-		else if ((vec[i] == "USER" && (vec.size() > i + 1) ) && client.getAuthenticated()) 
-		{
-			if(getClientByUser(vec[i + 1]) != NULL){
-				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[i + 1]));
+		else if (vec[i] == "NICK" && client.getAuthenticated()) {
+			if(vec.size() < 2)
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("NICK", "NICK: <nickname>, sets your nick"));
 				return true;
 			}
+			changeNick(client, vec[++i]);
+		}
+		else if (vec[i] == "USER" && client.getAuthenticated()) 
+		{
+			if(!validateUser(vec, client, i))
+				return true;
 			client.setName(vec[i + 1]);
 		}
-		else if ((vec[i] == "JOIN" && (vec.size() > i + 1)) && client.checkLoginData())
+		else if (vec[i] == "JOIN" && client.checkLoginData())
 		{
+			if(vec.size() < 2)
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN <channel>, joins the channel"));
+				return true;
+			}
 			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
 				continue;
 			std::string key;
@@ -475,7 +511,7 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			handlePart(client, messages, vec[++i]);
 		else if(vec[i] == "QUIT" && vec.size() > i + 1 && client.checkLoginData())
 		{
-			handleQuit(client, messages);
+			handleQuit(client, messages._message);
 			return false;
 		}
 		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){

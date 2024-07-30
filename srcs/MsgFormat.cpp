@@ -1,12 +1,12 @@
 #include "../includes/MsgFormat.hpp"
 
 std::string MsgFormat::join(Client &client, const std::string &channelName){
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " JOIN :" + channelName);
+	return (":" + client.getNickname() + "!" + client.getName() + "@localhost JOIN :" + channelName);
 }
 
 std::string MsgFormat::invite(Client &client, const std::string &channelName, const std::string &targetNick)
 {
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " INVITE " + targetNick + ":" + channelName);
+	return (":" + client.getNickname() + "!" + client.getName() + "@localhost INVITE " + targetNick + ":" + channelName);
 }
 
 std::string MsgFormat::inviteConfirm(Client &client, const std::string &channelName, const std::string &targetNick)
@@ -17,7 +17,7 @@ std::string MsgFormat::inviteConfirm(Client &client, const std::string &channelN
 std::string MsgFormat::part(Client &client, Channel *channel, std::string exitMsg) {
 	if(exitMsg[exitMsg.size()-1] == '\n')
 		exitMsg.erase(exitMsg.size() - 1, 1);
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PART " + channel->getName() + " :" + exitMsg);
+	return (":" + client.getNickname() + "!" + client.getName() + "@localhost PART " + channel->getName() + " :" + exitMsg);
 }
 
 std::string MsgFormat::nick(Client &client, const std::string &oldNick) {
@@ -27,11 +27,11 @@ std::string MsgFormat::nick(Client &client, const std::string &oldNick) {
 std::string MsgFormat::priv(Client &client, std::string name, std::string message) {
 	if(message[message.size()-1] == '\n')
 		message.erase(message.size() - 1, 1);
-	return ":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " PRIVMSG " + name + " :" + message;
+	return ":" + client.getNickname() + "!" + client.getName() + "@localhost PRIVMSG " + name + " :" + message;
 }
 
 std::string MsgFormat::quit(Client &client, std::string message){
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " QUIT :" + message);
+	return (":" + client.getNickname() + "!" + client.getName() + "@localhost QUIT :" + message);
 
 }
 
@@ -45,7 +45,7 @@ std::string MsgFormat::topic(Client &client, const std::string &channelName, std
 }
 
 std::string MsgFormat::topicCreator(Client &client, const std::string &channelName){
-	return(":server 333 " + client.getNickname() + " " + channelName + " " + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " 0");
+	return(":server 333 " + client.getNickname() + " " + channelName + " " + client.getNickname() + "!" + client.getName() + "@localhost 0");
 }
 /// error handling
 std::string MsgFormat::nickError(Client &client, std::string nick) {
@@ -60,7 +60,7 @@ std::string MsgFormat::channelNotFound(Client &client, std::string wrongChannel)
 }
 
 std::string MsgFormat::notifyNickChanged(Client& client, std::string oldNickname) {
-	return (":" + oldNickname + "!" + client.getName() + "@" + client.getHostname() + " NICK :" + client.getNickname());
+	return (":" + oldNickname + "!" + client.getName() + "@localhost NICK :" + client.getNickname());
 }
 
 std::string MsgFormat::notifyUserNotInChannel(Client &client, const std::string &channelName)
@@ -110,7 +110,7 @@ std::string MsgFormat::userAlreadyInChannel(Client &client, const std::string &c
 
 std::string MsgFormat::kickUser(Client &client, const std::string &channelName, const std::string &targetNick, const std::string &reason)
 {
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " KICK " + channelName + " " + targetNick + " :" + reason);
+	return (":" + client.getNickname() + "!" + client.getName() + "@localhost KICK " + channelName + " " + targetNick + " :" + reason);
 }
 
 std::string MsgFormat::mode(Client &client, const std::string &channelName, const std::string &modeMsg)
@@ -140,14 +140,14 @@ std::string MsgFormat::invalidKey(Client &client, const std::string &channelName
 
 std::string MsgFormat::keySet(Client &client, const std::string &channelName, const std::string &key)
 {
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " MODE " + channelName + " +k " + key);
+	return (":" + client.getNickname() + "!" + client.getName() + "@localhost MODE " + channelName + " +k " + key);
 }
 
 std::string MsgFormat::changeOpStatus(Client &client, Client *target, const std::string &channelName, bool set)
 {
 	std::string action = set ? "gives" : "removes";
 	std::string mode = set ? "+o" : "-o";
-	return (":" + client.getNickname() + "!" + client.getName() + "@" + client.getHostname() + " MODE " + channelName + " " + mode + " " + target->getNickname());
+	return (":" + client.getNickname() + "!" + client.getName() + "@localhost MODE " + channelName + " " + mode + " " + target->getNickname());
 }
 
 std::string MsgFormat::channelFull(Client &client, const std::string &channelName)
@@ -159,6 +159,10 @@ std::string MsgFormat::userAlreadyInUse(const std::string &username){
 	return(":server 400 " + username + " :Username is already in use");
 }
 
+
+std::string  MsgFormat::usageMsg(std::string cmd, std::string usage){
+	return(":server 461 " + cmd + " :Usage: " + usage);
+}
 
 
 std::string MsgFormat::handleMsg(std::string msg)
