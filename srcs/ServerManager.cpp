@@ -1,7 +1,7 @@
 #include "../includes/ServerManager.hpp"
 #include "../includes/Server.hpp"
 #include <string>
-
+#include <map>
 ServerManager::ServerManager(){}
 
 ServerManager::~ServerManager(){
@@ -465,15 +465,36 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 	return true;
 }
 
-bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
+bool parseArgs(const std::vector<std::string> &vec){
 	if(vec.empty())
+		return false;
+	std::map<std::string, std::string> usageMessage;
+
+	usageMessage["NICK"] = "NICK <nickname>, sets your nick";
+	usageMessage["USER"] = "USER <username> 0 * :realname, sets your user";
+	usageMessage["JOIN"] = "JOIN #<channel>, joins the channel";
+	usageMessage["PRIVMSG"] = "PRIVMSG <nickname OR channel> :<message>, send a message";
+	usageMessage["MODE"] = "MODE #<channel> <+ OR -> <t,i,k,l,o> *for k and l you need a argument here*";
+	usageMessage["PART"] = "PART #<channel> :<optional message>, part a channel";
+	usageMessage["KICK"] = "KICK #<channel> <nickname> :<optional message> , kick a user from channel";
+	usageMessage["INVITE"] = "INVITE <nickname> #<channel>, invite a user to a channel";
+	usageMessage["TOPIC"] = "TOPIC #<channel>  <your topic>, sets a topic channel";
+
+	return true
+
+
+}
+
+bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
+	
+	if(!parseArgs(vec))
 		return true;
 	if (vec[0] == "PASS" && (vec.size() > 1))
 		handlePass(client, pass, vec[1]);
 	else if (vec[0] == "NICK" && client.getAuthenticated()) {
 		if(vec.size() < 2)
 		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("NICK", "NICK: <nickname>, sets your nick"));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("NICK", "NICK <nickname>, sets your nick"));
 			return true;
 		}
 		changeNick(client, vec[1]);
@@ -551,10 +572,10 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 				for(size_t i = 0; i < vecLines.size(); ++i)
 				{
 					IrcMessages message(vecLines[i]);
+
 					if(!findCmd(message._vecMsg, *_clients[j], message, pass))
 						return;
 					_clients[j]->clearBuffer();
-
 				}
 			}
 		}
