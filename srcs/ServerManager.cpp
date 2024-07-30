@@ -466,7 +466,7 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 }
 
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
-
+	
 	if (vec[0] == "PASS" && (vec.size() > 1))
 		handlePass(client, pass, vec[1]);
 	else if (vec[0] == "NICK" && client.getAuthenticated()) {
@@ -485,13 +485,10 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 	}
 	else if (vec[0] == "JOIN" && client.checkLoginData())
 	{
-		if(vec.size() < 2)
-		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN <channel>, joins the channel"));
+		if(vec.size() < 2 || (vec[1][0] != '#' && vec[1][0] != '&')){
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN #<channel>, joins the channel"));
 			return true;
 		}
-		if(vec[1][0] != '#' && vec[1][0] != '&')
-			return true;
 		std::string key;
 		(vec.size() == 2) ? key = "" : key = vec[2];
 		handleJoinCommand(client, vec[1], key);
@@ -520,7 +517,7 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 	return true;
 }
 
-std::vector<std::string> functionfodase(std::string buff){
+std::vector<std::string> splitNewLine(std::string buff){
 	
 	std::string node;
 	size_t start = 0;
@@ -542,7 +539,7 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 		if (fd == _clients[j]->getSocket()) {
 			if(_clients[j]->saveBuffer(buff))
 			{
-				std::vector<std::string> vecLines = functionfodase(buff);
+				std::vector<std::string> vecLines = splitNewLine(buff);
 				for(size_t i = 0; i < vecLines.size(); ++i)
 				{
 					IrcMessages message(vecLines[i]);
@@ -550,7 +547,6 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 						_clients[j]->clearBuffer();
 
 				}
-	
 			}
 		}
 	}
