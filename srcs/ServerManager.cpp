@@ -2,6 +2,7 @@
 #include "../includes/Server.hpp"
 #include <string>
 #include <map>
+#include <utility> 
 ServerManager::ServerManager(){}
 
 ServerManager::~ServerManager(){
@@ -452,7 +453,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 
 bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client){
 
-	if(vec.size() < 5 || vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
+	if(vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
 		return false;
@@ -465,40 +466,43 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 	return true;
 }
 
-bool parseArgs(const std::vector<std::string> &vec){
+bool parseArgs(const std::vector<std::string> &vec, Client &client){
 	if(vec.empty())
 		return false;
-	std::map<std::string, std::string> usageMessage;
+	std::map<std::string, std::pair<std::string, size_t> > usageMessage;
 
-	usageMessage["NICK"] = "NICK <nickname>, sets your nick";
-	usageMessage["USER"] = "USER <username> 0 * :realname, sets your user";
-	usageMessage["JOIN"] = "JOIN #<channel>, joins the channel";
-	usageMessage["PRIVMSG"] = "PRIVMSG <nickname OR channel> :<message>, send a message";
-	usageMessage["MODE"] = "MODE #<channel> <+ OR -> <t,i,k,l,o> *for k and l you need a argument here*";
-	usageMessage["PART"] = "PART #<channel> :<optional message>, part a channel";
-	usageMessage["KICK"] = "KICK #<channel> <nickname> :<optional message> , kick a user from channel";
-	usageMessage["INVITE"] = "INVITE <nickname> #<channel>, invite a user to a channel";
-	usageMessage["TOPIC"] = "TOPIC #<channel>  <your topic>, sets a topic channel";
+	usageMessage["NICK"] = std::make_pair("NICK <nickname>, sets your nick", 2);
+	usageMessage["USER"] = std::make_pair("USER <username> 0 * :realname, sets your user", 5);
+	usageMessage["JOIN"] = std::make_pair("JOIN #<channel>, joins the channel", 2);
+	usageMessage["PRIVMSG"] = std::make_pair("PRIVMSG <nickname OR channel> :<message>, send a message", 2);
+	usageMessage["MODE"] = std::make_pair("MODE #<channel> <+ OR -> <t,i,k,l,o> *for k and l you need a argument here*", 2);
+	usageMessage["PART"] = std::make_pair("PART #<channel> :<optional message>, part a channel", 2);
+	usageMessage["KICK"] = std::make_pair("KICK #<channel> <nickname> :<optional message> , kick a user from channel", 3);
+	usageMessage["INVITE"] = std::make_pair("INVITE <nickname> #<channel>, invite a user to a channel", 3);
+	usageMessage["TOPIC"] = std::make_pair("TOPIC #<channel>  <your topic>, sets a topic channel", 2);
+	//usageMessage["QUIT"] = std::make_pair("QUIT :<message>, disconect user", 2);
 
-	return true
 
-
+	try{
+		if (vec.size() < usageMessage.at(vec[0]).second){
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
+			return false;
+		}
+	}
+	catch (const std::exception &e) {
+		return true;
+	}
+	return true;
 }
 
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
 	
-	if(!parseArgs(vec))
+	if(!parseArgs(vec, client))
 		return true;
 	if (vec[0] == "PASS" && (vec.size() > 1))
 		handlePass(client, pass, vec[1]);
-	else if (vec[0] == "NICK" && client.getAuthenticated()) {
-		if(vec.size() < 2)
-		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("NICK", "NICK <nickname>, sets your nick"));
-			return true;
-		}
+	else if (vec[0] == "NICK" && client.getAuthenticated())
 		changeNick(client, vec[1]);
-	}
 	else if (vec[0] == "USER" && client.getAuthenticated()) 
 	{
 		if(!validateUser(vec, client))
@@ -507,7 +511,7 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 	}
 	else if (vec[0] == "JOIN" && client.checkLoginData())
 	{
-		if(vec.size() < 2 || (vec[1][0] != '#' && vec[1][0] != '&')){
+		if(vec[1][0] != '#' && vec[1][0] != '&'){
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN #<channel>, joins the channel"));
 			return true;
 		}
@@ -515,25 +519,25 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		(vec.size() == 2) ? key = "" : key = vec[2];
 		handleJoinCommand(client, vec[1], key);
 	}
-	else if((vec[0] == "PRIVMSG" && (vec.size() > 1)) && client.checkLoginData())
+	else if(vec[0] == "PRIVMSG" && client.checkLoginData())
 		handlePrivMessage(client, vec[1], messages);
-	else if((vec[0] == "PART" && (vec.size() > 1)) && client.checkLoginData())
+	else if(vec[0] == "PART" && client.checkLoginData())
 		handlePart(client, messages, vec[1]);
-	else if(vec[0] == "QUIT" && vec.size() > 1 && client.checkLoginData())
+	else if(vec[0] == "QUIT" && client.checkLoginData())
 	{
 		handleQuit(client, messages._message);
 		return false;
 	}
-	else if(vec[0] == "KICK" && vec.size() > 2 && client.checkLoginData()){
+	else if(vec[0] == "KICK" && client.checkLoginData()){
 		handleKick(client, vec[1], vec[2], vec, 3);
 	}		
-	else if(vec[0] == "INVITE" && vec.size() > 2 && client.checkLoginData()){
+	else if(vec[0] == "INVITE" && client.checkLoginData()){
 		handleInvite(client, vec[1], vec[2]);
 	}
-	else if(vec[0] == "TOPIC" && (vec.size() > 1) && client.checkLoginData()){
+	else if(vec[0] == "TOPIC" && client.checkLoginData()){
 		handleTopic(client, vec, 1);
 	}		
-	else if(vec[0] == "MODE" && vec.size() > 2 && client.checkLoginData()){
+	else if(vec[0] == "MODE" && client.checkLoginData()){
 		handleMode(client, vec, 1);
 	}
 	return true;
