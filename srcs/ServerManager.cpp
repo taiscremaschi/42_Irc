@@ -543,6 +543,8 @@ void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
 			if(_clients[j]->saveBuffer(buff))
 			{
 				std::vector<std::string> vecLines = splitNewLine(_clients[j]->getBuffer());
+				if(vecLines.empty())
+					_clients[j]->clearBuffer();
 				for(size_t i = 0; i < vecLines.size(); ++i)
 				{
 					IrcMessages message(vecLines[i]);

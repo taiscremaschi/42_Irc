@@ -13,8 +13,8 @@ nc 0 $PORT << EOF
 PASS 123
 NICK $WHO
 USER $WHO 0 * :realname
-PRIVMSG tata :testando 23
-PRIVMSG tata :mais
-PRIVMSG tata :hahahahaa
+PRIVMSG RICARDO :testando 23
+PRIVMSG RICARDO :mais
+PRIVMSG RICARDO :hahahahaa
 JOIN #CU
 EOF
