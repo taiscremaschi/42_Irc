@@ -468,10 +468,7 @@ bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
 
 	if (vec[0] == "PASS" && (vec.size() > 1))
-	{
-		if (!handlePass(client, pass, vec[1]))
-			return true;
-	}
+		handlePass(client, pass, vec[1]);
 	else if (vec[0] == "NICK" && client.getAuthenticated()) {
 		if(vec.size() < 2)
 		{
