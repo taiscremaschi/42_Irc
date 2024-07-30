@@ -197,7 +197,6 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 	channel->sendMessageToClients(MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
 	channel->removeOperator(&client);
 	channel->removeClient(&client);
-
 }
 
 void ServerManager::handleQuit(Client& client, IrcMessages &quitMsg)
@@ -306,7 +305,7 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		reason = reason.substr(1);
 	if (!reason.empty() && reason[reason.size() - 2] == ' ')
 		reason.erase(reason.size() - 2);
-	else if (reason == " ")
+	else
 		reason = "Kicked by " + client.getName();
 
 	std::string kickMsg = MsgFormat::kickUser(client, channelName, targetNick, reason);
@@ -425,7 +424,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 			return;
 		}
-
 		if (set)
 		{
 			channel->setKey(key);
