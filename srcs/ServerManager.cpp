@@ -416,22 +416,23 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	}
 	else if (modeFlag == 'k')
 	{
-		if (i > vec.size() - 1)
-			return;
-		std::string key = vec[i];
-		if (set && key.empty())
+		if (!set)
+			channel->unsetKey();
+		else
 		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
-			return;
-		}
-		if (set)
-		{
+			if (i > vec.size() - 1)
+				return;
+			std::string key = vec[i];
+			if (set && key.empty())
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
+				return;
+			}
+
 			channel->setKey(key);
 			channel->sendMessageToClients(MsgFormat::keySet(client, channelName, key));
 			return;
 		}
-		else
-			channel->unsetKey();
 	}
 	else
 	{
