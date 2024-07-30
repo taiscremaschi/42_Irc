@@ -6,15 +6,15 @@ MAG='\001\e[0;35m\002'
 WHO=$1
 WHERE=$2
 PORT=$3
-echo $GREEN Testing MODE in channel $END
+echo $GREEN Testing JOIN in channel $END
 echo "\n"
 
 nc 0 $PORT << EOF
 PASS 123
 NICK $WHO
 USER $WHO 0 * :realname
-PRIVMSG RICARDO :testando 23
-PRIVMSG RICARDO :mais
-PRIVMSG RICARDO :hahahahaa
-JOIN #CU
+PRIVMSG tataa :testando 23
+PRIVMSG tataa :mais
+PRIVMSG tataa :hahahahaa
+
 EOF
