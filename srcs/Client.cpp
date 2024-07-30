@@ -60,6 +60,7 @@ bool Client::checkLoginData(){
 bool Client::saveBuffer(std::string buff)
 {
 	_bufferMsg += buff;
+
 	return (buff[buff.size() - 1] == '\n');
 }
 

@@ -1,6 +1,7 @@
 #include "../includes/Irc.hpp"
 #include "../includes/Server.hpp"
 #include <signal.h>
+
 #define MAX_FDS 1024
 
 void handleSig(int sig)
