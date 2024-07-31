@@ -164,6 +164,10 @@ std::string  MsgFormat::usageMsg(std::string cmd, std::string usage){
 	return(":server 461 " + cmd + " :Usage: " + usage);
 }
 
+std::string  MsgFormat::limitMsg(std::string nickname, std::string channel, std::string limit){
+
+	return(":" + nickname + " NOTICE " + channel + " :The user limit for this channel has been set to " + limit + ".");
+}
 
 std::string MsgFormat::handleMsg(std::string msg)
 {
