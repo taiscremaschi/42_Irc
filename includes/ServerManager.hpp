@@ -30,8 +30,8 @@ class ServerManager{
         void removeClientByNick(std::string nick);
         void removeClient(int i);
         void removeClientByFd(int fd);
-        bool handlePass(Client& client, std::string pass, std::string vec);
-        bool validateUser(const std::vector<std::string> &vec, Client &client, size_t i);
+        void handlePass(Client& client, std::string pass, std::string vec);
+        bool validateUser(const std::vector<std::string> &vec, Client &client);
 
 
 };
