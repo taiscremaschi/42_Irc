@@ -41,8 +41,8 @@ void ServerManager::removeClientByFd(int fd){
 }
 
 void ServerManager::removeClient(int i){
-
-	handleQuit(*_clients[i], ":leaving");
+	
+handleQuit(*_clients[i], ":leaving");
 	// delete _clients[i];
 	// _clients.erase(_clients.begin() + i);
 }
