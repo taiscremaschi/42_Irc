@@ -2,7 +2,7 @@ echo Testing JOIN in channel
 
 nc 0 8081 << EOF
 PASS 123
-NICK tata
+NICK oioi
 USER tata 0 * :realname
 JOIN #g3
 PRIVMSG #g3 :tata tambem!
