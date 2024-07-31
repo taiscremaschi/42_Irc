@@ -500,43 +500,44 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		return true;
 	if (vec[0] == "PASS" && (vec.size() > 1))
 		handlePass(client, pass, vec[1]);
-	else if (vec[0] == "NICK" && client.getAuthenticated())
-		changeNick(client, vec[1]);
-	else if (vec[0] == "USER" && client.getAuthenticated()) 
+	else if(client.getAuthenticated())
 	{
-		if(!validateUser(vec, client))
-			return true;
-		client.setName(vec[1]);
-	}
-	else if (vec[0] == "JOIN" && client.checkLoginData())
-	{
-		if(vec[1][0] != '#' && vec[1][0] != '&'){
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN #<channel>, joins the channel"));
-			return true;
+		if (vec[0] == "NICK")
+			changeNick(client, vec[1]);
+		else if (vec[0] == "USER") 
+		{
+			if(!validateUser(vec, client))
+				return true;
+			client.setName(vec[1]);
 		}
-		std::string key;
-		(vec.size() == 2) ? key = "" : key = vec[2];
-		handleJoinCommand(client, vec[1], key);
-	}
-	else if(vec[0] == "PRIVMSG" && client.checkLoginData())
-		handlePrivMessage(client, vec[1], messages);
-	else if(vec[0] == "PART" && client.checkLoginData())
-		handlePart(client, messages, vec[1]);
-	else if(vec[0] == "QUIT" && client.checkLoginData()){
-		handleQuit(client, messages._message);
-		return false;
-	}
-	else if(vec[0] == "KICK" && client.checkLoginData()){
-		handleKick(client, vec[1], vec[2], vec);
-	}		
-	else if(vec[0] == "INVITE" && client.checkLoginData()){
-		handleInvite(client, vec[1], vec[2]);
-	}
-	else if(vec[0] == "TOPIC" && client.checkLoginData()){
-		handleTopic(client, vec);
-	}		
-	else if(vec[0] == "MODE" && client.checkLoginData()){
-		handleMode(client, vec);
+		else if(client.checkLoginData())
+		{
+			if (vec[0] == "JOIN"){
+				if(vec[1][0] != '#' && vec[1][0] != '&'){
+					MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN #<channel>, joins the channel"));
+					return true;
+				}
+				std::string key;
+				(vec.size() == 2) ? key = "" : key = vec[2];
+				handleJoinCommand(client, vec[1], key);
+			}
+			else if(vec[0] == "PRIVMSG")
+				handlePrivMessage(client, vec[1], messages);
+			else if(vec[0] == "PART")
+				handlePart(client, messages, vec[1]);
+			else if(vec[0] == "QUIT"){
+				handleQuit(client, messages._message);
+				return false;
+			}
+			else if(vec[0] == "KICK")
+				handleKick(client, vec[1], vec[2], vec);
+			else if(vec[0] == "INVITE")
+				handleInvite(client, vec[1], vec[2]);
+			else if(vec[0] == "TOPIC")
+				handleTopic(client, vec);
+			else if(vec[0] == "MODE")
+				handleMode(client, vec);
+		}
 	}
 	return true;
 }
