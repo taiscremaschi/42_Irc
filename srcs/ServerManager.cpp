@@ -1,19 +1,8 @@
 #include "../includes/ServerManager.hpp"
 #include "../includes/Server.hpp"
-#include <string>
-#include <map>
-#include <utility> 
+
 ServerManager::ServerManager(){
-	_usageMessage["NICK"] = std::make_pair("NICK <nickname>, sets your nick", 2);
-	_usageMessage["USER"] = std::make_pair("USER <username> 0 * :realname, sets your user", 5);
-	_usageMessage["JOIN"] = std::make_pair("JOIN #<channel>, joins the channel", 2);
-	_usageMessage["PRIVMSG"] = std::make_pair("PRIVMSG <nickname OR channel> :<message>, send a message", 2);
-	_usageMessage["MODE"] = std::make_pair("MODE #<channel> <+ OR -> <t,i,k,l,o> *for k and l you need a argument here*", 2);
-	_usageMessage["PART"] = std::make_pair("PART #<channel> :<optional message>, part a channel", 2);
-	_usageMessage["KICK"] = std::make_pair("KICK #<channel> <nickname> :<optional message> , kick a user from channel", 3);
-	_usageMessage["INVITE"] = std::make_pair("INVITE <nickname> #<channel>, invite a user to a channel", 3);
-	_usageMessage["TOPIC"] = std::make_pair("TOPIC #<channel>  <your topic>, sets a topic channel", 2);
-	//usageMessage["QUIT"] = std::make_pair("QUIT :<message>, disconect user", 2);
+
 
 }
 
@@ -90,8 +79,11 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
 	return NULL;
 }
 
-void ServerManager::handleJoinCommand(Client& client, const std::string& channelName, const std::string &key)
+void ServerManager::handleJoinCommand(Client& client, const std::string& channelName, const std::vector<std::string> &vec)
 {
+	std::string key;
+	(vec.size() == 2) ? key = "" : key = vec[2];
+	
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
 	{
@@ -217,7 +209,7 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 
 }
 
-void ServerManager::handleQuit(Client& client, const std::string &quitMsg)
+bool ServerManager::handleQuit(Client& client, const std::string &quitMsg)
 {
 	for(size_t i = 0; i < _channels.size(); i++)
 	{
@@ -229,6 +221,7 @@ void ServerManager::handleQuit(Client& client, const std::string &quitMsg)
 	}
 	close(client.getSocket());
 	removeClientByNick(client.getNickname());
+	return false;
 }
 
 void ServerManager::handlePass(Client& client, std::string pass, std::string vec)
@@ -366,7 +359,9 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 {
 	std::string channelName = vec[1];
-	std::string mode = vec[2];
+	std::string mode;
+	if (vec.size() > 2 )
+		mode = vec[2];
 	if (mode.empty())
 		return;
 	Channel	*channel = getChannelByName(channelName);
@@ -463,29 +458,50 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
-bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client){
+void ServerManager::validateUser(const std::vector<std::string> &vec, Client &client){
 
 	if(vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
-		return false;
+		return;
 	}
 
 	if(getClientByUser(vec[1]) != NULL){
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[1]));
-		return false;
+		return;
 	}
-	return true;
+	client.setName(vec[1]);
+	return;
 }
 
 bool ServerManager::parseArgs(const std::vector<std::string> &vec, Client &client){
 	if(vec.empty())
 		return false;
+
+	std::map<std::string, std::pair<std::string, size_t> > usageMessage;
+	
+	usageMessage["NICK"] = std::make_pair("NICK <nickname>, sets your nick", 2);
+	usageMessage["USER"] = std::make_pair("USER <username> 0 * :realname, sets your user", 5);
+	usageMessage["JOIN"] = std::make_pair("JOIN #<channel> <optional key>, joins the channel", 2);
+	usageMessage["PRIVMSG"] = std::make_pair("PRIVMSG <nickname OR channel> :<message>, send a message", 2);
+	usageMessage["MODE"] = std::make_pair("MODE #<channel> <+ OR -> <t,i,k,l,o> *for k and l you need a argument here*", 2);
+	usageMessage["PART"] = std::make_pair("PART #<channel> :<optional message>, part a channel", 2);
+	usageMessage["KICK"] = std::make_pair("KICK #<channel> <nickname> :<optional message> , kick a user from channel", 3);
+	usageMessage["INVITE"] = std::make_pair("INVITE <nickname> #<channel>, invite a user to a channel", 3);
+	usageMessage["TOPIC"] = std::make_pair("TOPIC #<channel>  <your topic>, sets a topic channel", 2);
+	//usageMessage["QUIT"] = std::make_pair("QUIT :<message>, disconect user", 2);
 	
 	try{
-		if (vec.size() < _usageMessage.at(vec[0]).second){
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg(vec[0], _usageMessage[vec[0]].first));
+		if (vec.size() < usageMessage.at(vec[0]).second){
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
 			return false;
+		}
+		if (vec[0] == "JOIN")
+		{
+			if(vec[1][0] != '#' && vec[1][0] != '&'){
+				MsgFormat::MsgforHex(client.getSocket(),  MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
+				return false;
+			}
 		}
 	}
 	catch (const std::exception &e) {
@@ -505,30 +521,19 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 		if (vec[0] == "NICK")
 			changeNick(client, vec[1]);
 		else if (vec[0] == "USER") 
-		{
-			if(!validateUser(vec, client))
-				return true;
-			client.setName(vec[1]);
-		}
+			validateUser(vec, client);
 		else if(client.checkLoginData())
 		{
 			if (vec[0] == "JOIN"){
-				if(vec[1][0] != '#' && vec[1][0] != '&'){
-					MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN #<channel>, joins the channel"));
-					return true;
-				}
-				std::string key;
-				(vec.size() == 2) ? key = "" : key = vec[2];
-				handleJoinCommand(client, vec[1], key);
+
+				handleJoinCommand(client, vec[1], vec);
 			}
 			else if(vec[0] == "PRIVMSG")
 				handlePrivMessage(client, vec[1], messages);
 			else if(vec[0] == "PART")
 				handlePart(client, messages, vec[1]);
-			else if(vec[0] == "QUIT"){
-				handleQuit(client, messages._message);
-				return false;
-			}
+			else if(vec[0] == "QUIT")
+				return (handleQuit(client, messages._message));
 			else if(vec[0] == "KICK")
 				handleKick(client, vec[1], vec[2], vec);
 			else if(vec[0] == "INVITE")
