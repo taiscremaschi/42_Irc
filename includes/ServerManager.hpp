@@ -9,6 +9,8 @@ class ServerManager{
     private:
         std::vector<Channel*>    _channels;
         std::vector<Client*>     _clients;
+	    std::map<std::string, std::pair<std::string, size_t> > _usageMessage;
+
     public:
         ServerManager();
         ~ServerManager();
@@ -23,15 +25,17 @@ class ServerManager{
         void handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages);
         void handlePart(Client& client, IrcMessages &messages,const std::string& channelName);
         void handleQuit(Client& client, const std::string &quitMsg);
-		void handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec, size_t i);
-		void handleTopic(Client &client, const std::vector<std::string> &vec, size_t i);
+		void handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec);
+		void handleTopic(Client &client, const std::vector<std::string> &vec);
 		void handleInvite(Client &client, const std::string &targetNick, const std::string &channelName);
-		void handleMode(Client &client, std::vector<std::string> vec, size_t i);
+		void handleMode(Client &client, std::vector<std::string> vec);
         void removeClientByNick(std::string nick);
         void removeClient(int i);
         void removeClientByFd(int fd);
         void handlePass(Client& client, std::string pass, std::string vec);
         bool validateUser(const std::vector<std::string> &vec, Client &client);
+        bool parseArgs(const std::vector<std::string> &vec, Client &client);
+
 
 
 };
