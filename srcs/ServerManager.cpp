@@ -44,7 +44,7 @@ void ServerManager::removeClientByFd(int fd){
 
 void ServerManager::removeClient(int i){
 	
-handleQuit(*_clients[i], ":leaving");
+	handleQuit(*_clients[i], ":leaving");
 	// delete _clients[i];
 	// _clients.erase(_clients.begin() + i);
 }
@@ -136,26 +136,28 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 }
 
 
-bool ServerManager::changeNick(Client &client, const std::string &nick)
+void ServerManager::changeNick(Client &client, const std::string &nick)
 {
 	for(size_t x = 0; x < _clients.size(); ++x)
 	{
 		if (_clients[x]->getNickname() == nick){
-			if(client.getNickname().empty())
+			if(client.getNickname().empty()){
 				client.setNickname(nick);
+				client.setNickError(true);
+			}
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickError(client, nick));
-			return false;
+			return ;
 		}
 	}
 	std::string oldNick = client.getNickname();
 	client.setNickname(nick);
+	client.setNickError(false);
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nick(client, oldNick));
 	for(size_t i = 0; i < _channels.size(); ++i)
 	{
 		if(_channels[i]->searchNames(client.getNickname()) == true)
 			_channels[i]->sendMessageToClients(MsgFormat::notifyNickChanged(client, oldNick));
 	}
-	return true;
 }
 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
@@ -211,6 +213,10 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 
 bool ServerManager::handleQuit(Client& client, const std::string &quitMsg)
 {
+	if(client.getNickError() == true){
+		removeClientByFd(client.getSocket());
+		return false;
+	}
 	for(size_t i = 0; i < _channels.size(); i++)
 	{
 		if(_channels[i]->searchNames(client.getNickname())){

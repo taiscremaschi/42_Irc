@@ -1,18 +1,4 @@
-cho Testing JOIN in channel
-
-nc 0 8081 << EOF
-PASS 123
-NICK paula
-USER paula 0 * :realname
-JOIN #g3
-PRIVMSG #g3 :paula passou por aqui!
-QUIT :Leaving
-QUIT
-
-
-
-
-EOF
+echo Testing JOIN in channel
 
 nc 0 8081 << EOF
 PASS 123
