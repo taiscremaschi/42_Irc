@@ -471,7 +471,6 @@ void ServerManager::validateUser(const std::vector<std::string> &vec, Client &cl
 		return;
 	}
 	client.setName(vec[1]);
-	return;
 }
 
 bool ServerManager::parseArgs(const std::vector<std::string> &vec, Client &client){
