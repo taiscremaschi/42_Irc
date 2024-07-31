@@ -446,7 +446,7 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 		{
 			if (3 > vec.size() - 1)
 				return;
-			std::string key = vec[2];
+			std::string key = vec[3];
 			if (set && key.empty())
 			{
 				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
