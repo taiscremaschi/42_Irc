@@ -500,8 +500,6 @@ bool ServerManager::parseArgs(const std::vector<std::string> &vec, Client &clien
 		}
 		if (vec[0] == "JOIN")
 		{
-			if(vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
-	
 			if(vec[1][0] != '#' && vec[1][0] != '&'){
 				MsgFormat::MsgforHex(client.getSocket(),  MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
 				return false;
