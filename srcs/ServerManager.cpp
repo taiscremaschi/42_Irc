@@ -546,9 +546,6 @@ std::vector<std::string> splitNewLine(std::string buff){
 	std::string node;
 	size_t start = 0;
 	std::vector<std::string> result;
-	if(buff[0] == '\n' || buff[0] == '\r' || buff[0] == '\0'){
-		return result;
-	}
 	for(size_t i = 0; i < buff.size(); ++i)
 	{
 		if(buff[i] == '\n'){
