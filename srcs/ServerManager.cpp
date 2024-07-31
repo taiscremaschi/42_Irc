@@ -466,12 +466,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 
 void ServerManager::validateUser(const std::vector<std::string> &vec, Client &client){
 
-	if(vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
-	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
-		return;
-	}
-
 	if(getClientByUser(vec[1]) != NULL){
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[1]));
 		return;
@@ -503,8 +497,17 @@ bool ServerManager::parseArgs(const std::vector<std::string> &vec, Client &clien
 		}
 		if (vec[0] == "JOIN")
 		{
+			if(vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
+	
 			if(vec[1][0] != '#' && vec[1][0] != '&'){
 				MsgFormat::MsgforHex(client.getSocket(),  MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
+				return false;
+			}
+		}
+		else if(vec[0] == "USER"){
+			if(vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
 				return false;
 			}
 		}
