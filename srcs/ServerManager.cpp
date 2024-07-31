@@ -414,6 +414,11 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 	}
 	else if (modeFlag == 'l')
 	{
+		if(set == false)
+		{
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::ulimitMsg(client.getNickname(), channelName));
+			return;
+		}
 		if (3 > vec.size() - 1){
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 			return;

@@ -169,6 +169,13 @@ std::string  MsgFormat::limitMsg(std::string nickname, std::string channel, std:
 	return(":" + nickname + " NOTICE " + channel + " :The user limit for this channel has been set to " + limit + ".");
 }
 
+
+std::string  MsgFormat::ulimitMsg(std::string nickname, std::string channel){
+
+	return(":" + nickname + " NOTICE " + channel + " :The user limit for this channel has been removed.");
+}
+
+
 std::string MsgFormat::handleMsg(std::string msg)
 {
 	int i = 0;
