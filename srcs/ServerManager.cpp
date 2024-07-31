@@ -83,7 +83,7 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 {
 	std::string key;
 	(vec.size() == 2) ? key = "" : key = vec[2];
-	
+
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
 	{
@@ -522,12 +522,9 @@ bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client,
 			changeNick(client, vec[1]);
 		else if (vec[0] == "USER") 
 			validateUser(vec, client);
-		else if(client.checkLoginData())
-		{
-			if (vec[0] == "JOIN"){
-
+		else if(client.checkLoginData()){
+			if (vec[0] == "JOIN")
 				handleJoinCommand(client, vec[1], vec);
-			}
 			else if(vec[0] == "PRIVMSG")
 				handlePrivMessage(client, vec[1], messages);
 			else if(vec[0] == "PART")
