@@ -130,7 +130,7 @@ std::string MsgFormat::invalidModeParams(Client &client, const std::string &chan
 
 std::string MsgFormat::inviteOnlyChannel(Client &client, const std::string &channelName)
 {
-	return (":" + client.getNickname() + " 475 " + channelName + " :Cannot join channel (+i)");
+	return (":" + client.getNickname() + " 473 " + channelName + " :Cannot join channel (+i)");
 }
 
 std::string MsgFormat::invalidKey(Client &client, const std::string &channelName)

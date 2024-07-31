@@ -208,7 +208,6 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 	channel->sendMessageToClients(MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
 	channel->removeOperator(&client);
 	channel->removeClient(&client);
-
 }
 
 bool ServerManager::handleQuit(Client& client, const std::string &quitMsg)
@@ -304,14 +303,16 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 	}
 
 	Client *target = getClientByNick(targetNick);
-
-	if (!channel->searchNames(targetNick) || channel->searchOperator(targetNick))
+	if (!channel->searchNames(targetNick))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, targetNick));
 		return;
 	}
 	if (channel->isInvited(target))
 		channel->removeInvite(target);
+	if (channel->searchOperator(targetNick))
+		channel->removeOperator(target);
+
 	std::string reason;
 	for (size_t j = 3; j < vec.size(); ++j)
 		reason += vec[j] + " ";
@@ -319,6 +320,8 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		reason = reason.substr(1);
 	if (!reason.empty() && reason[reason.size() - 2] == ' ')
 		reason.erase(reason.size() - 2);
+	else
+		reason = "Kicked by " + client.getName();
 
 	std::string kickMsg = MsgFormat::kickUser(client, channelName, targetNick, reason);
 	channel->sendMessageToClients(kickMsg);
@@ -437,23 +440,23 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 	}
 	else if (modeFlag == 'k')
 	{
-		if (3 > vec.size() - 1)
-			return;
-		std::string key = vec[3];
-		if (set && key.empty())
-		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
-			return;
-		}
+		  if (!set)
+			  channel->unsetKey();
+		  else
+		  {
+        if (i > vec.size() - 1)
+          return;
+        std::string key = vec[i];
+        if (set && key.empty())
+        {
+          MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
+          return;
+			}
 
-		if (set)
-		{
 			channel->setKey(key);
 			channel->sendMessageToClients(MsgFormat::keySet(client, channelName, key));
 			return;
 		}
-		else
-			channel->unsetKey();
 	}
 	else
 	{

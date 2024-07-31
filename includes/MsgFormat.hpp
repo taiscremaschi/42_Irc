@@ -46,9 +46,6 @@ class MsgFormat {
         static std::string modeactive(const std::string &channelName, std::string mode);
         static std::string userAlreadyInUse(const std::string &username);
         static std::string usageMsg(std::string cmd, std::string usage);
-
-
-
 };
 
 #endif
