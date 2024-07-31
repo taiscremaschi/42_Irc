@@ -379,6 +379,13 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
+	/*
+	else if (channel->isNew())
+	{
+		channel->setNew(false);
+		return;
+	}
+	*/
 	else if (!channel->searchOperator(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
@@ -414,27 +421,19 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec)
 	}
 	else if (modeFlag == 'l')
 	{
-		if (3 > vec.size() - 1)
-			return;
-		std::string limit = vec[3];
-		std::cout << "LIMIT: " << limit << std::endl;
-		if (limit.empty())
-		{
+		if (3 > vec.size() - 1){
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 			return;
 		}
-		for (size_t j = 0; limit[j]; j++)
+		for (size_t j = 0; vec[3][j]; j++)
 		{
-			if (limit[j] < '0' || limit[j] > '9')
+			if (vec[3][j] < '0' || vec[3][j] > '9')
 			{
 				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 				return;
 			}
 		}
-		channel->setUserLimit(set ? std::atoi(limit.c_str()) : 0);
-		std::string modeMsg = "+l " + limit;
-		channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
-		return;
+		channel->setUserLimit(set ? std::atoi(vec[3].c_str()) : 0);
 	}
 	else if (modeFlag == 'k')
 	{
