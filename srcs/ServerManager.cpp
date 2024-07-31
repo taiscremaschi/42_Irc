@@ -406,6 +406,7 @@ void ServerManager::handleMode(Client &client, const std::vector<std::string> &v
 		if(set == false)
 		{
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::ulimitMsg(client.getNickname(), channelName));
+			channel->setUserLimit(0);
 			return;
 		}
 		if (3 > vec.size() - 1){
@@ -420,8 +421,8 @@ void ServerManager::handleMode(Client &client, const std::vector<std::string> &v
 				return;
 			}
 		}
-		channel->setUserLimit(set ? std::atoi(vec[3].c_str()) : 0);
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::limitMsg(client.getNickname(), channelName, vec[3]));
+		channel->setUserLimit(set ? std::atoi(vec[3].c_str()) : 0);
 		return;
 
 	}
