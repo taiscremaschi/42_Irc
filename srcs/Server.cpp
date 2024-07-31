@@ -107,7 +107,7 @@ void Server::runServer()
 					std::string buff = readData(i);
 					if(buff.empty())
 						continue ;
-					std::cout << "Received: " << buff << std::endl;
+					std::cout << "\nReceived: " << buff << std::endl;
 					_manager.handleIrcCmds(buff, _fds[i].fd, this->_password);
 				}
 			}

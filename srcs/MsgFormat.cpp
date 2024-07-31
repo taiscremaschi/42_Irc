@@ -193,8 +193,8 @@ std::string MsgFormat::handleMsg(std::string msg)
 
 void MsgFormat::MsgforHex(int clientSocket, const std::string& message) 
 {
+	std::cout << "fd: " << clientSocket << " msg: " << message << std::endl;
 	std::string msg = message + "\r\n";
-	std::cout << msg << std::endl;
 	int bytes = send(clientSocket, msg.c_str(), msg.length(), 0);
 	if (bytes == -1)
 		std::cerr << "send message failed" << std::endl;
