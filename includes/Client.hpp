@@ -9,13 +9,16 @@
 class MsgFormat;
 
 class Client {
+
     private:
+    
         std::string             _name;
         std::string             _nickname;
         int                     _socketClient;
         std::string             _hostname;
         bool                    _authenticated;
         std::string             _bufferMsg;
+        bool                    _nickError;
 
     public:
         Client(int clientSocket);
@@ -33,7 +36,8 @@ class Client {
         bool saveBuffer(std::string buff);
         std::string getBuffer();
         void clearBuffer();
-
+        bool getNickError();
+        void setNickError(bool nickError);
 
 };
 

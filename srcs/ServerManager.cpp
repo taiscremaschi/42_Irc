@@ -1,8 +1,10 @@
 #include "../includes/ServerManager.hpp"
 #include "../includes/Server.hpp"
-#include <string>
 
-ServerManager::ServerManager(){}
+ServerManager::ServerManager(){
+
+
+}
 
 ServerManager::~ServerManager(){
 	for(size_t i=0; i< _channels.size(); ++i){
@@ -41,10 +43,7 @@ void ServerManager::removeClientByFd(int fd){
 }
 
 void ServerManager::removeClient(int i){
-
 	handleQuit(*_clients[i], ":leaving");
-	// delete _clients[i];
-	// _clients.erase(_clients.begin() + i);
 }
 
 Client *ServerManager::getClientByNick(const std::string &nick)
@@ -77,8 +76,11 @@ Channel *ServerManager::getChannelByName(const std::string &channel)
 	return NULL;
 }
 
-void ServerManager::handleJoinCommand(Client& client, const std::string& channelName, const std::string &key)
+void ServerManager::handleJoinCommand(Client& client, const std::string& channelName, const std::vector<std::string> &vec)
 {
+	std::string key;
+	(vec.size() == 2) ? key = "" : key = vec[2];
+
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
 	{
@@ -131,36 +133,38 @@ void ServerManager::handleJoinCommand(Client& client, const std::string& channel
 }
 
 
-bool ServerManager::changeNick(Client &client, const std::string &nick)
+void ServerManager::changeNick(Client &client, const std::string &nick)
 {
 	for(size_t x = 0; x < _clients.size(); ++x)
 	{
 		if (_clients[x]->getNickname() == nick){
-			if(client.getNickname().empty())
+			if(client.getNickname().empty()){
 				client.setNickname(nick);
+				client.setNickError(true);
+			}
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickError(client, nick));
-			return false;
+			return ;
 		}
 	}
 	std::string oldNick = client.getNickname();
 	client.setNickname(nick);
+	client.setNickError(false);
 	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nick(client, oldNick));
 	for(size_t i = 0; i < _channels.size(); ++i)
 	{
 		if(_channels[i]->searchNames(client.getNickname()) == true)
 			_channels[i]->sendMessageToClients(MsgFormat::notifyNickChanged(client, oldNick));
 	}
-	return true;
 }
 
 void ServerManager::handlePrivMessage(Client& client, const std::string& type, IrcMessages &messages)
 {
-	if ( type[0] == '#' || type[0] == '&')
+	if (type[0] == '#' || type[0] == '&')
 	{
 		Channel *ch = getChannelByName(type);
 		if(ch == NULL)
 		{
-			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, type));
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, type));
 			return;
 		}
 		if (ch->searchNames(client.getNickname()))
@@ -170,7 +174,6 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
 			{
 				if (clients[i]->getSocket() != client.getSocket()) 
 					MsgFormat::MsgforHex(clients[i]->getSocket(), MsgFormat::priv(client, ch->getName(), MsgFormat::handleMsg(messages._message)));
-
 			}
 		}
 		else
@@ -186,7 +189,7 @@ void ServerManager::handlePrivMessage(Client& client, const std::string& type, I
 	}
 }
 
-void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::string& channelName)
+void ServerManager::handlePart(Client& client, IrcMessages &messages, const std::string& channelName)
 {
 	Channel *channel = getChannelByName(channelName);
 	if(channel == NULL){
@@ -197,14 +200,17 @@ void ServerManager::handlePart(Client& client, IrcMessages &messages,const std::
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notifyUserNotInChannel(client, channel->getName()));
 		return;
 	}
-
 	channel->sendMessageToClients(MsgFormat::part(client, channel, MsgFormat::handleMsg(messages._message)));
 	channel->removeOperator(&client);
 	channel->removeClient(&client);
 }
 
-void ServerManager::handleQuit(Client& client, const std::string &quitMsg)
+bool ServerManager::handleQuit(Client& client, const std::string &quitMsg)
 {
+	if(client.getNickError() == true){
+		removeClientByFd(client.getSocket());
+		return false;
+	}
 	for(size_t i = 0; i < _channels.size(); i++)
 	{
 		if(_channels[i]->searchNames(client.getNickname())){
@@ -215,42 +221,38 @@ void ServerManager::handleQuit(Client& client, const std::string &quitMsg)
 	}
 	close(client.getSocket());
 	removeClientByNick(client.getNickname());
+	return false;
 }
 
-bool ServerManager::handlePass(Client& client, std::string pass, std::string vec)
+void ServerManager::handlePass(Client& client, const std::string &pass, const std::string &sendPass)
 {
-	if (vec != pass){
+	if (sendPass != pass){
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passInvalid());
-		//removeClientByFd(client.getSocket());
-		return false;
+		return;
 	}
-	else {
-		client.isAuthenticated();
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passValid());
-		return true;
-	}
+	client.isAuthenticated();
+	MsgFormat::MsgforHex(client.getSocket(), MsgFormat::passValid());
 }
 
-
-void ServerManager::handleTopic(Client &client, const std::vector<std::string> &vec, size_t i)
+void ServerManager::handleTopic(Client &client, const std::vector<std::string> &vec)
 {
-	std::string channelName = vec[i];
-	std::string topic = "";
+	std::string channelName = vec[1];
+	std::string topic;
+
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
-	else if (vec[++i].empty())
+	else if (vec.size() < 3 || vec[2].empty())
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
 		return;
 	}
-
-	if (vec.size() >= i + 1)
+	if (vec.size() >= 3)
 	{
-		for (size_t j = i; j < vec.size(); j++)
+		for (size_t j = 2; j < vec.size(); j++)
 			topic += vec[j] + " ";
 
 		if (!topic.empty() && topic[topic.size() - 1] == ' ')
@@ -258,8 +260,6 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 		if (!topic.empty() && topic[0] == ':')
 			topic = topic.substr(1);
 	}
-
-	std::cout << "topic: " << topic << std::endl;
 
 	if (!channel->searchNames(client.getNickname()))
 	{
@@ -271,13 +271,12 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
 		return;
 	}
-
 	channel->setTopic(topic);
 	channel->sendMessageToClients(MsgFormat::topic(client, channelName, topic));
 	channel->sendMessageToClients(MsgFormat::topicCreator(client, channelName));
 }
 
-void ServerManager::handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec, size_t i)
+void ServerManager::handleKick(Client &client, const std::string &channelName, const std::string &targetNick, const std::vector<std::string> &vec)
 {
 	Channel *channel = getChannelByName(channelName);
 	if (!channel)
@@ -303,7 +302,7 @@ void ServerManager::handleKick(Client &client, const std::string &channelName, c
 		channel->removeOperator(target);
 
 	std::string reason;
-	for (size_t j = i; j < vec.size(); ++j)
+	for (size_t j = 3; j < vec.size(); ++j)
 		reason += vec[j] + " ";
 	if (reason[0] == ':')
 		reason = reason.substr(1);
@@ -354,10 +353,13 @@ void ServerManager::handleInvite(Client &client, const std::string &targetNick, 
 	channel->addInvite(target);
 }
 
-void ServerManager::handleMode(Client &client, std::vector<std::string> vec, size_t i)
+void ServerManager::handleMode(Client &client, const std::vector<std::string> &vec)
 {
-	std::string channelName = vec[i++];
-	std::string mode = vec[i++];
+	std::string channelName = vec[1];
+	std::string mode;
+
+	if (vec.size() > 2 )
+		mode = vec[2];
 	if (mode.empty())
 		return;
 	Channel	*channel = getChannelByName(channelName);
@@ -366,13 +368,6 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
-	/*
-	else if (channel->isNew())
-	{
-		channel->setNew(false);
-		return;
-	}
-	*/
 	else if (!channel->searchOperator(client.getNickname()))
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
@@ -393,37 +388,57 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 		channel->setTopicOpOnly(set);
 	else if (modeFlag == 'o')
 	{
-		if (i > vec.size() - 1)
+		if (3 > vec.size() - 1)
 			return;
-		std::string targetNick = vec[i];
+		std::string targetNick = vec[3];
 		Client *target = getClientByNick(targetNick);
 		if (!target)
 		{
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
 			return;
 		}
-		set ? channel->addOperator(target) : channel->removeOperator(target);
-		channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
+		if(set == true)
+		{
+			if(channel->addOperator(target))
+				channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
+			else {
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, target->getNickname()));
+			}
+		}
+		else if (!set)
+		{
+			if(channel->removeOperator(target))
+				channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
+			else {
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+			}
+		}
 		return;
 	}
 	else if (modeFlag == 'l')
 	{
-		if (i > vec.size() - 1)
-			return;
-		if (vec[i].empty())
+		if(set == false)
 		{
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::ulimitMsg(client.getNickname(), channelName));
+			channel->setUserLimit(0);
+			return;
+		}
+		if (3 > vec.size() - 1){
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 			return;
 		}
-		for (size_t j = 0; vec[i][j]; j++)
+		for (size_t j = 0; vec[3][j]; j++)
 		{
-			if (vec[i][j] < '0' || vec[i][j] > '9')
+			if (vec[3][j] < '0' || vec[3][j] > '9')
 			{
 				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
 				return;
 			}
 		}
-		channel->setUserLimit(set ? std::atoi(vec[i].c_str()) : 0);
+		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::limitMsg(client.getNickname(), channelName, vec[3]));
+		channel->setUserLimit(set ? std::atoi(vec[3].c_str()) : 0);
+		return;
+
 	}
 	else if (modeFlag == 'k')
 	{
@@ -431,9 +446,9 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 			channel->unsetKey();
 		else
 		{
-			if (i > vec.size() - 1)
+			if (3 > vec.size() - 1)
 				return;
-			std::string key = vec[i];
+			std::string key = vec[3];
 			if (set && key.empty())
 			{
 				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::invalidModeParams(client, channelName, mode));
@@ -454,91 +469,125 @@ void ServerManager::handleMode(Client &client, std::vector<std::string> vec, siz
 	channel->sendMessageToClients(MsgFormat::mode(client, channelName, modeMsg));
 }
 
-bool ServerManager::validateUser(const std::vector<std::string> &vec, Client &client, size_t i){
-
-	if(vec.size() < 5 || vec[i + 2] != "0" || vec[i + 3] != "*" || vec[i + 4] != ":realname")
-	{
-		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("USER", "USER <username> 0 * :realname, sets your user"));
-		return false;
-	}
+void ServerManager::validateUser(const std::vector<std::string> &vec, Client &client){
 
 	if(getClientByUser(vec[1]) != NULL){
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userAlreadyInUse(vec[1]));
-		return false;
+		return;
 	}
-	return true;
+	client.setName(vec[1]);
 }
 
-bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, std::string pass) {
+bool ServerManager::parseArgs(const std::vector<std::string> &vec, Client &client){
+	if(vec.empty())
+		return false;
 
-	for (size_t i = 0; i < vec.size(); ++i) {
-		if (vec[i] == "PASS" && (vec.size() > i + 1))
-		{
-			if (!handlePass(client, pass, vec[++i]))
-				return true;
-		}
-		else if (vec[i] == "NICK" && client.getAuthenticated()) {
-			if(vec.size() < 2)
-			{
-				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("NICK", "NICK: <nickname>, sets your nick"));
-				return true;
-			}
-			changeNick(client, vec[++i]);
-		}
-		else if (vec[i] == "USER" && client.getAuthenticated()) 
-		{
-			if(!validateUser(vec, client, i))
-				return true;
-			client.setName(vec[i + 1]);
-		}
-		else if (vec[i] == "JOIN" && client.checkLoginData())
-		{
-			if(vec.size() < 2)
-			{
-				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg("JOIN", "JOIN <channel>, joins the channel"));
-				return true;
-			}
-			if(vec[i + 1][0] != '#' && vec[i + 1][0] != '&')
-				continue;
-			std::string key;
-			(vec.size() == i + 2) ? key = "" : key = vec[i + 2];
-			handleJoinCommand(client, vec[i + 1], key);
-			i += 2;
-		}
-		else if((vec[i] == "PRIVMSG" && (vec.size() > i + 1)) && client.checkLoginData())
-			handlePrivMessage(client, vec[++i], messages);
-		else if((vec[i] == "PART" && (vec.size() > i + 1)) && client.checkLoginData())
-			handlePart(client, messages, vec[++i]);
-		else if(vec[i] == "QUIT" && vec.size() > i + 1 && client.checkLoginData())
-		{
-			handleQuit(client, messages._message);
+	std::map<std::string, std::pair<std::string, size_t> > usageMessage;
+	
+	usageMessage["NICK"] = std::make_pair("NICK <nickname>, sets your nick", 2);
+	usageMessage["USER"] = std::make_pair("USER <username> 0 * :realname, sets your user", 5);
+	usageMessage["JOIN"] = std::make_pair("JOIN #<channel> <optional key>, joins the channel", 2);
+	usageMessage["PRIVMSG"] = std::make_pair("PRIVMSG <nickname OR channel> :<message>, send a message", 2);
+	usageMessage["MODE"] = std::make_pair("MODE #<channel> <+ OR -> <t,i,k,l,o> *for k and l you need a argument here*", 2);
+	usageMessage["PART"] = std::make_pair("PART #<channel> :<optional message>, part a channel", 2);
+	usageMessage["KICK"] = std::make_pair("KICK #<channel> <nickname> :<optional message> , kick a user from channel", 3);
+	usageMessage["INVITE"] = std::make_pair("INVITE <nickname> #<channel>, invite a user to a channel", 3);
+	usageMessage["TOPIC"] = std::make_pair("TOPIC #<channel>  <your topic>, sets a topic channel", 2);
+	//usageMessage["QUIT"] = std::make_pair("QUIT :<message>, disconect user", 2);
+	
+	try{
+		if (vec.size() < usageMessage.at(vec[0]).second){
+			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
 			return false;
 		}
-		else if(vec[i] == "KICK" && vec.size() > i + 2 && client.checkLoginData()){
-			handleKick(client, vec[i + 1], vec[i + 2], vec, i + 3);
-		}		
-		else if(vec[i] == "INVITE" && vec.size() > i + 2 && client.checkLoginData()){
-			handleInvite(client, vec[i + 1], vec[i + 2]);
-			i += 2;
+		if (vec[0] == "JOIN")
+		{
+			if(vec[1][0] != '#' && vec[1][0] != '&'){
+				MsgFormat::MsgforHex(client.getSocket(),  MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
+				return false;
+			}
 		}
-		else if(vec[i] == "TOPIC" && (vec.size() > i + 1) && client.checkLoginData()){
-			handleTopic(client, vec, ++i);
-		}		
-		else if(vec[i] == "MODE" && vec.size() > i + 2 && client.checkLoginData()){
-			handleMode(client, vec, ++i);
+		else if(vec[0] == "USER"){
+			if(vec[2] != "0" || vec[3] != "*" || vec[4] != ":realname")
+			{
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::usageMsg(vec[0], usageMessage[vec[0]].first));
+				return false;
+			}
+		}
+	}
+	catch (const std::exception &e) {
+		return true;
+	}
+	return true;
+}
+
+bool ServerManager::findCmd(const std::vector<std::string> &vec, Client &client, IrcMessages &messages, const std::string &pass) {
+	
+	if(!parseArgs(vec, client))
+		return true;
+	if (vec[0] == "PASS" && (vec.size() > 1))
+		handlePass(client, pass, vec[1]);
+	else if(client.getAuthenticated())
+	{
+		if (vec[0] == "NICK")
+			changeNick(client, vec[1]);
+		else if (vec[0] == "USER") 
+			validateUser(vec, client);
+		else if(client.checkLoginData()){
+			if (vec[0] == "JOIN")
+				handleJoinCommand(client, vec[1], vec);
+			else if(vec[0] == "PRIVMSG")
+				handlePrivMessage(client, vec[1], messages);
+			else if(vec[0] == "PART")
+				handlePart(client, messages, vec[1]);
+			else if(vec[0] == "QUIT")
+				return (handleQuit(client, messages._message));
+			else if(vec[0] == "KICK")
+				handleKick(client, vec[1], vec[2], vec);
+			else if(vec[0] == "INVITE")
+				handleInvite(client, vec[1], vec[2]);
+			else if(vec[0] == "TOPIC")
+				handleTopic(client, vec);
+			else if(vec[0] == "MODE")
+				handleMode(client, vec);
 		}
 	}
 	return true;
 }
 
-void ServerManager::handleIrcCmds(std::string buff, int fd, std::string pass){
+std::vector<std::string> splitNewLine(std::string buff){
+	
+	std::string node;
+	size_t start = 0;
+	std::vector<std::string> result;
+	for(size_t i = 0; i < buff.size(); ++i)
+	{
+		if(buff[i] == '\n'){
+			node = buff.substr(start, i - start);
+			result.push_back(node);
+			start = i + 1;
+		}
+	}
+	return result;
+}
+
+void ServerManager::handleIrcCmds(const std::string &buff, int fd, const std::string &pass){
 	for (size_t j = 0; j < _clients.size(); ++j) {
 		if (fd == _clients[j]->getSocket()) {
 			if(_clients[j]->saveBuffer(buff))
 			{
-				IrcMessages message(_clients[j]->getBuffer());
-				if(findCmd(message._vecMsg, *_clients[j], message, pass))
+				std::vector<std::string> vecLines = splitNewLine(_clients[j]->getBuffer());
+				if(vecLines.empty()){
 					_clients[j]->clearBuffer();
+				}
+				for(size_t i = 0; i < vecLines.size(); ++i)
+				{
+					IrcMessages message(vecLines[i]);
+
+					if(!findCmd(message._vecMsg, *_clients[j], message, pass))
+						return;
+					_clients[j]->clearBuffer();
+				}
 			}
 		}
 	}

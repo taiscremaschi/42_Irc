@@ -3,6 +3,7 @@
 Client::Client(int clientSocket) {
    _socketClient =  clientSocket;
    _authenticated = false;
+   _nickError = false;
 }
 
 Client:: ~Client(){
@@ -49,7 +50,7 @@ bool Client::getAuthenticated() const{
 }
 
 bool Client::checkLoginData(){
-	if( _name.empty() || _nickname.empty())
+	if( _name.empty() || _nickname.empty() || _nickError == true)
 	{
 		MsgFormat::MsgforHex(_socketClient, MsgFormat::UserNotAutenticated());
 		return false;
@@ -60,6 +61,7 @@ bool Client::checkLoginData(){
 bool Client::saveBuffer(std::string buff)
 {
 	_bufferMsg += buff;
+
 	return (buff[buff.size() - 1] == '\n');
 }
 
@@ -69,4 +71,12 @@ std::string Client::getBuffer(){
 
 void Client::clearBuffer(){
 	_bufferMsg.clear();
+}
+
+bool Client::getNickError(){
+	return _nickError;
+}
+
+void Client::setNickError(bool nickError){
+	_nickError = nickError;
 }

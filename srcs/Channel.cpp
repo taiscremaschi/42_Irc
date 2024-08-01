@@ -107,22 +107,31 @@ bool Channel::searchOperator(const std::string &name){
 	return false;
 }
 
-void Channel::addOperator(Client *client)
+bool Channel::addOperator(Client *client)
 {
-	if (!searchOperator(client->getNickname()))
-		_operators.push_back(client);
+	for(size_t i = 0; i < _clientsChannel.size(); ++i){
+		if(_clientsChannel[i]->getNickname() == client->getNickname())
+		{
+			if (!searchOperator(client->getNickname())){
+				_operators.push_back(client);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
-void Channel::removeOperator(Client *client)
+bool Channel::removeOperator(Client *client)
 {
 	for (size_t i = 0; i < _operators.size(); ++i)
 	{
 		if (_operators[i] == client)
 		{
 			_operators.erase(_operators.begin() + i);
-			break;
+			return true;
 		}
 	}
+	return false;
 }
 
 bool Channel::searchNames(const std::string name){

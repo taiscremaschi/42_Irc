@@ -85,7 +85,7 @@ std::string MsgFormat::UserNotAutenticated()
 
 std::string MsgFormat::notChannelOperator(const Client &client, const std::string &channelName)
 {
-	return (":server 482 " + client.getNickname() + " " + channelName + " :You're not channel operator");
+	return (":server 482 " + client.getNickname() + " " + channelName + " :not channel operator");
 }
 
 std::string MsgFormat::nickNotFound(Client &client, const std::string &targetNick)
@@ -164,6 +164,17 @@ std::string  MsgFormat::usageMsg(std::string cmd, std::string usage){
 	return(":server 461 " + cmd + " :Usage: " + usage);
 }
 
+std::string  MsgFormat::limitMsg(std::string nickname, std::string channel, std::string limit){
+
+	return(":" + nickname + " NOTICE " + channel + " :The user limit for this channel has been set to " + limit + ".");
+}
+
+
+std::string  MsgFormat::ulimitMsg(std::string nickname, std::string channel){
+
+	return(":" + nickname + " NOTICE " + channel + " :The user limit for this channel has been removed.");
+}
+
 
 std::string MsgFormat::handleMsg(std::string msg)
 {
@@ -182,8 +193,10 @@ std::string MsgFormat::handleMsg(std::string msg)
 
 void MsgFormat::MsgforHex(int clientSocket, const std::string& message) 
 {
+	std::cout << "fd: " << clientSocket << " msg: " << message << std::endl;
 	std::string msg = message + "\r\n";
-	std::cout << msg << std::endl;
-	send(clientSocket, msg.c_str(), msg.length(), 0);
+	int bytes = send(clientSocket, msg.c_str(), msg.length(), 0);
+	if (bytes == -1)
+		std::cerr << "send message failed" << std::endl;
 }
 
