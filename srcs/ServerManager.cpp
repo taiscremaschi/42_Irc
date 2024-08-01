@@ -245,7 +245,7 @@ void ServerManager::handleTopic(Client &client, const std::vector<std::string> &
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::channelNotFound(client, channelName));
 		return;
 	}
-	else if (vec[2].empty())
+	else if (vec.size() < 3 || vec[2].empty())
 	{
 		MsgFormat::MsgforHex(client.getSocket(), MsgFormat::topic(client, channelName, channel->getTopic()));
 		return;
