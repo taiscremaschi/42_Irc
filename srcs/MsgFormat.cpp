@@ -85,7 +85,7 @@ std::string MsgFormat::UserNotAutenticated()
 
 std::string MsgFormat::notChannelOperator(const Client &client, const std::string &channelName)
 {
-	return (":server 482 " + client.getNickname() + " " + channelName + " :You're not channel operator");
+	return (":server 482 " + client.getNickname() + " " + channelName + " :not channel operator");
 }
 
 std::string MsgFormat::nickNotFound(Client &client, const std::string &targetNick)

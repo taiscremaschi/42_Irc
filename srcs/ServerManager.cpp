@@ -397,8 +397,22 @@ void ServerManager::handleMode(Client &client, const std::vector<std::string> &v
 			MsgFormat::MsgforHex(client.getSocket(), MsgFormat::nickNotFound(client, targetNick));
 			return;
 		}
-		set ? channel->addOperator(target) : channel->removeOperator(target);
-		channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
+		if(set == true)
+		{
+			if(channel->addOperator(target))
+				channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
+			else {
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::userNotInChannel(client, channelName, target->getNickname()));
+			}
+		}
+		else if (!set)
+		{
+			if(channel->removeOperator(target))
+				channel->sendMessageToClients(MsgFormat::changeOpStatus(client, target, channelName, set));
+			else {
+				MsgFormat::MsgforHex(client.getSocket(), MsgFormat::notChannelOperator(client, channelName));
+			}
+		}
 		return;
 	}
 	else if (modeFlag == 'l')
