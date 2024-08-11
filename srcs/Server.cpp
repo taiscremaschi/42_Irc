@@ -65,18 +65,17 @@ std::string	 Server::readData(int i){
 
 void Server::newClientConnection()
 {
-	// Novo cliente tentando se conectar
 	sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	int clientSocket = accept(_serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
-	if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1)
-	{
-		std::cerr << "Error in connection" << std::endl;
-		return;
-	}
 	if (clientSocket == -1) 
 	{
 		std::cerr << "Erro in accept conection\n";
+		return;
+	}
+	if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1)
+	{
+		std::cerr << "Error in connection" << std::endl;
 		return;
 	}
 	pollfd client;
@@ -87,7 +86,6 @@ void Server::newClientConnection()
 	Client *newClient = new Client(clientSocket);
 	_manager.createClient(newClient);
 	std::cout << "new client conected\n";
-
 }
 
 void Server::runServer()
@@ -121,6 +119,8 @@ void Server::runServer()
 
 void Server::createServerSocket()
 {
+	//af_net : é o dominio e sera usando usado o protocolo ipv4, sock_stram eh o tipo indicando conecção tcp. a data sera tranmitida de forma sequecial sem erros ou duplicatas
+	//0 é o protocolo. sera usando o protocolo de forma automatica beseado no dominio e no tipo especificado.
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
 	if(_serverSocket == -1)
 		throw createSocket();
@@ -134,11 +134,11 @@ void Server::createServerSocket()
 		close(_serverSocket);
 		throw errorReuseador();
 	}
-	sockaddr_in serverAddr; // now I need configure the server address (read help 2)
+	sockaddr_in serverAddr; // now I need configure the server address 
 	serverAddr.sin_family = AF_INET; 
-	serverAddr.sin_addr.s_addr = INADDR_ANY; 
-	serverAddr.sin_port = htons(_port); 
-	if(bind(_serverSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) {
+	serverAddr.sin_addr.s_addr = INADDR_ANY;  // o server ira aceitar conexoes em qualquer endereço ip disponivel na maquina. 
+	serverAddr.sin_port = htons(_port);  //converte o numero da porta de host byte order para network byte order
+	if(bind(_serverSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) { //associa o um ip e uma porta a um socket
 		close(_serverSocket);
 		throw errorInBind();
 	}
@@ -164,5 +164,3 @@ void Server::inicializeServer() {
 	runServer();
 	close(_serverSocket);
 }
-
-
