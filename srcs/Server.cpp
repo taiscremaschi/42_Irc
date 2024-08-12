@@ -73,7 +73,7 @@ void Server::newClientConnection()
 		std::cerr << "Erro in accept conection\n";
 		return;
 	}
-	if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1)
+	if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1) //file control
 	{
 		std::cerr << "Error in connection" << std::endl;
 		return;
@@ -119,18 +119,15 @@ void Server::runServer()
 
 void Server::createServerSocket()
 {
-	//af_net : é o dominio e sera usando usado o protocolo ipv4, sock_stram eh o tipo indicando conecção tcp. a data sera tranmitida de forma sequecial sem erros ou duplicatas
-	//0 é o protocolo. sera usando o protocolo de forma automatica beseado no dominio e no tipo especificado.
-	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
+	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); // domain ipv4, type conection tcp (sequence without erros or duplicates)(udp, sock_dgram), protocol basead in domain and type
 	if(_serverSocket == -1)
 		throw createSocket();
 
 	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1)
 		throw conectionError();
 
- 	// Definir a opção SO_REUSEADDR no socket do servidor
 	int opt = 1;
-	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) { // Esta funcão, server para definir configurações do socket, e a opção SO_REUSEADDR é para reutilizar o mesmo port 
 		close(_serverSocket);
 		throw errorReuseador();
 	}
