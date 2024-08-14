@@ -35,10 +35,20 @@ int Server::setPort(char *av){
 	return (_port);
 }
 
-void Server::savePass(char *av)
+bool Server::savePass(char *av)
 {
+	
 	_password = av;
+	if(_password.empty() || _password == " " || _password == "	")	
+		return false;
+	for(size_t i=0; i<_password.size(); i++){
+		if(_password[i] == ' ')
+			return false;
+	}
+	
+	return true;
 }
+
 
 std::string	 Server::readData(int i){
 	
@@ -65,18 +75,17 @@ std::string	 Server::readData(int i){
 
 void Server::newClientConnection()
 {
-	// Novo cliente tentando se conectar
 	sockaddr_in clientAddr;
 	socklen_t clientAddrSize = sizeof(clientAddr);
 	int clientSocket = accept(_serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
-	if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1)
-	{
-		std::cerr << "Error in connection" << std::endl;
-		return;
-	}
 	if (clientSocket == -1) 
 	{
 		std::cerr << "Erro in accept conection\n";
+		return;
+	}
+	if(fcntl(clientSocket, F_SETFL, O_NONBLOCK) == -1) //file control
+	{
+		std::cerr << "Error in connection" << std::endl;
 		return;
 	}
 	pollfd client;
@@ -87,7 +96,6 @@ void Server::newClientConnection()
 	Client *newClient = new Client(clientSocket);
 	_manager.createClient(newClient);
 	std::cout << "new client conected\n";
-
 }
 
 void Server::runServer()
@@ -121,24 +129,23 @@ void Server::runServer()
 
 void Server::createServerSocket()
 {
-	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); 
+	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); // domain ipv4, type conection tcp (sequence without erros or duplicates)(udp, sock_dgram), protocol basead in domain and type
 	if(_serverSocket == -1)
 		throw createSocket();
-
-	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1)
+ 
+	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1) //file control 
 		throw conectionError();
 
- 	// Definir a opção SO_REUSEADDR no socket do servidor
 	int opt = 1;
-	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
+	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) { // definir configurações do socket, e a opção SO_REUSEADDR é para reutilizar o mesmo port 
 		close(_serverSocket);
 		throw errorReuseador();
 	}
-	sockaddr_in serverAddr; // now I need configure the server address (read help 2)
+	sockaddr_in serverAddr; // now I need configure the server address 
 	serverAddr.sin_family = AF_INET; 
-	serverAddr.sin_addr.s_addr = INADDR_ANY; 
-	serverAddr.sin_port = htons(_port); 
-	if(bind(_serverSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) {
+	serverAddr.sin_addr.s_addr = INADDR_ANY;  // o server ira aceitar conexoes em qualquer endereço ip disponivel na maquina. 
+	serverAddr.sin_port = htons(_port);  //converte o numero da porta de host byte order para network byte order
+	if(bind(_serverSocket, (sockaddr*) &serverAddr, sizeof(serverAddr)) == -1) { //associa o um ip e uma porta a um socket
 		close(_serverSocket);
 		throw errorInBind();
 	}
@@ -164,5 +171,3 @@ void Server::inicializeServer() {
 	runServer();
 	close(_serverSocket);
 }
-
-

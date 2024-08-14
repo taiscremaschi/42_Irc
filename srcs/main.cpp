@@ -22,11 +22,13 @@ int main(int ac, char **av)
 	
 	signal(SIGINT, handleSig);
 	signal(SIGPIPE, SIG_IGN);
+	signal(SIGQUIT,handleSig);
 	if(ac != 3)
 		return (errorMsg("Wrong number of arguments"));
 	if(serverClass.setPort(av[1]) == -1)
 		return (errorMsg("Invalid port number"));
-	serverClass.savePass(av[2]);
+	if(!serverClass.savePass(av[2]))
+		return (errorMsg("Invalid pass"));
 	serverClass.inicializeServer();
 	return 0;
 }
