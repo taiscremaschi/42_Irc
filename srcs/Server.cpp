@@ -122,12 +122,12 @@ void Server::createServerSocket()
 	_serverSocket = socket(AF_INET, SOCK_STREAM, 0); // domain ipv4, type conection tcp (sequence without erros or duplicates)(udp, sock_dgram), protocol basead in domain and type
 	if(_serverSocket == -1)
 		throw createSocket();
-
-	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1)
+ 
+	if(fcntl(_serverSocket, F_SETFL, O_NONBLOCK) == -1) //file control 
 		throw conectionError();
 
 	int opt = 1;
-	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) { // Esta funcão, server para definir configurações do socket, e a opção SO_REUSEADDR é para reutilizar o mesmo port 
+	if (setsockopt(_serverSocket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) { // definir configurações do socket, e a opção SO_REUSEADDR é para reutilizar o mesmo port 
 		close(_serverSocket);
 		throw errorReuseador();
 	}
