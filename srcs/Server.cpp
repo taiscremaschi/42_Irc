@@ -35,10 +35,20 @@ int Server::setPort(char *av){
 	return (_port);
 }
 
-void Server::savePass(char *av)
+bool Server::savePass(char *av)
 {
+	
 	_password = av;
+	if(_password.empty() || _password == " " || _password == "	")	
+		return false;
+	for(size_t i=0; i<_password.size(); i++){
+		if(_password[i] == ' ')
+			return false;
+	}
+	
+	return true;
 }
+
 
 std::string	 Server::readData(int i){
 	

@@ -18,7 +18,7 @@ class Server {
         ~Server();
         void        inicializeServer();
         int         setPort(char *av);
-        void        savePass(char *av);
+        bool        savePass(char *av);
         void        runServer();
         void        newClientConnection();
         std::string readData(int i);
